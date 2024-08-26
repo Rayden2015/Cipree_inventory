@@ -1,0 +1,65 @@
+<?php
+
+namespace App\Models;
+
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Auth\Passwords\CanResetPassword;
+use Illuminate\Auth\ThrottlesLogins;
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Foundation\Auth\Access\Authorizable;
+use Illuminate\Foundation\Auth\ThrottlesLogins as ThrottlesLoginsTrait;
+
+
+class User extends Authenticatable
+{
+    use HasApiTokens, HasFactory, Notifiable,CanResetPassword, ThrottlesLoginsTrait, Authorizable;
+    use HasRoles;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password','phone','address','location','image','role_id','status','staff_id','site_id', 'add_admin','add_site_admin','add_requester','add_finance_officer','add_store_officer','add_purchasing_officer','add_authoriser','add_store_assistant','add_procurement_assistant','last_successful_login','last_failed_login','failed_login_attempts'
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+
+    public function role(){
+        return $this->belongsTo(Role::class);
+    }
+    public function enduser(){
+       return $this->belongsTo(Enduser::class,'enduser_id');
+    }
+    public function request_by(){
+        return $this->belongsTo(User::class,'requested_by');
+    }
+    public function site(){
+        return $this->belongsTo(Site::class,'site_id');
+    }
+}

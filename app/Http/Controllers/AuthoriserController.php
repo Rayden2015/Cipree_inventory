@@ -1,0 +1,674 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use \PDF;
+use Carbon\Carbon;
+use App\Helpers\Pay;
+use App\Models\Part;
+use App\Models\Site;
+use App\Models\User;
+use App\Models\Order;
+use App\Models\Porder;
+use App\Models\Company;
+use App\Models\Enduser;
+use App\Models\Location;
+use App\Models\Purchase;
+use App\Models\Supplier;
+use App\Models\OrderPart;
+use App\Models\PorderPart;
+use Illuminate\Http\Request;
+use App\Helpers\UploadHelper;
+use Illuminate\Support\Facades\DB;
+
+use Illuminate\Support\Facades\Log;
+use Brian2694\Toastr\Facades\Toastr;
+use Illuminate\Support\Facades\Auth;
+
+class AuthoriserController extends Controller
+{
+    public function __construct(){
+        $this->middleware('auth');
+    }
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $site_id = Auth::user()->site->id;
+        $purchases = Order::where('site_id', '=', $site_id)->latest()->paginate(10);
+        return view('authoriser.index', compact('purchases'));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        return view('authoriser.create');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        try {
+            $authid = Auth::id();
+            $site_id = Auth::user()->site->id;
+            $request->validate([
+                'photo' => 'sometimes|nullable|image|mimes:jpeg,gif,png,jpg|max:9048',
+            ]);
+            $purchase =  Purchase::create([
+                'part_id' => $request->part_id,
+                'description' => $request->description,
+                'quantity' => $request->quantity,
+                'make' => $request->make,
+                'model' => $request->model,
+                'serial_number' => $request->serial_number,
+                'tax' => $request->tax,
+                'tax2' => $request->tax2,
+                'tax3' => $request->tax3,
+                'intended_recipient' => $request->intended_recipient,
+                'unit_price' => $request->unit_price,
+                'currency' => $request->currency,
+                'supplier_id' => $request->supplier_id,
+                'comments' => $request->comments,
+                'type_of_purchase' => $request->type_of_purchase,
+                'enduser_id' => $request->enduser_id,
+                'status' => $request->status,
+                'user_id' => $authid,
+                'site_id' => $site_id,
+
+            ]);
+            if ($request->image) {
+                $imageName = UploadHelper::upload($request->image, 'purchase-' . $purchase->id, 'images/purchases');
+                $purchase->image = $imageName;
+                $purchase->save();
+            }
+            Log::info('AuthoriserController | store() |Pruchase Created Successfully ');
+            Toastr::success('Successfully Updated:)', 'Sucess');
+            return redirect()->route('purchases.index');
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('AuthoriserController | Store() Error ' . $unique_id);
+            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        try {
+            $company = Company::first();
+            $purchase = Order::where('id', '=', $id)->first();
+            $order_parts = OrderPart::where('order_id', '=', $id)->get();
+            Log::info('AuthoriserController | show() ', [
+                'user_details' => Auth::user(),
+                'message' => 'Authoriser page displyaed successfully',
+                'company' => $company,
+                'purchase' => $purchase,
+                'order_parts' => $order_parts
+            ]);
+            return view('authoriser.show', compact('purchase', 'order_parts', 'company'));
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('AuthoriserController | Show() Error ' . $unique_id);
+            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+        }
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        try {
+            $site_id = Auth::user()->site->id;
+            $purchase = Order::find($id);
+            $suppliers = Supplier::all();
+            $sites = Site::where('site_id','=',$site_id)->get();
+            $locations = Location::where('site_id','=',$site_id)->get();
+            $parts = Part::where('site_id','=',$site_id)->get();
+            $endusers = Enduser::where('site_id','=',$site_id)->get();
+            $order_parts = OrderPart::where('order_id', '=', $id)->where('site_id', '=', $site_id)->get();
+            Log::info('AuthoriserController| Edit() | ', [
+                'User Details' => Auth::user(),
+                'Message' => 'AuthoriserController| edit() Edit Page Loaded Succsfully'
+            ]);
+            return view('authoriser.edit', compact('purchase', 'suppliers', 'sites', 'locations', 'parts', 'endusers', 'order_parts'));
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('AuthoriserController | Edit() Error ' . $unique_id);
+            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        try {
+            $purchase = Order::find($id);
+            Log::info('AuthoriserController| Update() | Before Authoriser Update', [
+                'details' => Order::find($id)
+            ]);
+            $authid = Auth::id();
+            $purchase->part_id = $request->part_id; //2
+            $purchase->tax = $request->tax; //10
+            $purchase->tax2 = $request->tax2; //11
+            $purchase->tax3 = $request->tax3; //12
+            $purchase->supplier_id = $request->supplier_id; //1
+            $purchase->type_of_purchase = $request->type_of_purchase; //3
+            $purchase->enduser_id = $request->enduser_id; //4
+            $purchase->status = $request->status;
+            $purchase->user_id = $authid;
+            $purchase->save();
+
+            Log::info('AuthoriserController | Update() | After Edit', [
+                'user_details' => Auth::user(),
+                'details' => $request->all(),
+            ]);
+            Toastr::success('Successfully Updated()', 'Sucess');
+            return redirect()->route('home');
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('AuthoriserController | Edit() Error ' . $unique_id);
+            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+        }
+    }
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        try {
+            $purchase = Order::find($id);
+            Order::where("id", $purchase->id)->delete();
+            OrderPart::where("order_id", $purchase->id)->delete();
+            // $purchase->destroy();
+            Toastr::success('AuthoriserController| Destroy()| Successfully Updated', 'Sucess');
+            return redirect()->route('purchases.index');
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('AuthoriserController | Destroy() Error ' . $unique_id);
+            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+        }
+    }
+
+    public function selectPart(Request $request)
+    {
+        try {
+            $movies = Part::all();
+            if ($request->has('q')) {
+                $search = $request->q;
+                $movies = Part::select("id", "name")
+                    ->where('name', 'LIKE', "%$search%")
+                    ->get();
+            }
+            return response()->json($movies);
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('AuthoriserController | SelectPart() Error ' . $unique_id);
+            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+        }
+    }
+
+
+    public function selectSearch(Request $request)
+    {
+        try {
+            $site_id = Auth::user()->site->id;
+            $movies = Supplier::all();
+            if ($request->has('q')) {
+                $search = $request->q;
+                $movies = Supplier::select("id", "name")
+                    ->where('name', 'LIKE', "%$search%")->orWhere('phone', 'LIKE', "%$search%")
+                    ->get();
+            }
+
+            Log::info('AuthoriserController | selectSearch() | ', [
+                'user_details' => Auth::user(),
+                'message' =>  'Supplier searched successfully'
+            ]);
+            return response()->json($movies);
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('AuthoriserController | SelectPart() Error ' . $unique_id);
+            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+        }
+    }
+    public function selectEnduser(Request $request)
+    {
+        try {
+            $site_id = Auth::user()->site->id;
+            $movies = Enduser::where('site_id','=',$site_id)->get();
+          
+            if ($request->has('q')) {
+                $search = $request->q;
+                $movies = Enduser::select("id", "name")
+                    ->where('name', 'LIKE', "%$search%")->orWhere('phone', 'LIKE', "%$search%")
+                    ->where('site_id','=', $site_id)
+                    ->get();
+            }
+            return response()->json($movies);
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('AuthoriserController | SelectEnduser() Error ' . $unique_id);
+            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+        }
+    }
+
+    public function selectRequester(Request $request)
+    {
+        try {
+            $site_id = Auth::user()->site->id;
+            $movies = User::where('role_id', '=', '3')->where('site_id','=', $site_id)->get();
+
+            if ($request->has('q')) {
+                $search = $request->q;
+                $movies = User::select("id", "name")
+                    ->where('name', 'LIKE', "%$search%")->orWhere('phone', 'LIKE', "%$search%")
+                    ->where('site_id','=',$site_id)
+                    ->get();
+            }
+            return response()->json($movies);
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('AuthoriserController | SelectRequester() Error ' . $unique_id);
+            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+        }
+    }
+
+    // requester dashboard links
+    public function requested()
+    {
+        try {
+            $site_id = Auth::user()->site->id;
+            $authid = Auth::id();
+            // $purchase = Purchase::find($id);
+            $requested = Order::where('user_id', '=', $authid)->where('status', '=', 'Requested')->where('site_id','=', $site_id)->paginate(15);
+            return view('authoriser.requested', compact('requested'));
+            // dd($requested);
+            // return ('hellow word');
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('AuthoriserController | Requested() Error ' . $unique_id);
+            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+        }
+    }
+
+    public function initiated()
+    {
+        try {
+            $site_id = Auth::user()->site->id;
+            $authid = Auth::id();
+            $initiated = Purchase::where('user_id', '=', $authid)->where('status', '=', 'Initiated')->where('site_id','=', $site_id)->paginate(15);
+            return view('authoriser.initiated', compact('initiated'));
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('AuthoriserController | Initiated() Error ' . $unique_id);
+            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+        }
+    }
+    public function approved()
+    {
+        try {
+             $site_id = Auth::user()->site->id;
+            $authid = Auth::id();
+            $approved = Order::where('user_id', '=', $authid)->where('status', '=', 'Approved')->where('site_id','=', $site_id)->paginate(15);
+            return view('authoriser.approved', compact('approved'));
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('AuthoriserController | Approved() Error ' . $unique_id);
+            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+        }
+    }
+    public function ordered()
+    {
+         $site_id = Auth::user()->site->id;
+        $authid = Auth::id();
+        $ordered = Order::where('user_id', '=', $authid)->where('status', '=', 'Ordered')->where('site_id','=', $site_id)->paginate(15);
+        return view('authoriser.ordered', compact('ordered'));
+    }
+    public function delivered()
+    {
+          $site_id = Auth::user()->site->id;
+        $authid = Auth::id();
+        $delivered = Order::where('user_id', '=', $authid)->where('status', '=', 'Supplied')->where('site_id','=', $site_id)->paginate(15);
+        return view('authoriser.delivered', compact('delivered'));
+    }
+    public function req_all()
+    {
+          $site_id = Auth::user()->site->id;
+        $authid = Auth::id();
+        $req_all = Order::where('user_id', '=', $authid)->where('site_id','=', $site_id)->latest()->paginate(15);
+        return view('authoriser.reqall', compact('req_all'));
+    }
+
+    // store_officer purchase pages
+    public function all_requests()
+    {
+        $site_id = Auth::user()->site->id;
+        $all_requests = Order::where('status', '=', 'Requested')->where('site_id','=', $site_id)->latest()->paginate(15);
+        return view('authoriser.all_requests', compact('all_requests'));
+    }
+
+    public function all_initiates()
+    {
+         $site_id = Auth::user()->site->id;
+        $all_initiates = Order::where('status', '=', 'Initiated')->where('site_id','=', $site_id)->latest()->paginate(15);
+        return view('authoriser.all_initiates', compact('all_initiates'));
+    }
+    public function all_approves()
+    {
+         $site_id = Auth::user()->site->id;
+        $all_approves = Order::where('status', '=', 'Approved')->where('site_id','=', $site_id)->latest()->paginate(15);
+        return view('authoriser.all_approves', compact('all_approves'));
+    }
+    public function all_orders()
+    {
+         $site_id = Auth::user()->site->id;
+        $all_orders = Order::where('status', '=', 'Ordered')->where('site_id','=', $site_id)->latest()->paginate(15);
+        return view('authoriser.all_orders', compact('all_orders'));
+    }
+    public function all_delivers()
+    {
+         $site_id = Auth::user()->site->id;
+        $all_delivers = Order::where('status', '=', 'Supplied')->where('site_id','=', $site_id)->latest()->paginate(15);
+        return view('authoriser.all_delivers', compact('all_delivers'));
+    }
+    // end of store_officer purchases pages
+
+
+    // generate purchase order
+    public function generate_order($id)
+    {
+        $purchase_order = Order::find($id);
+
+        $new_purchase_order = $purchase_order->replicate();
+        $new_purchase_order->setTable('porders');
+        $new_purchase_order->order_id = $id;
+        $purchase_order_number = Pay::genPurchaseCode();
+        $new_purchase_order->purchasing_order_number = $purchase_order_number;
+        $new_purchase_order->save();
+
+        $fks = OrderPart::where('order_id', '=', $id)->get();
+        foreach ($fks as $fk) {
+            $orderpart = $fk->replicate();
+            $orderpart->setTable('porder_parts');
+            $orderpart->purchasing_order_number = $purchase_order_number;
+            $orderpart->save();
+        }
+        return redirect()->back();
+    }
+
+
+    public function purchase_list()
+    {
+        $site_id = Auth::user()->site->id;
+        $purchase_lists = Porder::where('site_id','=',$site_id)->latest()->paginate(15);
+        return view('authoriser.list', compact('purchase_lists'));
+    }
+    //edit purchase list
+    public function purchase_edit($id)
+    {
+        $site_id = Auth::user()->site->id;
+        $purchase = Porder::find($id);
+        $orderid = Porder::where('id', '=', $id)->value('order_id');
+
+        $suppliers = Supplier::all();
+        $sites = Site::where('site_id','=', $site_id)->get();
+        $locations = Location::where('site_id','=', $site_id)->get();
+        $parts = Part::where('site_id','=', $site_id)->get();
+        $endusers = Enduser::where('site_id','=', $site_id)->get();
+        $order_parts = OrderPart::where('order_id', '=', $orderid)->where('site_id','=', $site_id)->get();
+        return view('authoriser.purchase_edit', compact('purchase', 'suppliers', 'sites', 'locations', 'parts', 'endusers', 'order_parts'));
+    }
+
+    // purchase order edit
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function purchase_update(Request $request, $id)
+    {
+        try {
+            $purchase = Porder::find($id);
+            Log::info('Purchase Order Edit', [
+                'before_purchase_order_edit' => Porder::find($id),
+            ]);
+            $authid = Auth::id();
+            $purchase->part_id = $request->part_id; //2
+            $purchase->tax = $request->tax; //10
+            $purchase->tax2 = $request->tax2; //11
+            $purchase->tax3 = $request->tax3; //12
+            $purchase->supplier_id = $request->supplier_id; //1
+            $purchase->type_of_purchase = $request->type_of_purchase; //3
+            $purchase->enduser_id = $request->enduser_id; //4
+            $purchase->status = $request->status;
+            $purchase->user_id = $authid;
+
+            $purchase->save();
+            Toastr::success('Successfully Updated:)', 'Sucess');
+            return redirect()->back();
+        } catch(\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('AuthoriserController | PurchaseUpdate() Error ' . $unique_id);
+            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+        }
+    }
+
+    public function purchase_destroy($id)
+    {
+        try {
+            $purchase = Porder::find($id);
+            Porder::where("id", $purchase->id)->delete();
+            Toastr::success('Successfully Updated:)', 'Sucess');
+            return redirect()->back();
+        } catch (\Throwable $th) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('AuthoriserController | PurchaseDestroy() Error ' . $unique_id);
+            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+        }
+    }
+    // purchase list show record
+    public function showlist($id)
+    {
+        $company = Company::first();
+        $purchase = Porder::where('id', '=', $id)->first();
+        $orderid = Porder::where('id', '=', $id)->value('order_id');
+        $purchasing_order_number = Porder::where('id', '=', $id)->value('purchasing_order_number');
+        $order_parts = PorderPart::where('order_id', '=', $orderid)->where('purchasing_order_number', '=', $purchasing_order_number)->get();
+        $grandtotal = PorderPart::where('order_id', '=', $orderid)->where('purchasing_order_number', '=', $purchasing_order_number)->sum('sub_total');
+        return view('authoriser.showlist', compact('purchase', 'order_parts', 'company', 'grandtotal'));
+    }
+
+    // purchase list edit record
+    public function editlist($id)
+    {
+        $purchase = Porder::find($id);
+        $orderid = Porder::where('id', '=', $id)->value('order_id');
+        $purchasing_order_number = Porder::where('id', '=', $id)->value('purchasing_order_number');
+        $suppliers = Supplier::all();
+        $sites = Site::all();
+        $locations = Location::all();
+        $parts = Part::all();
+        $endusers = Enduser::all();
+        $order_parts = PorderPart::where('order_id', '=', $orderid)->where('purchasing_order_number', '=', $purchasing_order_number)->get();
+        $grandtotal = PorderPart::where('order_id', '=', $orderid)->where('purchasing_order_number', '=', $purchasing_order_number)->sum('sub_total');
+        return view('authoriser.editlist', compact('purchase', 'suppliers', 'sites', 'locations', 'parts', 'endusers', 'order_parts', 'grandtotal'));
+
+        // dd($grandtotal);
+    }
+
+    //update purchase list 
+    /**
+     * Write code on Method
+     *
+     * @return response()
+     */
+    public function purchaselist_update(Request $request)
+    {
+        try {
+            if ($request->ajax()) {
+
+                PorderPart::findOrFail($request->pk)
+                    ->update([
+                        $request->quantity => $request->value
+
+                    ]);
+
+                return response()->json(['success' => true]);
+            }
+        } catch (\Throwable $th) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('AuthoriserController | PurchaselistUpdate() Error ' . $unique_id);
+            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+        }
+    }
+
+    public function action(Request $request)
+    {
+        try {
+            if ($request->ajax()) {
+                if ($request->action == 'edit') {
+                    $data = array(
+
+                        'quantity'        =>    $request->quantity,
+                        'unit_price'        =>    $request->unit_price
+                    );
+                    Log::info('Action', [
+                        'details' => $data
+                    ]);
+                    $ndata =   DB::table('porder_parts')
+                        ->where('id', $request->id)
+                        ->update($data);
+                    Log::info('After Action', [
+                        'details' => $ndata
+                    ]);
+                    $quantity = PorderPart::where('id', '=', $request->id)->value('quantity');
+                    $unit_price = PorderPart::where('id', '=', $request->id)->value('unit_price');
+                    $sub_total = $quantity * $unit_price;
+                    PorderPart::where('id', $request->id)->update(['sub_total' => $sub_total]);
+                }
+
+                if ($request->action == 'delete') {
+                    Log::info('Deleted porder parts from authoriser', DB::table('porder_parts')
+                        ->where('id', $request->id));
+                    DB::table('porder_parts')
+                        ->where('id', $request->id)
+                        ->delete();
+                }
+
+                return response()->json($request);
+            }
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('AuthoriserController | Actoin() Error ' . $unique_id);
+            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+        }
+    }
+
+    public function approved_status($id)
+    {
+        try {
+            $authid = Auth::id();
+            $approved_on = Carbon::now();
+            $order = Order::find($id);
+            Order::where('id', '=', $id)->update(['approval_status' => 'Approved', 'approved_by' => $authid, 'approved_on' => $approved_on]);
+
+            Log::info('AuthoriserController | approved_status() | Order Approval Status Updated to Approved', [
+                'user_details' => Auth::user(),
+                'order_id' => $id,
+            ]);
+
+            return redirect()->back();
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('AuthoriserController | ApprovedStatus() Error ' . $unique_id);
+            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+            // Handle the error as needed
+            return redirect()->back()->withErrors('Error updating order approval status.');
+        }
+    }
+
+    /**
+     * Set the approval status of an order to Denied.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function denied_status($id)
+    {
+        try {
+            $order = Order::find($id);
+            $authid = Auth::id();
+            $approved_on = Carbon::now()->toDateTimeString();
+            Order::where('id', '=', $id)->update(['approval_status' => 'Denied', 'approved_by' => $authid, 'approved_on' => $approved_on]);
+
+            Log::info('AuthoriserController | denied_status() | Order Approval Status Updated to Denied', [
+                'user_details' => Auth::user(),
+                'order_id' => $id,
+            ]);
+
+            return redirect()->back();
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('AuthorserController | DeniedStatus() Error ' . $unique_id);
+            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+
+            // Handle the error as needed
+            return redirect()->back()->withErrors('Error updating order approval status.');
+        }
+    }
+    // generate pdf to send to supplier
+    // public function generatePDF($id)
+    // {
+    //     $purchase = Order::find($id);
+
+    //     $order_parts = OrderPart::where('order_id', '=', $id)->get();
+
+    //     $purchase = PDF::loadView('purchases.pdf', compact('purchase', 'order_parts'))->setOptions(['defaultFont' => 'sans-serif']);
+    //     return $purchase->download('purchase.pdf');
+    // }
+
+    // public function generatePurchaseOrderPDF($id)
+    // {
+    //     $purchase = Porder::find($id);
+    //     $company= Company::first();
+    //     $order_parts = PorderPart::where('order_id', '=', $id)->get();
+    //     $purchasing_order_number = Porder::where('id', '=', $id)->value('purchasing_order_number');
+    //     $grandtotal = PorderPart::where('order_id', '=', $id)->where('purchasing_order_number', '=', $purchasing_order_number)->sum('sub_total');
+    //     $purchase = PDF::loadView('purchases.porderpdf', compact('purchase', 'order_parts','grandtotal','company'))->setOptions(['defaultFont' => 'sans-serif']);
+    //     return $purchase->download('purchase.porderpdf');
+    // }
+
+
+}

@@ -1,0 +1,31 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('endusers', function (Blueprint $table) {
+            $table->renameColumn('name', 'asset_staff_id');
+            $table->renameColumn('type', 'name_description');
+            $table->renameColumn('bic', 'type');
+         
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('endusers', function (Blueprint $table) {
+         
+        });
+    }
+};
