@@ -1,1 +1,0 @@
-<?php /**PATH C:\Users\Hackman_GH\Desktop\Zipped Projects\Laravel-10-roles-and-permissions-master\resources\views/partials/js/custom_js.blade.php ENDPATH**/ ?>
