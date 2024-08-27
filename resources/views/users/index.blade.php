@@ -95,31 +95,27 @@
         <script>
             $(document).ready(function() {
                 $('#search').on('keyup', function() {
-                    let query = $(this).val();
-                    if (query.length > 2) { // start searching after 3 characters
+                    let query = $(this).val().trim();
+        
+                    if (query.length > 2) { // Start searching after 3 characters
                         $.ajax({
-                            url: "{{ route('search.users') }}",
+                            url: "{{ route('search.users') }}", // Your search route
                             type: "GET",
-                            data: {
-                                query: query
-                            },
+                            data: { query: query },
                             success: function(data) {
-                                $('#user-list').html('');
+                                $('#user-list').html(''); // Clear previous results
                                 if (data.length > 0) {
                                     data.forEach(user => {
+                                        // Check if roles exist, if not, set to an empty array
+                                        let roles = user.roles ? user.roles.map(role => 
+                                            `<span class="badge bg-primary">${role.name}</span>`).join('') : '<span class="text-muted">No Role Assigned</span>';
+                                        
                                         $('#user-list').append(`
                                             <tr>
                                                 <td>${user.id}</td>
                                                 <td>${user.name}</td>
-                                                   <td>${user.email}</td>
-                                               
-                                             
-                                               <td>
-                        @forelse ($user->getRoleNames() as $role)
-                            <span class="badge bg-primary">{{ $role }}</span>
-                        @empty
-                        @endforelse
-                    </td>
+                                                <td>${user.email}</td>
+                                                <td>${roles}</td>
                                                 <td>
                                                     <a href="/users/${user.id}/edit" class="btn btn-success">Edit</a>
                                                 </td>
@@ -135,40 +131,30 @@
                                     });
                                 } else {
                                     $('#user-list').append(
-                                        '<tr><td class="text-center" colspan="8">Data Not Found!</td></tr>'
+                                        '<tr><td class="text-center" colspan="5">No User Found!</td></tr>'
                                     );
                                 }
                             }
                         });
-                    } else {
-                        // Optionally reset the list or show initial users
-                        $('#user-list').html(`@foreach ($users as $us)
-                            <tr>
-                                <td>{{ $us->id }}</td>
-                                <td>{{ $us->name }}</td>
-                            <td>{{ $us->email }}</td>
-                              <td>
-                        @forelse ($user->getRoleNames() as $role)
-                            <span class="badge bg-primary">{{ $role }}</span>
-                        @empty
-                        @endforelse
-                    </td>
-                                <td>
-                                    <a href="{{ route('users.edit', $us->id) }}" class="btn btn-success">Edit</a>
-                                </td>
-                                <td>
-                                    <form action="{{ route('users.destroy', $us->id) }}" method="post">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" onclick="return confirm('Are you sure?')" class="btn btn-danger">Delete</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @endforeach`);
+                    } else if (query === "") {
+                        // If the search bar is cleared, load the users.index content
+                        $.ajax({
+                            url: "{{ route('users.index') }}", // Your users.index route
+                            type: "GET",
+                            success: function(response) {
+                                // Replace the user-list content with the response from the server
+                                $('#user-list').html($(response).find('#user-list').html());
+                            },
+                            error: function() {
+                                alert('Failed to load users.');
+                            }
+                        });
                     }
                 });
             });
         </script>
+        
+        
   </body>
   <script src="https://cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
   <script src="https://cdn.bootcss.com/toastr.js/latest/js/toastr.min.js"></script>

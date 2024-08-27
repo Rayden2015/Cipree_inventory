@@ -34,13 +34,19 @@ class UserController extends Controller
     public function searchUsers(Request $request)
     {
         $query = $request->get('query');
-        $users = User::with('role')
-            ->where('name', 'like', '%' . $query . '%')
+        
+        // Fetch users and include role names
+        $users = User::where('name', 'like', '%' . $query . '%')
             ->orWhere('email', 'like', '%' . $query . '%')
-            ->get();
+            ->get()
+            ->map(function ($user) {
+                $user->role_names = $user->getRoleNames(); // Add role names to the user object
+                return $user;
+            });
     
         return response()->json($users);
     }
+    
    
     public function index()
     {
