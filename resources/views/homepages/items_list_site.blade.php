@@ -68,7 +68,7 @@
                                 <td>{{ $rq->item->stock_quantity ?? '' }}</td>
                                 <td>{{ $rq->amount ?? '' }}</td>
                                 <td>{{ $rq->location->name ?? '' }}</td>
-                                <td>{{ $rq->inventory->trans_type ?? '' }}</td>
+                                <td>{{ $rq->trans_type ?? '' }}</td>
                             @empty
                             <tr>
                                 <td class="text-center" colspan="12">Data Not Found!</td>
