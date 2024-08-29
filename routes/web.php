@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SmsController;
+use App\Http\Controllers\UomController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LevyController;
@@ -43,6 +44,7 @@ Route::get('/', function () {
 
 
 Route::resource('users', UserController::class);
+Route::resource('uom', UomController::class);
 Route::get('search_users', [\App\Http\Controllers\UserController::class, 'searchUsers'])->name('search.users');
 Route::resource('company', CompanyController::class);
 Route::resource('suppliers', SupplierController::class);
@@ -320,5 +322,6 @@ Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::resources([
     'roles' => RoleController::class,
     'users' => UserController::class,
+
 
 ]);

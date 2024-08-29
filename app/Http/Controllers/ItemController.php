@@ -11,6 +11,7 @@ use App\Models\InventoryItemDetail;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Models\Uom;
 
 class ItemController extends Controller
 {
@@ -98,23 +99,23 @@ class ItemController extends Controller
      */
     public function create()
     {
-        try {
+        // try {
             $categories = Category::all();
-
+$uom = Uom::all();
             // Log successful user input
             Log::info('ItemController | Create() | Item creation form displayed', [
                 'user_details' => Auth::user(),
                 'categories' => $categories
             ]);
 
-            return view('items.create', compact('categories'));
-        } catch (\Exception $e) {
-            // Log errors
-            $unique_id = floor(time() - 999999999);
-            Log::error('ItemController | Create() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            return view('items.create', compact('categories','uom'));
+        // } catch (\Exception $e) {
+        //     // Log errors
+        //     $unique_id = floor(time() - 999999999);
+        //     Log::error('ItemController | Create() Error ' . $unique_id);
+        //     Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+        //     return redirect()->back();
+        // }
     }
 
     /**
@@ -140,6 +141,8 @@ class ItemController extends Controller
             $item = new Item();
             $item->item_description = $request->item_description;
             $item->item_uom = $request->item_uom;
+            $item->uom_id = $request->uom_id;
+            
             $item->item_part_number = $request->item_part_number;
             $item->item_stock_code = $stock_codes;
             $item->added_by = $added_by;
@@ -190,6 +193,7 @@ class ItemController extends Controller
         try {
             $item = Item::find($id);
             $categories = Category::all();
+            $uom = Uom::all();
 
             // Log successful user input and request
             Log::info('Item edit form displayed', [
@@ -198,7 +202,7 @@ class ItemController extends Controller
                 'item_id' => $id,
                 // Add other relevant information
             ]);
-            return view('items.edit', compact('item', 'categories'));
+            return view('items.edit', compact('item', 'categories','uom'));
         } catch (\Exception $e) {
             // Log errors
             $unique_id = floor(time() - 999999999);
@@ -230,6 +234,7 @@ class ItemController extends Controller
             $stock_codes = $initials . str_pad($lastorderId, 4, "0", STR_PAD_LEFT);
             $item->item_description = $request->item_description;
             $item->item_uom = $request->item_uom;
+            $item->uom_id = $request->uom_id;
             $item->item_part_number = $request->item_part_number;
             $item->item_stock_code = $request->item_stock_code;
             $item->modified_by = $modified_by;

@@ -358,7 +358,7 @@
                                         {{ $ph->description ?? '' }}</td>
                                         <td style="background-color:white;border: 1px solid black;">
                                             {{ $ph->part_number ?? '' }}</td>
-                                    <td style="background-color:white;border: 1px solid black;">{{ $ph->uom ?? '' }}
+                                    <td style="background-color:white;border: 1px solid black;">{{ $ph->uoms->name ?? ''}}
                                     </td>
                                  
                                     <td style="background-color:white;border: 1px solid black;">

@@ -69,7 +69,7 @@
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label> UOM: <span class="text-danger"></span></label>
-                                        <select class="select form-control" id="item_uom" name="item_uom" required
+                                        {{-- <select class="select form-control" id="item_uom" name="item_uom" required
                                             data-fouc data-placeholder="Choose..">
                                             <option value=""></option>
                                             <option {{ old('item_uom') == 'Kilograms' ? 'selected' : '' }}
@@ -113,7 +113,17 @@
                                                 Roll</option>
                                            
 
-                                        </select>
+                                        </select> --}}
+                                        <select id="uom_id" type="text"
+                                        class="form-control @error('uom_id') is-invalid @enderror"
+                                        name="uom_id" autocomplete="uom_id" autofocus>
+                                        <option value="" selected hidden>Please Select</option>
+
+                                        @foreach ($uom as $um)
+                                            <option {{ old('um') == $um->id ? 'selected' : '' }}
+                                                value="{{ $um->id }}">{{ $um->name }}</option>
+                                        @endforeach
+                                    </select>
                                     </div>
                                 </div>
 

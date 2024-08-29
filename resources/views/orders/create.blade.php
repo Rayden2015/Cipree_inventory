@@ -246,7 +246,17 @@
                         html += '<td><input type="text" name="part_number[]" required class="form-control"/></td>';
 
 
-                          html += '<td> <select style="height:33px; font-size:11px;"  class="select form-select" id="uom" name="uom[]" required"></option><option>  <option {{ old('uom') == 'Kilograms' ? 'selected' : '' }} value="Kilograms">Kilograms </option><option {{ old('uom') == 'Meters' ? 'selected' : '' }} value="Meters">Meters</option><option {{ old('uom') == 'Litres' ? 'selected' : '' }} value="Litres">Litres</option>  <option {{ old('uom') == 'Pieces' ? 'selected' : '' }} value="Pieces">Pieces </option><option {{ old('uom') == 'Kits' ? 'selected' : '' }} value="Kits">Kits</option><option {{ old('uom') == 'Pair' ? 'selected' : '' }} value="Pair">Pair</option>  <option {{ old('uom') == 'Bale' ? 'selected' : '' }} value="Bale">Bale </option><option {{ old('uom') == 'Bottle' ? 'selected' : '' }} value="Bottle">Bottle</option><option {{ old('uom') == 'Box' ? 'selected' : '' }} value="Box">Box</option>  <option {{ old('uom') == 'Bucket' ? 'selected' : '' }} value="Bucket">Bucket </option><option {{ old('uom') == 'Carton' ? 'selected' : '' }} value="Carton">Carton</option><option {{ old('uom') == 'Drum' ? 'selected' : '' }} value="Drum">Drum</option>  <option {{ old('uom') == 'Gallon' ? 'selected' : '' }} value="Gallon">Gallon </option><option {{ old('uom') == 'Pack' ? 'selected' : '' }} value="Pack">Pack</option><option {{ old('uom') == 'Rim' ? 'selected' : '' }} value="Rim">Rim</option>  <option {{ old('uom') == 'Roll' ? 'selected' : '' }} value="Roll">Roll </option></select></td>';
+                        html += `
+    <td>
+        <select style="height:33px; font-size:11px;" class="select form-select" id="uom_id" name="uom_id[]" required>
+            <option value="" selected hidden>Please Select</option>
+            @foreach ($uom as $um)
+                <option {{ old('um') == $um->id ? 'selected' : '' }} value="{{ $um->id }}">{{ $um->name }}</option>
+            @endforeach
+        </select>
+    </td>
+`;
+
 
 
 

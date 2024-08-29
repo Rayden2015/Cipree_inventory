@@ -10,7 +10,7 @@ class Item extends Model
     use HasFactory;
    
     protected $fillable = [
-        'item_description','item_uom','item_category_id','item_stock_code','item_part_number','added_by','modified_by','reorder_level','stock_quantity','amount','new_category','site_id'
+        'item_description','item_uom','item_category_id','item_stock_code','item_part_number','added_by','modified_by','reorder_level','stock_quantity','amount','new_category','site_id','uom_id'
     ];
 
     public function category(){
@@ -32,4 +32,11 @@ class Item extends Model
     {
         return $this->belongsTo(Site::class, 'site_id');
     }
+
+    public function uom()
+    {
+        return $this->belongsTo(Uom::class, 'uom_id');
+    }
+
+
 }

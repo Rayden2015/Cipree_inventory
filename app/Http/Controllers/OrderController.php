@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\Uom;
 use App\Helpers\Pay;
 use App\Models\Part;
 use App\Models\Site;
@@ -61,6 +62,7 @@ class OrderController extends Controller
         try {
             $site_id = Auth::user()->site->id;
             $customers = Supplier::all();
+            $uom = Uom::all();
             $products = Part::where('site_id','=',$site_id)->get();
             $request_number = Pay::genRefCode();
             $requested_date = Carbon::now()->toDateTimeString();
@@ -70,7 +72,7 @@ class OrderController extends Controller
                 'user_details' => Auth::user(),
                 'messasge' => 'Create Order Page Loaded Successfully'
             ]);
-            return view('orders.create', compact('customers', 'products', 'request_number', 'request_date'));
+            return view('orders.create', compact('customers', 'products', 'request_number', 'request_date','uom'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
             Log::error('OrderController | Create() Error ' . $unique_id);
@@ -111,7 +113,7 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        try {
+        // try {
             $request->validate([
                 'photo' => 'sometimes|nullable|image|mimes:jpeg,gif,png,jpg|max:9048',
                 'desc' => 'nullable',
@@ -143,7 +145,7 @@ class OrderController extends Controller
                 $order->save();
             }
             if ($order) {
-                $products = ['products' => $request->products, 'quantity' => $request->quantity, 'description' => $request->description, 'make' => $request->make, 'model' => $request->model, 'serial_number' => $request->serial_number, 'unit_price' => $request->unit_price, 'comments' => $request->comments, 'remarks' => $request->remarks, 'priority' => $request->priority, 'uom' => $request->uom, 'part_number' => $request->part_number,'site_id'=>$request->site_id];
+                $products = ['products' => $request->products, 'quantity' => $request->quantity, 'description' => $request->description, 'make' => $request->make, 'model' => $request->model, 'serial_number' => $request->serial_number, 'unit_price' => $request->unit_price, 'comments' => $request->comments, 'remarks' => $request->remarks, 'priority' => $request->priority, 'part_number' => $request->part_number,'site_id'=>$request->site_id,'uom_id'=>$request->uom_id];
 
                 for ($i = 0; $i < (count($products['products'])); $i++) {
                     OrderPart::create([
@@ -158,7 +160,8 @@ class OrderController extends Controller
                         // 'comments'   => $products['comments'][$i],
                         'remarks'   => $products['remarks'][$i],
                         'priority'   => $products['priority'][$i],
-                        'uom'   => $products['uom'][$i],
+                        // 'uom'   => $products['uom'][$i],
+                        'uom_id'   => $products['uom_id'][$i],
                         'part_number'   => $products['part_number'][$i],
                         'site_id'=>$site_id,
                     ]);
@@ -182,12 +185,12 @@ class OrderController extends Controller
             ]);
 
             return back()->with('success', 'Order #' . $order->id . ' Placed Successfully');
-        } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::error('OrderController | Store() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+        // } catch (\Exception $e) {
+        //     $unique_id = floor(time() - 999999999);
+        //     Log::error('OrderController | Store() Error ' . $unique_id);
+        //     Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+        //     return redirect()->back();
+        // }
     }
     // admin ordering a request
 
@@ -331,11 +334,12 @@ class OrderController extends Controller
             $purchase = Order::find($id);
             $suppliers = Supplier::all();
             $sites = Site::all();
+            $uom = Uom::all();
             $locations = Location::where('site_id','=',$site_id)->get();
             $parts = Part::where('site_id','=',$site_id)->get();
             $endusers = Enduser::where('site_id','=',$site_id)->get();
             $order_parts = OrderPart::where('order_id', '=', $id)->get();
-            return view('orders.edit', compact('purchase', 'suppliers', 'sites', 'locations', 'parts', 'endusers', 'order_parts'));
+            return view('orders.edit', compact('purchase', 'suppliers', 'sites', 'locations', 'parts', 'endusers', 'order_parts','uom'));
         }catch (\Exception $e){
             $unique_id = floor(time() - 999999999);
             Log::error('OrderController | Edit() Error ' . $unique_id);
@@ -344,6 +348,7 @@ class OrderController extends Controller
         }
        
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -479,6 +484,7 @@ $product = DB::select('select price,quantity from products where id = ? and site
             $order->description = $request->description;
             $order->part_number = $request->part_number;
             $order->uom = $request->uom;
+            $order->uom_id = $request->uom_id;
             $order->quantity = $request->quantity;
             $order->remarks = $request->remarks;
             $order->priority = $request->priority;

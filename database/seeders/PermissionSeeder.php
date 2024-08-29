@@ -138,6 +138,12 @@ class PermissionSeeder extends Seeder
             'edit-tax',
             'delete-tax',
 
+             // uom Permissions
+             'view-uom',
+             'add-uom',
+             'edit-uom',
+             'delete-uom',
+
             // Site Admin Permissions
             // Add your site admin permissions here
         ];

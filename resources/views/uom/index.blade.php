@@ -19,7 +19,7 @@
             <h3 class="page-title"></h3>
 
             <p>
-                <a href="{{ route('taxes.create') }}" class="btn btn-primary mr-3 my-3">Add </a>
+                <a href="{{ route('uom.create') }}" class="btn btn-primary mr-3 my-3">Add </a>
             </p>
 
         </div>
@@ -27,7 +27,7 @@
 
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Tax and Levies Lists</h3>
+                <h3 class="card-title">UoM  Lists</h3>
             </div>
             <!-- /.card-header -->
             @if (session('success'))
@@ -48,31 +48,31 @@
                         <tr>
                             <th>ID</th>
                             <th>Description</th>
-                            <th>Rate</th>
-                            @can('edit-tax')
+                            {{-- <th>Rate</th> --}}
+                            @can('edit-uom')
                                 <th>Edit</th>
                             @endcan
-                            @can('delete-tax')
+                            @can('delete-uom')
                                 <th>Delete</th>
                             @endcan
                         </tr>
                     </thead>
-                    @forelse ($taxes as $tx)
+                    @forelse ($uom as $um)
                         <tbody>
                             <tr>
-                                <td>{{ $tx->id }}</td>
-                                <td>{{ $tx->description ?? '' }}</td>
-                                <td>{{ $tx->rate ?? '' }}</td>
-                                @can('edit-tax')
+                                <td>{{ $um->id }}</td>
+                                <td>{{ $um->name ?? '' }}</td>
+                                {{-- <td>{{ $um->rate ?? '' }}</td> --}}
+                                @can('edit-uom')
                                     <td>
-                                        <a href="{{ route('taxes.edit', $tx->id) }}" class ="btn btn-success">Edit</a>
+                                        <a href="{{ route('uom.edit', $um->id) }}" class ="btn btn-success">Edit</a>
 
                                     </td>
                                 @endcan
-                                @can('delete-tax')
+                                @can('uom-tax')
                                     <td>
 
-                                        <form action="{{ route('taxes.destroy', $tx->id) }}" method="post">
+                                        <form action="{{ route('uom.destroy', $um->id) }}" method="post">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" onclick="return confirm('Are you sure?')"
@@ -91,7 +91,7 @@
 
                 </table>
             </div>
-            {{ $taxes->links('pagination::bootstrap-4') }}
+            {{ $uom->links('pagination::bootstrap-4') }}
             <!-- /.card-body -->
         </div>
 

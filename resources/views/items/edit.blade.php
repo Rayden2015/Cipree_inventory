@@ -92,28 +92,13 @@
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>UOM: </label>
-                                        <select class="select form-control" id="item_uom" name="item_uom" required data-fouc
-                                        data-placeholder="Choose..">
-
+                                        <select data-placeholder="Choose..." name="uom_id" id="uom_id"
+                                        class="select-search form-control">
                                         <option value=""></option>
-                                        <option {{ ($item->item_uom  == 'Kilogram' ? 'selected' : '') }} value="Kilogram">Kilogram</option>
-                                        <option {{ ($item->item_uom  == 'Meters' ? 'selected' : '') }} value="Meters">Meters</option>
-                                        <option {{ ($item->item_uom  == 'Litres' ? 'selected' : '') }} value="Litres">Litres</option>
-                                        <option {{ ($item->item_uom  == 'Pieces' ? 'selected' : '') }} value="Pieces">Pieces</option>
-                                        <option {{ ($item->item_uom  == 'Kit' ? 'selected' : '') }} value="Kit">Kit</option>
-
-                                        <option {{ ($item->item_uom  == 'Pair' ? 'selected' : '') }} value="Pair">Pair</option>
-                                        <option {{ ($item->item_uom  == 'Bale' ? 'selected' : '') }} value="Bale">Bale</option>
-                                        <option {{ ($item->item_uom  == 'Bottle' ? 'selected' : '') }} value="Bottle">Bottle</option>
-                                        <option {{ ($item->item_uom  == 'Box' ? 'selected' : '') }} value="Box">Box</option>
-                                        <option {{ ($item->item_uom  == 'Bucket' ? 'selected' : '') }} value="Bucket">Bucket</option>
-                                        <option {{ ($item->item_uom  == 'Carton' ? 'selected' : '') }} value="Carton">Carton</option>
-                                        <option {{ ($item->item_uom  == 'Drum' ? 'selected' : '') }} value="Drum">Drum</option>
-                                        <option {{ ($item->item_uom  == 'Gallon' ? 'selected' : '') }} value="Gallon">Gallon</option>
-                                        <option {{ ($item->item_uom  == 'Pack' ? 'selected' : '') }} value="Pack">Pack</option>
-                                        <option {{ ($item->item_uom  == 'Rim' ? 'selected' : '') }} value="Rim">Rim</option>
-                                        <option {{ ($item->item_uom  == 'Roll' ? 'selected' : '') }} value="Roll">Roll</option>
-                                       
+                                        @foreach ($uom as $um)
+                                            <option {{ $item->uom_id == $um->id ? 'selected' : '' }}
+                                                value="{{ $um->id }}">{{ $um->name }}</option>
+                                        @endforeach
                                     </select>
                                     </div>
                                 </div>

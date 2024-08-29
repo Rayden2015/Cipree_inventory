@@ -49,9 +49,9 @@
                     {{-- @if (Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'site_admin') --}}
                     @can('company-module')
                     <li
-                        class="nav-item {{ request()->routeIs('company.index', 'users.index', 'reviews.index', 'sites*','roles*','permissions*') ? 'menu-open' : '' }}">
+                        class="nav-item {{ request()->routeIs('company.index', 'users.index', 'reviews.index', 'sites*','roles*','permissions*','uom*') ? 'menu-open' : '' }}">
                         <a href="#"
-                            class="nav-link {{ request()->routeIs('company.index', 'users.index', 'reviews.index', 'sites*','roles*','permissions*') ? 'active' : '' }}">
+                            class="nav-link {{ request()->routeIs('company.index', 'users.index', 'reviews.index', 'sites*','roles*','permissions*','uom*') ? 'active' : '' }}">
                             <i>
                                 <img src="{{ asset('assets/images/icons/comp.png') }}"width="26" height="26"
                                     alt="" />
@@ -100,6 +100,16 @@
                                     </a>
                                 </li>
                             @endcan
+
+                            @can('view-uom')
+                            <li class="nav-item">
+                                <a href="{{ route('uom.index') }}"
+                                    class="nav-link {{ request()->routeIs('uom.index') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>UoM</p>
+                                </a>
+                            </li>
+                        @endcan
 
                             @can('view-role')
                                 <li class="nav-item">
