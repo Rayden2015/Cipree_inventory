@@ -42,6 +42,17 @@
                     <h3 class="card-title">Department Lists</h3>
                 </div>
                 <!-- /.card-header -->
+                @if (session('success'))
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
+            @endif
+    
+            @if (session('error'))
+                <div class="alert alert-danger">
+                    {{ session('error') }}
+                </div>
+            @endif
 
                 <div class="card-body">
                     <table id="example1" class="table table-bordered table-striped">

@@ -22,7 +22,7 @@
         <!-- Theme style -->
         <link rel="stylesheet" href="{{ asset('/assets/dist/css/adminlte.min.css') }}">
 
-        <title>Document</title>
+        <title>Search History</title>
 
     </head>
 
@@ -49,6 +49,18 @@
                         </div>
                     </div>
                 </form>
+                @if (session('success'))
+                    <div class="alert alert-success">
+                        {{ session('success') }}
+                    </div>
+                @endif
+        
+                @if (session('error'))
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
                 <form action="inventory_history_date_search" method="GET">
                     <div class="row">
                         <div class="input-group mb-3" style="width:99%; padding-left: 10px;">

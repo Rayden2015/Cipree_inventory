@@ -25,9 +25,10 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class DashboardNavigationController extends Controller
 {
-   public function __construct(){
+   public function __construct()
+   {
       $this->middleware('auth');
-  }
+   }
    public function pending_po_approvals()
    {
       try {
@@ -40,9 +41,14 @@ class DashboardNavigationController extends Controller
          return view('homepages.pending_po_approvals', compact('pending_po_approvals'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | PendingPoApprovals() Error ' . $unique_id);
-         Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-         return redirect()->back()->with('error', 'An error occurred while fetching pending PO approvals.');
+         Log::error('DashboardController | PendingPoApprovals() Error ' . $unique_id, [
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+         ]);
+
+         // Redirect back with the error message
+         return redirect()->back()
+            ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
       }
    }
 
@@ -58,10 +64,14 @@ class DashboardNavigationController extends Controller
          return view('homepages.approved_request', compact('approved_request'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | ApprovedRequest() Error ' . $unique_id);
-         Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+         Log::error('DashboardController | ApprovedRequest() Error ' . $unique_id, [
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+         ]);
 
-         return redirect()->back()->with('error', 'An error occurred while fetching approved requests.');
+         // Redirect back with the error message
+         return redirect()->back()
+            ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
       }
    }
 
@@ -77,10 +87,14 @@ class DashboardNavigationController extends Controller
          return view('homepages.approved_pos', compact('approved_pos'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-            Log::error('DashboardController | ApprovedPos() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+         Log::error('DashboardController | ApprovedPos() Error ' . $unique_id, [
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+         ]);
 
-         return redirect()->back()->with('error', 'An error occurred while fetching approved POs.');
+         // Redirect back with the error message
+         return redirect()->back()
+            ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
       }
    }
 
@@ -97,10 +111,14 @@ class DashboardNavigationController extends Controller
          // dd($processed_request);
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-            Log::error('DashboardController | ProcessedRequst() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+         Log::error('DashboardController | ProcessedRequst() Error ' . $unique_id, [
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+         ]);
 
-         return redirect()->back()->with('error', 'An error occurred while fetching processed requests.');
+         // Redirect back with the error message
+         return redirect()->back()
+            ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
       }
    }
 
@@ -116,10 +134,14 @@ class DashboardNavigationController extends Controller
          return view('homepages.pending_request_approvals', compact('pending_request_approvals'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | PendingRequestApprovals() Error ' . $unique_id);
-         Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+         Log::error('DashboardController | PendingRequestApprovals() Error ' . $unique_id, [
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+         ]);
 
-         return redirect()->back()->with('error', 'An error occurred while fetching pending request approvals.');
+         // Redirect back with the error message
+         return redirect()->back()
+            ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
       }
    }
 
@@ -135,10 +157,14 @@ class DashboardNavigationController extends Controller
          return view('homepages.pending_stock_approvals', compact('pending_stock_approvals'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-            Log::error('DashboardController | PendingStockApprovals() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+         Log::error('DashboardController | PendingStockApprovals() Error ' . $unique_id, [
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+         ]);
 
-         return redirect()->back()->with('error', 'An error occurred while fetching pending stock approvals.');
+         // Redirect back with the error message
+         return redirect()->back()
+            ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
       }
    }
 
@@ -155,11 +181,16 @@ class DashboardNavigationController extends Controller
          return view('homepages.processed_pos', compact('processed_pos'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-            Log::error('DashboardController | ProcessedPos() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+         Log::error('DashboardController | ProcessedPos() Error ' . $unique_id,[
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+        ]);
 
-         return redirect()->back()->with('error', 'An error occurred while fetching processed POs.');
-      }
+// Redirect back with the error message
+return redirect()->back()
+                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
    }
 
    public function stock_request_pending()
@@ -174,11 +205,16 @@ class DashboardNavigationController extends Controller
          return view('homepages.stock_request_pending', compact('stock_request_pending'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-            Log::error('DashboardController | StockRequestPending() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+         Log::error('DashboardController | StockRequestPending() Error ' . $unique_id,[
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+        ]);
 
-         return redirect()->back()->with('error', 'An error occurred while fetching stock request pending.');
-      }
+// Redirect back with the error message
+return redirect()->back()
+                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
    }
 
    public function sofficer_stock_request_pending()
@@ -195,11 +231,16 @@ class DashboardNavigationController extends Controller
          return view('homepages.sofficer_stock_request_pending', compact('sofficer_stock_request_pending'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-            Log::error('DashboardController | SofficerStockRequestPending() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+         Log::error('DashboardController | SofficerStockRequestPending() Error ' . $unique_id,[
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+        ]);
 
-         return redirect()->back()->with('error', 'An error occurred while fetching SO officer stock request pending.');
-      }
+// Redirect back with the error message
+return redirect()->back()
+                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
    }
 
    public function rfi_pending_approval()
@@ -215,11 +256,16 @@ class DashboardNavigationController extends Controller
          return view('homepages.rfi_pending_approval', compact('rfi_pending_approval'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-            Log::error('DashboardController | RfiPendingApproval() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+         Log::error('DashboardController | RfiPendingApproval() Error ' . $unique_id,[
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+        ]);
 
-         return redirect()->back()->with('error', 'An error occurred while fetching RFI pending approval.');
-      }
+// Redirect back with the error message
+return redirect()->back()
+                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
    }
 
    public function rfi_approved_requests()
@@ -235,11 +281,16 @@ class DashboardNavigationController extends Controller
          return view('homepages.rfi_approved_requests', compact('rfi_approved_requests'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-            Log::error('DashboardController | RfiApprovedRequests() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+         Log::error('DashboardController | RfiApprovedRequests() Error ' . $unique_id,[
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+        ]);
 
-         return redirect()->back()->with('error', 'An error occurred while fetching RFI approved requests.');
-      }
+// Redirect back with the error message
+return redirect()->back()
+                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
    }
 
    public function rfi_processed_requests()
@@ -257,11 +308,16 @@ class DashboardNavigationController extends Controller
          return view('homepages.rfi_processed_requests', compact('rfi_processed_requests'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-            Log::error('DashboardController | RfiProcessedRequests() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+         Log::error('DashboardController | RfiProcessedRequests() Error ' . $unique_id,[
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+        ]);
 
-         return redirect()->back()->with('error', 'An error occurred while fetching RFI processed requests.');
-      }
+// Redirect back with the error message
+return redirect()->back()
+                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
    }
 
    public function rfi_denied()
@@ -277,10 +333,16 @@ class DashboardNavigationController extends Controller
          return view('homepages.rfi_denied', compact('rfi_denied'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-            Log::error('DashboardController | RfiDenied() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-         return redirect()->back()->with('error', 'An error occurred while fetching RFI denied requests.');
-      }
+         Log::error('DashboardController | RfiDenied() Error ' . $unique_id,[
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+        ]);
+
+// Redirect back with the error message
+return redirect()->back()
+                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
    }
    public function po_total_value_of_approved_pos_mtd()
    {
@@ -295,11 +357,16 @@ class DashboardNavigationController extends Controller
          return view('homepages.po_total_value_of_approved_pos_mtd', compact('po_total_value_of_approved_pos_mtd'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-            Log::error('DashboardController | PoTotalValueOfApprovedPosMtd() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+         Log::error('DashboardController | PoTotalValueOfApprovedPosMtd() Error ' . $unique_id,[
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+        ]);
 
-         return redirect()->back()->with('error', 'An error occurred while fetching po_total_value_of_approved_pos_mtd.');
-      }
+// Redirect back with the error message
+return redirect()->back()
+                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
    }
 
    public function po_total_value_of_supplied_pos_mtd()
@@ -315,11 +382,16 @@ class DashboardNavigationController extends Controller
          return view('homepages.po_total_value_of_supplied_pos_mtd', compact('po_total_value_of_supplied_pos_mtd'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-            Log::error('DashboardController | PoTotalValueOfSuppliedPosMtd() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+         Log::error('DashboardController | PoTotalValueOfSuppliedPosMtd() Error ' . $unique_id,[
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+        ]);
 
-         return redirect()->back()->with('error', 'An error occurred while fetching po_total_value_of_supplied_pos_mtd.');
-      }
+// Redirect back with the error message
+return redirect()->back()
+                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
    }
 
    public function po_total_value_of_pending_pos_mtd()
@@ -335,11 +407,16 @@ class DashboardNavigationController extends Controller
          return view('homepages.po_total_value_of_pending_pos_mtd', compact('po_total_value_of_pending_pos_mtd'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-            Log::error('DashboardController | PoTotalValueOfPendingPosMtd() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+         Log::error('DashboardController | PoTotalValueOfPendingPosMtd() Error ' . $unique_id,[
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+        ]);
 
-         return redirect()->back()->with('error', 'An error occurred while fetching po_total_value_of_pending_pos_mtd.');
-      }
+// Redirect back with the error message
+return redirect()->back()
+                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
    }
 
    public function po_approved_stock_requests()
@@ -355,11 +432,16 @@ class DashboardNavigationController extends Controller
          return view('homepages.po_approved_stock_requests', compact('po_approved_stock_requests'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-            Log::error('DashboardController | PoApprovedStockRequests() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+         Log::error('DashboardController | PoApprovedStockRequests() Error ' . $unique_id,[
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+        ]);
 
-         return redirect()->back()->with('error', 'An error occurred while fetching po_approved_stock_requests.');
-      }
+// Redirect back with the error message
+return redirect()->back()
+                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
    }
 
    public function po_approved_direct_requests()
@@ -375,11 +457,16 @@ class DashboardNavigationController extends Controller
          return view('homepages.po_approved_direct_requests', compact('po_approved_direct_requests'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-            Log::error('DashboardController | PoApprovedDirectRequests() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+         Log::error('DashboardController | PoApprovedDirectRequests() Error ' . $unique_id,[
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+        ]);
 
-         return redirect()->back()->with('error', 'An error occurred while fetching po_approved_direct_requests.');
-      }
+// Redirect back with the error message
+return redirect()->back()
+                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
    }
 
    public function po_approved_pos()
@@ -395,11 +482,16 @@ class DashboardNavigationController extends Controller
          return view('homepages.po_approved_pos', compact('po_approved_pos'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-            Log::error('DashboardController | PoApprovedPos() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+         Log::error('DashboardController | PoApprovedPos() Error ' . $unique_id,[
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+        ]);
 
-         return redirect()->back()->with('error', 'An error occurred while fetching po_approved_pos.');
-      }
+// Redirect back with the error message
+return redirect()->back()
+                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
    }
 
    public function po_denied_requests()
@@ -416,22 +508,27 @@ class DashboardNavigationController extends Controller
          return view('homepages.po_denied_requests', compact('po_denied_requests'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-            Log::error('DashboardController | PoDeniedRequests() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+         Log::error('DashboardController | PoDeniedRequests() Error ' . $unique_id,[
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+        ]);
 
-         return redirect()->back()->with('error', 'An error occurred while fetching po_denied_requests.');
-      }
+// Redirect back with the error message
+return redirect()->back()
+                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
    }
 
    public function reorder_level()
    {
       $site_id = Auth::user()->site->id;
-      $reorder_level =  InventoryItem::select('inventory_items.id', 'inventory_items.item_id','inventory_items.site_id')->join('items', 'items.id', '=', 'inventory_items.item_id')
-      ->where('inventory_items.site_id', '=', $site_id) 
-      ->join('inventories', 'inventory_items.inventory_id', '=', 'inventories.id')
-       
+      $reorder_level =  InventoryItem::select('inventory_items.id', 'inventory_items.item_id', 'inventory_items.site_id')->join('items', 'items.id', '=', 'inventory_items.item_id')
+         ->where('inventory_items.site_id', '=', $site_id)
+         ->join('inventories', 'inventory_items.inventory_id', '=', 'inventories.id')
+
          ->whereRaw('items.stock_quantity <= items.reorder_level')->where('inventory_items.quantity', '>', '0')->where('trans_type', '=', 'Stock Purchase')
-       
+
          ->get();
       return view('homepages.reorder_level', compact('reorder_level'));
    }
@@ -445,7 +542,7 @@ class DashboardNavigationController extends Controller
          ->whereRaw('items.stock_quantity <= items.reorder_level')
          ->where('inventory_items.quantity', '>', 0)
          ->where('trans_type', '=', 'Stock Purchase')
-         ->where('inventory_items.site_id','=', $site_id);
+         ->where('inventory_items.site_id', '=', $site_id);
 
       // Check if search query exists
       if ($request->has('search')) {
@@ -474,26 +571,26 @@ class DashboardNavigationController extends Controller
    public function active_user_accounts()
    {
       $site_id = Auth::user()->site->id;
-      $active_user_accounts = User::where('site_id','=',$site_id)->where('status', '=', 'Active')->latest()->paginate(15);
+      $active_user_accounts = User::where('site_id', '=', $site_id)->where('status', '=', 'Active')->latest()->paginate(15);
       return view('homepages.active_user_accounts', compact('active_user_accounts'));
    }
    public function disabled_user_accounts()
    {
       $site_id = Auth::user()->site->id;
-      $disabled_user_accounts = User::where('site_id','=',$site_id)->where('status', '=', 'Inactive')->latest()->paginate(15);
+      $disabled_user_accounts = User::where('site_id', '=', $site_id)->where('status', '=', 'Inactive')->latest()->paginate(15);
       return view('homepages.disabled_user_accounts', compact('disabled_user_accounts'));
    }
 
    public function active_endusers()
    {
       $site_id = Auth::user()->site->id;
-      $active_endusers = Enduser::where('site_id','=',$site_id)->where('status', '=', 'Active')->latest()->paginate(15);
+      $active_endusers = Enduser::where('site_id', '=', $site_id)->where('status', '=', 'Active')->latest()->paginate(15);
       return view('homepages.active_endusers', compact('active_endusers'));
    }
    public function disabled_endusers()
    {
       $site_id = Auth::user()->site->id;
-      $disabled_endusers = Enduser::where('site_id','=',$site_id)->where('status', '=', 'Inactive')->latest()->paginate(15);
+      $disabled_endusers = Enduser::where('site_id', '=', $site_id)->where('status', '=', 'Inactive')->latest()->paginate(15);
       return view('homepages.disabled_endusers', compact('disabled_endusers'));
    }
 
@@ -515,7 +612,7 @@ class DashboardNavigationController extends Controller
    {
       $site_id = Auth::user()->site->id;
       $authid = Auth::id();
-      $dpr_pending_approval = Order::where('site_id','=',$site_id)->whereNull('approval_status')->where('user_id', '=', $authid)->latest()->paginate(15);
+      $dpr_pending_approval = Order::where('site_id', '=', $site_id)->whereNull('approval_status')->where('user_id', '=', $authid)->latest()->paginate(15);
       return view('homepages.dpr_pending_approval', compact('dpr_pending_approval'));
    }
 
@@ -523,14 +620,14 @@ class DashboardNavigationController extends Controller
    {
       $site_id = Auth::user()->site->id;
       $authid = Auth::id();
-      $dpr_approved = Order::where('site_id','=',$site_id)->where('approval_status', '=', 'Approved')->where('user_id', '=', $authid)->latest()->paginate(15);
+      $dpr_approved = Order::where('site_id', '=', $site_id)->where('approval_status', '=', 'Approved')->where('user_id', '=', $authid)->latest()->paginate(15);
       return view('homepages.dpr_approved', compact('dpr_approved'));
    }
    public function dpr_processed()
    {
       $site_id = Auth::user()->site->id;
       $authid = Auth::id();
-      $dpr_processed = Order::where('site_id','=',$site_id)->where('status', '=', 'Supplied')->where('user_id', '=', $authid)->latest()->paginate(15);
+      $dpr_processed = Order::where('site_id', '=', $site_id)->where('status', '=', 'Supplied')->where('user_id', '=', $authid)->latest()->paginate(15);
       return view('homepages.dpr_processed', compact('dpr_processed'));
    }
 
@@ -538,7 +635,7 @@ class DashboardNavigationController extends Controller
    {
       $site_id = Auth::user()->site->id;
       $authid = Auth::id();
-      $dpr_denied = Order::where('site_id','=',$site_id)->where('approval_status', '=', 'Denied')->where('user_id', '=', $authid)->latest()->paginate(15);
+      $dpr_denied = Order::where('site_id', '=', $site_id)->where('approval_status', '=', 'Denied')->where('user_id', '=', $authid)->latest()->paginate(15);
       return view('homepages.dpr_denied', compact('dpr_denied'));
    }
    public function out_of_stock()
@@ -551,7 +648,7 @@ class DashboardNavigationController extends Controller
             ->join('items', 'inventory_items.item_id', '=', 'items.id')
             ->where('stock_quantity', '=', '0')
             ->where('inventories.trans_type', '=', 'Stock Purchase')
-            ->where('inventory_items.site_id','=', $site_id)
+            ->where('inventory_items.site_id', '=', $site_id)
             ->groupBy('inventory_items.item_id')
             ->get();
 
@@ -564,9 +661,16 @@ class DashboardNavigationController extends Controller
          return view('homepages.out_of_stock', compact('unstocked'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | OutOfStock() Error ' . $unique_id);
-         Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-      }
+         Log::error('DashboardController | OutOfStock() Error ' . $unique_id,[
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+        ]);
+
+// Redirect back with the error message
+return redirect()->back()
+                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
    }
 
 
@@ -582,7 +686,8 @@ class DashboardNavigationController extends Controller
       // dd($out_of_stock_items);
       return view('homepages.out_of_stock_view', compact('out_of_stock_view'));
    }
-   public function items_list_site(){
+   public function items_list_site()
+   {
       $site_id = Auth::user()->site->id;
       // $items = InventoryItem::join('items','inventory_items.item_id','=','items.id')
       // ->join('locations','locations.id','=','inventory_items.location_id')
@@ -590,14 +695,12 @@ class DashboardNavigationController extends Controller
       // ->where('inventory_items.site_id','=',$site_id)
       // ->where('inventory_items.quantity', '>', '0')->get();
       $items = Item::join('inventory_items', 'inventory_items.item_id', '=', 'items.id')
-      ->join('inventories', 'inventories.id', '=', 'inventory_items.inventory_id')
-      ->where('inventory_items.site_id', '=', $site_id)
-      ->where('items.stock_quantity', '>', 0)
-      ->select('items.*', 'inventory_items.*', 'inventories.trans_type')
-      ->get();
-  
-      return view('homepages.items_list_site', compact('items'));
+         ->join('inventories', 'inventories.id', '=', 'inventory_items.inventory_id')
+         ->where('inventory_items.site_id', '=', $site_id)
+         ->where('items.stock_quantity', '>', 0)
+         ->select('items.*', 'inventory_items.*', 'inventories.trans_type')
+         ->get();
 
+      return view('homepages.items_list_site', compact('items'));
    }
-  
 }

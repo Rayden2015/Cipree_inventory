@@ -50,9 +50,8 @@ class TaxLeviesController extends Controller
             // 'site_id'=>$site_id,
 
         ]);
-        Toastr::Success('Successfully Updated:)', 'Success');
-
-        return redirect()->back();
+    
+        return redirect()->back()->withSuccess('Successfully Updated');
     }
 
     /**
@@ -86,8 +85,7 @@ class TaxLeviesController extends Controller
         $tax->rate = $request->rate;
         $tax->others = $request->others;
         $tax->save();
-        Toastr::Success('Successfully Updated:)', 'Success');
-        return redirect()->back();
+        return redirect()->back()->withSuccess('Successfully Updated');
         //
     }
 

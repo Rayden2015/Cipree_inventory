@@ -10,14 +10,15 @@ use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends Controller
 {
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware('auth');
         $this->middleware(['auth', 'permission:view-item-group'])->only('show');
         $this->middleware(['auth', 'permission:add-item-group'])->only('create');
         $this->middleware(['auth', 'permission:view-item-group'])->only('index');
         $this->middleware(['auth', 'permission:edit-item-group'])->only('edit');
     }
-      
+
     /**
      * Display a listing of the resource.
      */
@@ -33,8 +34,12 @@ class CategoryController extends Controller
             return view('categories.index', compact('categories'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('CategoryController | Index() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+            Log::error('CategoryController | Index() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
@@ -70,12 +75,16 @@ class CategoryController extends Controller
                     'description' => $request->description,
                 ]
             );
-            Toastr::success('Successfully Updated:)', 'Success');
-            return redirect()->back();
+
+            return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('CategoryController | Store() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+            Log::error('CategoryController | Store() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
@@ -108,11 +117,11 @@ class CategoryController extends Controller
             Log::info('Category Edit', [
                 'before_category_edit' => Category::find($id),
             ]);
-    
+
             $category->name = $request->name;
             $category->description = $request->description;
             $category->save();
-    
+
             $authId = Auth::user()->name;
             Log::info(
                 'edited a category',
@@ -122,15 +131,17 @@ class CategoryController extends Controller
                     'description' => $request->description,
                 ]
             );
-            Toastr::success('Successfully Updated:)', 'Success');
-            return redirect()->back();
-        } catch (\Throwable $th) {
-            $unique_id = floor(time() - 999999999);
-            Log::error('CategoryController | Update() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-        }
 
-       
+            return redirect()->back()->withSuccess('Successfully Updated');
+        } catch (\Throwable $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('CategoryController | Update() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
     /**
@@ -149,12 +160,18 @@ class CategoryController extends Controller
                     'category_name' => $category->name,
                 ]
             );
-            Toastr::success('Successfully Deleted:)', 'Success');
-            return redirect()->back();
+
+            return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('CategoryController | Destroy() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+            Log::error('CategoryController | Destroy() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 }

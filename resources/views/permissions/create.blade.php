@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-
+<title>Add Permission</title>
 @section('content')
     <div class="bg-light p-4 rounded">
         <h2>Add new permission</h2>
@@ -8,7 +8,17 @@
         </div>
 
         <div class="container mt-4">
+            @if (session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
 
+        @if (session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
             <form method="POST" action="{{ route('permissions.store') }}">
                 @csrf
                 <div class="mb-3">

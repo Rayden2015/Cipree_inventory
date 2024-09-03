@@ -44,10 +44,17 @@ class StockPurchaseRequestController extends Controller
             return view('stockpurchases.spr_lists', compact('spr_lists'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | SprLists() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | SprLists() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
     public function index(Request $request)
     {
@@ -74,8 +81,8 @@ class StockPurchaseRequestController extends Controller
 
 
                 if ($inventory->isEmpty()) {
-                    Toastr::error('Item not in stock:)', 'Oops');
-                    return redirect()->back();
+                    // Toastr::error('Item not in stock:)', 'Oops');
+                    return redirect()->back()->withError('Item not in stock', 'Oops');
                 } elseif ($inventory->isNotEmpty()) {
                     return view('stockpurchases.request_search', compact('inventory'));
                 }
@@ -88,10 +95,17 @@ class StockPurchaseRequestController extends Controller
             return view('stockpurchases.request_search', compact('inventory'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | Index() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | Index() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
 
@@ -117,10 +131,17 @@ class StockPurchaseRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | StockPurchaseCart() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | StockPurchaseCart() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function addToStock($id)
@@ -160,10 +181,17 @@ class StockPurchaseRequestController extends Controller
             return redirect()->back()->with('success', 'Item added to cart successfully!');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | AddToStock() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | AddToStock() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function update(Request $request)
@@ -187,10 +215,17 @@ class StockPurchaseRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | Update() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | Update() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
     public function remove(Request $request)
     {
@@ -210,10 +245,17 @@ class StockPurchaseRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | Remove() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | Remove() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
     public function store(Request $request)
     {
@@ -292,14 +334,21 @@ class StockPurchaseRequestController extends Controller
 
             ]);
 
-            return redirect()->route('spr_create')->with('success', 'Stock Purchase Request(SPR) #' . $order->request_number . ' forwarded for Authorisation');
-            Toastr::success('Successfully Updated:)', 'Sucess');
-        } catch (\Throwable $th) {
+            return redirect()->route('spr_create')->withSuccess('Stock Purchase Request(SPR) #' . $order->request_number . ' forwarded for Authorisation');
+          
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | Store() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | Store() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function store_officer_spr_edit(Request $request, $id)
@@ -318,10 +367,17 @@ class StockPurchaseRequestController extends Controller
             return view('stockpurchases.so_spr_edit', compact('sorder_parts', 'sorder', 'suppliers', 'endusers'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | StoreOfficerSprEdit() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | StoreOfficerSprEdit() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
     public function store_officer_spr_update(Request $request, $id)
     {
@@ -428,31 +484,58 @@ class StockPurchaseRequestController extends Controller
                 GROUP BY t.item_id
             ) AS subquery ON i.id = subquery.item_id
             SET i.stock_quantity = subquery.calculated_quantity;');
-            Toastr::success('Successfully Updated:)', 'Sucess');
-            return redirect()->back();
+         
+            return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            // An error occured; cancel the transaction...
-            DB::rollback();
+            Log::error('StockPurchaseRequestController | StoreOfficerSprLists() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
 
-            // and throw the error again.
-            $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | StoreOfficerSprLists() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
     }
+           
 
-    public function authoriser_remarks_update(Request $request, $id)
-    {
+    
+
+public function authoriser_remarks_update(Request $request, $id)
+{
+    try {
+        // Find the StockPurchaseRequest by ID
         $spr = StockPurchaseRequest::find($id);
+
+        if (!$spr) {
+            return redirect()->back()->withError('Stock Purchase Request not found.');
+        }
+
+        // Update the authoriser remarks
         $spr->authoriser_remarks = $request->authoriser_remarks;
         $spr->save();
-        Toastr::success('Saved Successfully', 'success');
-        return redirect()->back();
+
+        // Display a success message
+       
+        return redirect()->back()->withSuccess('Successfully Updated');
+    } catch (\Exception $e) {
+        // Generate a unique error ID
+        $unique_id = floor(time() - 999999999);
+        
+        // Log the error with details
+        Log::error('AuthoriserController | authoriser_remarks_update() Error ' . $unique_id ,[
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+        ]);
+
+        // Redirect back with the error message
+        return redirect()->back()
+                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
     }
+}
+
 
     public function so_spr_update(Request $request, $id)
     {
@@ -508,10 +591,17 @@ class StockPurchaseRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | SoSprUpdate() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | SoSprUpdate() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function auth_spr_lists()
@@ -527,10 +617,17 @@ class StockPurchaseRequestController extends Controller
             return view('stockpurchases.auth_spr_lists', compact('spr_lists'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | AuthSprLists() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | AuthSprLists() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
     public function auth_spr_list_edit($id)
     {
@@ -546,10 +643,17 @@ class StockPurchaseRequestController extends Controller
             return view('stockpurchases.auth_spr_list_edit', compact('sorder', 'suppliers', 'endusers', 'sorder_parts'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | AuthSprListEdit() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | AuthSprListEdit() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
     public function auth_spr_action(Request $request)
     {
@@ -574,10 +678,7 @@ class StockPurchaseRequestController extends Controller
                             'details 2' => $request->quantity
                         ]);
                         return back()->with('message', 'Quantity not available!');
-                        Log::info('stockpurchaserequest quantity Values', [
-
-                            'Details' => $quantity,
-                        ]);
+                      
                     } else
                         $val =     DB::table('stock_purchase_request_items')
                             ->where('id', $request->id)
@@ -607,10 +708,17 @@ class StockPurchaseRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | AuthSprAction() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | AuthSprAction() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
     public function auth_spr_list_view($id)
     {
@@ -636,10 +744,17 @@ class StockPurchaseRequestController extends Controller
             return redirect()->back();
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | AuthSprApprovedStatus() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | AuthSprApprovedStatus() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function auth_spr_denied_status($id)
@@ -656,10 +771,17 @@ class StockPurchaseRequestController extends Controller
             return redirect()->back();
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | AuthSprDeniedStatus() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | AuthSprDeniedStatus() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function po_spr_lists()
@@ -675,10 +797,17 @@ class StockPurchaseRequestController extends Controller
             return view('stockpurchases.po_spr_lists', compact('spr_lists'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | PoSprLists() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | PoSprLists() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
     public function po_spr_list_edit($id)
     {
@@ -694,10 +823,17 @@ class StockPurchaseRequestController extends Controller
             return view('stockpurchases.po_spr_list_edit', compact('sorder', 'suppliers', 'endusers', 'sorder_parts'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | PoSprListEdit() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | PoSprListEdit() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
     public function generate_spr_porder($id)
     {
@@ -727,16 +863,22 @@ class StockPurchaseRequestController extends Controller
                 $orderpart->save();
             }
             $purchase_order = SprPorder::latest()->value('id');
-            Toastr::success('Successfully Updated:)', 'Success');
-            return redirect()->route('spr_purchase_order_draft', $purchase_order);
+            return redirect()->route('spr_purchase_order_draft', $purchase_order)->withSuccess('Successfully Updated');
 
             // dd($id);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | GenerateSprPorder() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | GenerateSprPorder() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
     public function spr_purchase_order_draft($id)
     {
@@ -759,10 +901,17 @@ class StockPurchaseRequestController extends Controller
             // dd($id,$purchase_order_no,$order_parts);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | SprPurchaseOrderDraft() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | SprPurchaseOrderDraft() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
     public function numberToWord($num = '')
     {
@@ -879,14 +1028,21 @@ class StockPurchaseRequestController extends Controller
                 'request_payload' => $request->all(),
                 'nessage' => 'Purchase Order Updated Successfully'
             ]);
-            Toastr::success('Successfully Updated:)', 'Sucess');
-            return redirect()->back();
-        } catch (\Throwable $th) {
+           
+            return redirect()->back()->withSuccess('Successfully Updated');
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | SprPurchaseUpdate() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | SprPurchaseUpdate() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
     public function spr_save_draft(Request $request, $id)
     {
@@ -921,14 +1077,21 @@ class StockPurchaseRequestController extends Controller
             $purchase->is_draft = true;
             $purchase->save();
 
-            Toastr::success('Successfully Updated:)', 'success');
-            return redirect()->back();
+         
+            return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | SprSaveDraft() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | SprSaveDraft() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
     public function spr_purchase_update_row(Request $request, $id)
     {
@@ -948,14 +1111,21 @@ class StockPurchaseRequestController extends Controller
                 'sub_total' => $request->quantity * $request->unit_price,
 
             ]);
-            Toastr::success('Successfully Updated:)', 'Success');
-            return redirect()->back();
+         
+            return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | SprPurchaseUpdateRow() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | SprPurchaseUpdateRow() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
     public function spr_porder_action(Request $request)
     {
@@ -1017,10 +1187,17 @@ class StockPurchaseRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | SprPorderAction() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | SprPorderAction() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
 
@@ -1068,10 +1245,17 @@ class StockPurchaseRequestController extends Controller
             return view('stockpurchses.spr_edit', compact('purchase', 'suppliers', 'sites', 'locations', 'parts', 'endusers', 'order_parts', 'grandtotal'));
         }catch (\Exception $e){
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | SprPosEdit() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | SprPosEdit() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
        
     }
 
@@ -1087,14 +1271,21 @@ class StockPurchaseRequestController extends Controller
             SprPorder::where("id", $purchase->id)->delete();
             SprPorderItem::where("purchasing_order_number", $purchase->id)->delete();
             // $purchase->destroy();
-            Toastr::success('Successfully Updated:)', 'Sucess');
-            return redirect()->back();
+           
+            return redirect()->back()->withSuccess('Successfully Updated');
         }catch(\Exception $e){
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | SprPosDelete() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('StockPurchaseRequestController | SprPosDelete() Error ' . $unique_id
+            ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
       
     }
 }

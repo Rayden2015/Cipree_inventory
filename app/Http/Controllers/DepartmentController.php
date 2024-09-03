@@ -59,13 +59,20 @@ class DepartmentController extends Controller
                 'user ' => $authId,
                 'details' => $request,
             ]);
-            Toastr::success('Successfully Updated:)', 'Sucess');
-            return redirect()->back();
+          
+            return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('DepartmentController | Store() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-        }
+            Log::error('DepartmentController | Store() Error ' . $unique_id ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     /**
@@ -96,13 +103,19 @@ class DepartmentController extends Controller
             $department->name = $request->name;
             $department->description = $request->description;
             $department->save();
-            Toastr::success('Successfully Updated()', 'Sucess');
-            return redirect()->back();
+            return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('DepartmentController | Update() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-        }
+            Log::error('DepartmentController | Update() Error ' . $unique_id ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     /**
@@ -118,12 +131,19 @@ class DepartmentController extends Controller
             ]);
             $department = Department::find($id);
             $department->delete();
-            Toastr::success('Successfully Updated()', 'Sucess');
-            return redirect()->back();
+        
+            return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('DepartmentController | Destroy() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-        }
+            Log::error('DepartmentController | Destroy() Error ' . $unique_id ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 }

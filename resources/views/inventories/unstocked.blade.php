@@ -21,7 +21,7 @@
         <!-- Theme style -->
         <link rel="stylesheet" href="{{ asset('/assets/dist/css/adminlte.min.css') }}">
 
-        <title>Document</title>
+        <title>Unstocked List</title>
        
     </head>
 
@@ -32,6 +32,17 @@
                 <a href="{{ route('inventories.create') }}" class="btn btn-primary mr-3 my-3">Add</a>
             </p>
         </div>
+        @if (session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
 
 
         <div class="card">

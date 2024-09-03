@@ -21,7 +21,7 @@
         <!-- Theme style -->
         <link rel="stylesheet" href="{{ asset('/assets/dist/css/adminlte.min.css') }}">
 
-        <title>Document</title>
+        <title>Sections Lists</title>
 
     </head>
 
@@ -41,7 +41,19 @@
                 </p>
                
             </div>
-    
+            @if (session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
+
+
             <!-- /.card-header -->
 
             <div class="card-body">

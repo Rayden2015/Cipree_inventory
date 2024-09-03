@@ -6,7 +6,7 @@
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <meta http-equiv="X-UA-Compatible" content="ie=edge">
                 <meta name="csrf-token" content="{{ csrf_token() }}">
-                <title>Document</title>
+                <title>Add GRN</title>
                
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
                     integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA=="
@@ -62,6 +62,17 @@ input[type=number] {
                             <div class="col-md-12">
                                 <div class="card-box">
                                     <h2 class="mt-0 mb-3">Add Inventory</h2>
+                                    @if (session('success'))
+                    <div class="alert alert-success">
+                        {{ session('success') }}
+                    </div>
+                @endif
+        
+                @if (session('error'))
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
+                    </div>
+                @endif
                                     <div class="card-header">
                                       
                                         <a href="{{ route('inventories.index') }}" class="btn btn-primary float-right">Back</a>

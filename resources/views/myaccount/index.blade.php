@@ -26,7 +26,17 @@
                         Manage Profile</a></li>
                 {{-- @endif --}}
             </ul>
+            @if (session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
 
+        @if (session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
             <div class="tab-content">
                 <div class="tab-pane fade show active" id="change-pass">
                     <div class="row">

@@ -15,14 +15,15 @@ use App\Models\Uom;
 
 class ItemController extends Controller
 {
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware('auth');
         $this->middleware(['auth', 'permission:view-item'])->only('show');
         $this->middleware(['auth', 'permission:add-item'])->only('create');
         $this->middleware(['auth', 'permission:view-item'])->only('index');
         $this->middleware(['auth', 'permission:edit-item'])->only('edit');
     }
-    
+
     /**
      * Display a listing of the resource.
      */
@@ -88,8 +89,14 @@ class ItemController extends Controller
         } catch (\Exception $e) {
             // Log errors
             $unique_id = floor(time() - 999999999);
-            Log::error('HomeController | Index() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+            Log::error('HomeController | Index() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
@@ -99,23 +106,13 @@ class ItemController extends Controller
      */
     public function create()
     {
-        // try {
-            $categories = Category::all();
-$uom = Uom::all();
-            // Log successful user input
-            Log::info('ItemController | Create() | Item creation form displayed', [
-                'user_details' => Auth::user(),
-                'categories' => $categories
-            ]);
 
-            return view('items.create', compact('categories','uom'));
-        // } catch (\Exception $e) {
-        //     // Log errors
-        //     $unique_id = floor(time() - 999999999);
-        //     Log::error('ItemController | Create() Error ' . $unique_id);
-        //     Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-        //     return redirect()->back();
-        // }
+        $categories = Category::all();
+        $uom = Uom::all();
+
+
+
+        return view('items.create', compact('categories', 'uom'));
     }
 
     /**
@@ -142,7 +139,7 @@ $uom = Uom::all();
             $item->item_description = $request->item_description;
             $item->item_uom = $request->item_uom;
             $item->uom_id = $request->uom_id;
-            
+
             $item->item_part_number = $request->item_part_number;
             $item->item_stock_code = $stock_codes;
             $item->added_by = $added_by;
@@ -161,14 +158,19 @@ $uom = Uom::all();
                 // Add other relevant information
             ]);
 
-            Toastr::success('Successfully Updated:)', 'Success');
-            return redirect()->back();
+
+            return redirect()->back()->withSuccess('Successfully Updated');
             // dd($stock_codes );
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('ItemController | Store() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
+            Log::error('ItemController | Store() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
@@ -202,13 +204,18 @@ $uom = Uom::all();
                 'item_id' => $id,
                 // Add other relevant information
             ]);
-            return view('items.edit', compact('item', 'categories','uom'));
+            return view('items.edit', compact('item', 'categories', 'uom'));
         } catch (\Exception $e) {
             // Log errors
             $unique_id = floor(time() - 999999999);
-            Log::error('HomeController | Index() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
+            Log::error('HomeController | Index() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
@@ -254,15 +261,21 @@ $uom = Uom::all();
                 // Add other relevant information
             ]);
 
-            Toastr::success('Successfully Updated:)', 'Success');
-            return redirect()->back();
+            
+            return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             // Log errors
             $unique_id = floor(time() - 999999999);
-            Log::error('ItemController | Update() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('ItemController | Update() Error ' . $unique_id ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     /**
@@ -282,15 +295,21 @@ $uom = Uom::all();
                 // Add other relevant information
             ]);
 
-            Toastr::success('Successfully Updated:)', 'Success');
-            return redirect()->back();
+          
+            return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             // Log errors
             $unique_id = floor(time() - 999999999);
-            Log::error('ItemController | Destroy() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('ItemController | Destroy() Error ' . $unique_id ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function item_search(Request $request)
@@ -303,8 +322,8 @@ $uom = Uom::all();
                 ->orWhere('item_stock_code', 'like', "%" . $request->search . "%")
                 ->latest()->paginate();
             if ($items->isEmpty()) {
-                Toastr::error('Item not found', 'Oops');
-                return redirect()->back();
+             
+                return redirect()->back()->withError('Item not found');
             } elseif ($items->isNotEmpty()) {
                 return view('items.index', compact('items'));
             }

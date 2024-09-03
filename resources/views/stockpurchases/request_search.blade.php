@@ -56,7 +56,17 @@
                                                 @endif
                                             </span> </p>
                                     </h2>
-
+                                    @if (session('success'))
+                                    <div class="alert alert-success">
+                                        {{ session('success') }}
+                                    </div>
+                                @endif
+                        
+                                @if (session('error'))
+                                    <div class="alert alert-danger">
+                                        {{ session('error') }}
+                                    </div>
+                                @endif
                                     <form action="" method="GET">
                                         <div class="input-group mb-3">
                                             <input type="text" class="form-control"

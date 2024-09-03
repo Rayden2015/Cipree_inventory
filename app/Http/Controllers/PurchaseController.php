@@ -34,11 +34,7 @@ class PurchaseController extends Controller
     public function __construct(){
         $this->middleware('auth');
     }
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    
     public function index()
     {
         $site_id = Auth::user()->site->id;
@@ -46,22 +42,13 @@ class PurchaseController extends Controller
         return view('purchases.index', compact('purchases'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+   
     public function create()
     {
         return view('purchases.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+   
     public function store(Request $request)
     {
         try {
@@ -101,22 +88,21 @@ class PurchaseController extends Controller
                 $purchase->image = $imageName;
                 $purchase->save();
             }
-            Toastr::success('Successfully Updated:)', 'Sucess');
-            return redirect()->route('purchases.index');
-        } catch (\Throwable $th) {
+            
+            return redirect()->route('purchases.index')->withSuccess('Successfully Updated');
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('PurchaseController | Store() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
-    }
+            Log::error('PurchaseController | Store() Error ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
+    }
     public function show($id)
     {
         $company = Company::first();
@@ -126,12 +112,7 @@ class PurchaseController extends Controller
         // dd($purchase);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+  
     public function edit($id)
     {
         try{
@@ -146,30 +127,25 @@ class PurchaseController extends Controller
             return view('purchases.edit', compact('purchase', 'suppliers', 'sites', 'locations', 'parts', 'endusers', 'order_parts'));
         }catch (\Exception $e){
             $unique_id = floor(time() - 999999999);
-            Log::error('PurchaseController | Edit() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('PurchaseController | Edit() Error ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
        
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+ 
     public function update(Request $request, $id)
     {
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+   
     public function destroy($id)
     {
         try{
@@ -181,15 +157,20 @@ class PurchaseController extends Controller
             ]);
             Order::where("id", $purchase->id)->delete();
             OrderPart::where("order_id", $purchase->id)->delete();
-            // $purchase->destroy();
-            Toastr::success('Successfully Updated:)', 'Sucess');
-            return redirect()->route('purchases.index');
+           
+            return redirect()->route('purchases.index')->withSuccess('Successfully Updated');
         }catch (\Exception $e){
             $unique_id = floor(time() - 999999999);
-            Log::error('PurchaseController | Destroy() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('PurchaseController | Destroy() Error ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     
       
     }
@@ -380,18 +361,17 @@ class PurchaseController extends Controller
         }
         catch(\Exception $e){
             $unique_id = floor(time() - 999999999);
-            Log::error('PurchaseController | PurchaseOrderDraft() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
-       
+            Log::error('PurchaseController | PurchaseOrderDraft() Error ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
 
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
     }
 
-    
-    
-
-    // end of  purchase order draft
 
     // generate purchase order
     public function generate_order($id)
@@ -418,15 +398,21 @@ class PurchaseController extends Controller
                 $orderpart->save();
                 $purchase_order = Porder::latest()->value('id');
             }
-            Toastr::success('Successfully Updated:)', 'Success');
-            return redirect()->route('purchases.purchase_order_draft', $purchase_order);
+       
+            return redirect()->route('purchases.purchase_order_draft', $purchase_order)->withSuccess('Successfully Updated');
         }
             catch(\Exception $e){
                 $unique_id = floor(time() - 999999999);
-                Log::error('PurchaseController | GenerateOrder() Error ' . $unique_id);
-                Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-                return redirect()->back();
-        }
+                Log::error('PurchaseController | GenerateOrder() Error ' . $unique_id,[
+                    'message' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
+    
+        // Redirect back with the error message
+        return redirect()->back()
+                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+    }
+    
        
     }
 
@@ -462,21 +448,19 @@ class PurchaseController extends Controller
         }
             catch(\Exception $e){
                 $unique_id = floor(time() - 999999999);
-                Log::error('PurchaseController | PurchaseEdit() Error ' . $unique_id);
-                Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-                return redirect()->back();
-        }
+                Log::error('PurchaseController | PurchaseEdit() Error ' . $unique_id,[
+                    'message' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
+    
+        // Redirect back with the error message
+        return redirect()->back()
+                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+    }
+    
       
     }
 
-    // purchase order edit
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function purchase_update(Request $request, $id)
     {
         try {
@@ -521,15 +505,21 @@ class PurchaseController extends Controller
                 'request_payload' => $request->all(),
                 'nessage' => 'Purchase Order Updated Successfully'
             ]);
-            Toastr::success('Successfully Updated:)', 'Sucess');
-            return redirect()->back();
-        } catch (\Throwable $th) {
+           
+            return redirect()->back()->withSuccess('Successfully Updated');
+        } catch (\Throwable $e) {
            
                 $unique_id = floor(time() - 999999999);
-                Log::error('PurchaseController | PurchaseUpdate() Error ' . $unique_id);
-                Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-                return redirect()->back();
-        }
+                Log::error('PurchaseController | PurchaseUpdate() Error ' . $unique_id,[
+                    'message' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
+    
+        // Redirect back with the error message
+        return redirect()->back()
+                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+    }
+    
     }
 
 
@@ -559,15 +549,21 @@ class PurchaseController extends Controller
                 'site_id' => $site_id,
 
             ]);
-            Toastr::success('Successfully Updated:)', 'Success');
-            return redirect()->back();
+         
+            return redirect()->back()->withSuccess('Successfully updated');
         } catch (\Exception $e) {
           
                 $unique_id = floor(time() - 999999999);
-                Log::error('PurchaseController | PurchaseUpdateRow() Error ' . $unique_id);
-                Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-                return redirect()->back();
-        }
+                Log::error('PurchaseController | PurchaseUpdateRow() Error ' . $unique_id,[
+                    'message' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
+    
+        // Redirect back with the error message
+        return redirect()->back()
+                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+    }
+    
     }
 
 
@@ -584,16 +580,21 @@ class PurchaseController extends Controller
 
             Porder::where("id", $purchase->id)->delete();
 
-            Toastr::success('Successfully Updated:)', 'Success');
-
-            return redirect()->back();
+         
+            return redirect()->back()->withSuccess('Successfully Updated');
         }
             catch(\Exception $e){
                 $unique_id = floor(time() - 999999999);
-                Log::error('PurchaseController | PurchaseDestroy() Error ' . $unique_id);
-                Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-                return redirect()->back();
-        }
+                Log::error('PurchaseController | PurchaseDestroy() Error ' . $unique_id,[
+                    'message' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
+    
+        // Redirect back with the error message
+        return redirect()->back()
+                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+    }
+    
     }
 
     public function showlist($id)
@@ -616,10 +617,16 @@ class PurchaseController extends Controller
         } 
             catch(\Exception $e){
                 $unique_id = floor(time() - 999999999);
-                Log::error('PurchaseController | ShowList() Error ' . $unique_id);
-                Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-                return redirect()->back();
-        }
+                Log::error('PurchaseController | ShowList() Error ' . $unique_id,[
+                    'message' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
+    
+        // Redirect back with the error message
+        return redirect()->back()
+                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+    }
+    
     }
 
     public function editlist($id)
@@ -647,19 +654,20 @@ class PurchaseController extends Controller
         } 
             catch(\Exception $e){
                 $unique_id = floor(time() - 999999999);
-                Log::error('PurchaseController | EditList() Error ' . $unique_id);
-                Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+                Log::error('PurchaseController | EditList() Error ' . $unique_id,[
+                    'message' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
+    
+        // Redirect back with the error message
+        return redirect()->back()
+                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+    }
+    
     }
 
 
-    //update purchase list 
-    /**
-     * Write code on Method
-     *
-     * @return response()
-     */
+  
     public function purchaselist_update(Request $request)
     {
 
@@ -761,10 +769,16 @@ class PurchaseController extends Controller
         } 
             catch(\Exception $e){
                 $unique_id = floor(time() - 999999999);
-                Log::error('PurchaseController | GeneratePdf() Error ' . $unique_id);
-                Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-                return redirect()->back();
-        }
+                Log::error('PurchaseController | GeneratePdf() Error ' . $unique_id,[
+                    'message' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
+    
+        // Redirect back with the error message
+        return redirect()->back()
+                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+    }
+    
     }
 
     public function generatePurchaseOrderPDF($id)
@@ -798,10 +812,16 @@ class PurchaseController extends Controller
         } 
             catch(\Exception $e){
                 $unique_id = floor(time() - 999999999);
-                Log::error('PurchaseController | GeneratePurchaseOrderPDF() Error ' . $unique_id);
-                Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-                return redirect()->back();
-        }
+                Log::error('PurchaseController | GeneratePurchaseOrderPDF() Error ' . $unique_id,[
+                    'message' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
+    
+        // Redirect back with the error message
+        return redirect()->back()
+                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+    }
+    
     }
     public function numberToWord($num = '')
     {
@@ -909,15 +929,21 @@ class PurchaseController extends Controller
             $purchase->$site_id;
             $purchase->save();
     
-            Toastr::success('Successfully Updated:)', 'success');
-            return redirect()->back();
+           
+            return redirect()->back()->withSuccess('Successfully Updated');
         }
             catch(\Exception $e){
                 $unique_id = floor(time() - 999999999);
-                Log::error('PurchaseController | GenerateOrder() Error ' . $unique_id);
-                Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-                return redirect()->back();
-        }
+                Log::error('PurchaseController | GenerateOrder() Error ' . $unique_id,[
+                    'message' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
+    
+        // Redirect back with the error message
+        return redirect()->back()
+                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+    }
+    
        
     }
    

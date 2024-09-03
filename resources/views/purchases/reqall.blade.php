@@ -21,7 +21,7 @@
         <!-- Theme style -->
         <link rel="stylesheet" href="{{ asset('/assets/dist/css/adminlte.min.css') }}">
 
-        <title>Document</title>
+        <title>All Requested Purchases</title>
 
     </head>
 

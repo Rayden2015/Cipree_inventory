@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-
+<title>Permissions</title>
 @section('content')
     <div class="bg-light p-4 rounded">
         <h2>Permissions</h2>

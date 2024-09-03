@@ -11,7 +11,7 @@
         <link rel="stylesheet"
             href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
 
-        <title>Document</title>
+        <title>Company</title>
        
     </head>
 
@@ -22,6 +22,18 @@
                 <a href="{{ route('company.create') }}" class="btn btn-primary mr-3 my-3">Add New</a>
             </p> --}}
         </div>
+        @if (session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
+
 
 
         <div class="card">

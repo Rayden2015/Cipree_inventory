@@ -15,9 +15,7 @@ class ReviewController extends Controller
     {
         $this->middleware('auth');
     }
-    /**
-     * Display a listing of the resource.
-     */
+   
     public function index()
     {
         try {
@@ -30,12 +28,18 @@ class ReviewController extends Controller
             ]);
 
             return view('feedback.index', compact('feedbacks', 'images'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('ReviewController | Index() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('ReviewController | Index() Error ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function indexx()
@@ -54,12 +58,18 @@ class ReviewController extends Controller
             ]);
 
             return $feedbacks;
-        } catch (\Throwable $th) {
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('ReviewController | Indexx() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('ReviewController | Indexx() Error ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function show(Feedback $feedback, $id)
@@ -82,12 +92,18 @@ class ReviewController extends Controller
             ]);
 
             return view('feedback.show', compact('feedback1', 'user'), ['feedback' => $feedback]);
-        } catch (\Throwable $th) {
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('ReviewController | Show() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('ReviewController | Show() Error ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function markAsReviewed(Feedback $feedback, $id)
@@ -103,21 +119,27 @@ class ReviewController extends Controller
                 'feedback_id' => $id,
             ]);
 
-            Toastr::success('Successfully Updated', 'success');
-            return redirect()->back();
-        } catch (\Throwable $th) {
+           
+            return redirect()->back()->withSuccess('Successfully Updated');
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('ReviewController | MarkAsReviewed() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('ReviewController | MarkAsReviewed() Error ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
     public function destroy($id)
     {
         $feedback = Feedback::find($id);
         $feedback->delete();
-        Toastr::success('Successfully Updated', 'success');
-        return redirect()->back();
+       
+        return redirect()->back()->withSuccess('Successfully deleted');
     }
     // ... other methods ...
 }

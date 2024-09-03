@@ -33,9 +33,14 @@ class CompanyController extends Controller
             return view('company.index', compact('company'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('CategoryController | Index() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
+            Log::error('CategoryController | Index() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
     public function edit($id)
@@ -71,13 +76,18 @@ class CompanyController extends Controller
                 'company_id' => $company->id,
             ]);
 
-            Toastr::success('Successfully Updated:)', 'Success');
-            return redirect()->route('company.index');
+
+            return redirect()->route('company.index')->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('CompanyController | Store() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
+            Log::error('CompanyController | Store() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
@@ -93,7 +103,7 @@ class CompanyController extends Controller
             $company->vat_no = $request->vat_no;
             $company->website = $request->website;
             // $company->image = $request->image;
-           
+
             $company->save();
 
             Log::info('CompanyController@update: Company data updated successfully', [
@@ -101,14 +111,19 @@ class CompanyController extends Controller
                 'company_id' => $id,
             ]);
 
-            Toastr::success('Successfully Updated:)', 'Sucess');
-            return redirect()->route('company.index');
+            return redirect()->route('company.index')->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('CompanyController | Update() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('CompanyController | Update() Error ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function destroy($id)
@@ -122,13 +137,18 @@ class CompanyController extends Controller
                 'company_id' => $id,
             ]);
 
-            Toastr::success('Successfully Deleted:)', 'Success');
-            return redirect()->route('company.index');
+            return redirect()->route('company.index')->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('CompanyController | Destroy() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('CompanyController | Destroy() Error ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 }

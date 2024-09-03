@@ -30,13 +30,24 @@
             <!-- Theme style -->
             <link rel="stylesheet" href="{{ asset('/assets/dist/css/adminlte.min.css') }}">
 
-            <title>Document</title>
+            <title>Stock Request</title>
 
         </head>
 
         <body>
             <div class="content-page">
                 <div class="content">
+                    @if (session('success'))
+                    <div class="alert alert-success">
+                        {{ session('success') }}
+                    </div>
+                @endif
+        
+                @if (session('error'))
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
+                    </div>
+                @endif
 
                     <!-- Start Content-->
                     <div class="container-fluid">
@@ -93,9 +104,9 @@
                                                             <th>Part Number</th>
                                                             <th>Stock Code</th>
                                                             <th>Stock Quantity</th>
-                                                           @hasrole('requester')
+                                                            @if (!Auth::user()->hasRole('requester'))
                                                                 <th>Age</th>
-                                                            @endhasrole
+                                                            @endif
                                                             {{-- <th>Site</th> --}}
                                                         <th>Site</th>
                                                             <th>Action</th>
@@ -119,6 +130,7 @@
                                                                     <th>{{ $order->item_part_number ?? 'not set ' }}</th>
                                                                     <th>{{ $order->item_stock_code ?? 'not set ' }}</th>
                                                                     <td>{{ $order->quantity ?? '' }}</td>
+                                                                    
                                                                     <?php
                                                                     $date = \Carbon\Carbon::parse($order->created_at);
                                                                     $difference = $date->diffInDays(\Carbon\Carbon::now());

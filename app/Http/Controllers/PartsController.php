@@ -16,11 +16,7 @@ class PartsController extends Controller
     public function __construct(){
         $this->middleware('auth');
     }
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+  
     public function index()
     {
         try {
@@ -33,13 +29,18 @@ class PartsController extends Controller
             ]);
 
             return view('parts.index', compact('parts'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('PartsController | Index() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            
-            return redirect()->route('parts.index');
-        }
+            Log::error('PartsController | Index() Error ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     /**
@@ -54,12 +55,18 @@ class PartsController extends Controller
             ]);
 
             return view('parts.create');
-        } catch (\Throwable $th) {
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('PartsController | Create() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('PartsController | Create() Error ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     /**
@@ -81,19 +88,25 @@ class PartsController extends Controller
                 'quantity' => $request->quantity
             ]);
 
-            Toastr::success('Successfully Updated:)', 'Success');
+          
             Log::info('PartsController | store', [
                 'user_details' => auth()->user(),
                 'message' => 'Part stored successfully.',
             ]);
 
-            return redirect()->route('parts.index');
-        } catch (\Throwable $th) {
+            return redirect()->route('parts.index')->withSuccess('Successfully Updated');
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('PartsController | Store() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('PartsController | Store() Error ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     // ... other methods ...
@@ -107,19 +120,25 @@ class PartsController extends Controller
             $part = Part::find($id);
             $part->delete();
 
-            Toastr::success('Successfully Updated:)', 'Success');
+           
             Log::info('PartsController | destroy', [
                 'user_details' => auth()->user(),
                 'message' => 'Part deleted successfully.',
             ]);
 
-            return redirect()->route('parts.index');
-        } catch (\Throwable $th) {
+            return redirect()->route('parts.index')->withSuccess('Updated Successfully');
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('PartsController | Destroy() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('PartsController | Destroy() Error ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     // ... other methods ...
@@ -142,13 +161,19 @@ class PartsController extends Controller
             ]);
 
             return response()->json($movies);
-        } catch (\Throwable $th) {
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('PartsController | SelectSearch() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('PartsController | SelectSearch() Error ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
     }
+
 
     // ... other methods ...
 
@@ -172,11 +197,17 @@ class PartsController extends Controller
             ]);
 
             return response()->json($movies);
-        } catch (\Throwable $th) {
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('PartsController | SelectSite() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('PartsController | SelectSite() Error ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 }

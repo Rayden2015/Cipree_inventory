@@ -21,7 +21,7 @@
         <!-- Theme style -->
         <link rel="stylesheet" href="{{ asset('/assets/dist/css/adminlte.min.css') }}">
 
-        <title>Document</title>
+        <title>Endusers View</title>
 
         <style>
             .active{
@@ -37,7 +37,17 @@
                 <a href="{{ route('endusers.index') }}" class="btn btn-primary mr-3 my-3">Back</a>
             </p>
         </div>
+        @if (session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
 
+    @if (session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
 
         <div class="card">
             <div class="container">

@@ -3,6 +3,7 @@
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <title>Show History</title>
     <!------ Include the above in your HEAD tag ---------->
 
     <head>
@@ -184,7 +185,18 @@
 
             <a href="{{ route('inventories.inventory_item_history') }}" class="btn btn-primary float-right">Back</a>
         </div>
-       
+        @if (session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
+
         <div class="invoice overflow-auto">
             <div style="min-width: 600px">
                 <header>

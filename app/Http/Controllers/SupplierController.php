@@ -31,14 +31,16 @@ class SupplierController extends Controller
             return view('suppliers.index', compact('suppliers'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('SupplierController | Index() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back();
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function create()
@@ -51,14 +53,16 @@ class SupplierController extends Controller
             return view('suppliers.create');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('SupplierController | Create() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back();
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function store(Request $request)
@@ -101,14 +105,16 @@ class SupplierController extends Controller
             return redirect()->route('suppliers.index')->with('success', 'Supplier Added');
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('SupplierController | Create() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back();
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function edit($id)
@@ -143,14 +149,16 @@ class SupplierController extends Controller
             return redirect()->back()->with('success','Successfully Updated');
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('SupplierController | Create() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back();
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function destroy($id)
@@ -167,14 +175,16 @@ class SupplierController extends Controller
             return redirect()->route('suppliers.index')->with('success', 'Successfully Deleted');
         }catch(\Exception $e){
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('SupplierController | Destroy() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back();
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
        
     }
 
@@ -192,13 +202,15 @@ class SupplierController extends Controller
             return view('suppliers.index', compact('suppliers'));
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('SupplierController | SupplierSearch() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back();
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 }

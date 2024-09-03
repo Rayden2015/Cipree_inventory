@@ -21,7 +21,7 @@
         <!-- Theme style -->
         <link rel="stylesheet" href="{{ asset('/assets/dist/css/adminlte.min.css') }}">
 
-        <title>Document</title>
+        <title>Stock Lists</title>
 
     </head>
 
@@ -38,6 +38,17 @@
                 <a href="{{ route('stores.request_search') }}" class="btn btn-primary float-right">Add New</a>
             </div>
             <!-- /.card-header -->
+            @if (session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
 
             <div class="card-body">
                 <table id="example1" class="table table-bordered table-striped">

@@ -20,9 +20,7 @@ class SectionController extends Controller
         $this->middleware(['auth', 'permission:edit-section'])->only('edit');
     }
     
-    /**
-     * Display a listing of the resource.
-     */
+ 
     public function index()
     {
         $site_id = Auth::user()->site->id;
@@ -62,14 +60,20 @@ class SectionController extends Controller
                 'user ' => $authId,
                 'details' => $request,
             ]);
-            Toastr::success('Successfully Updated:)', 'Sucess');
-            return redirect()->back();
+           
+            return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-                Log::error('SectionController | Store() Error ' . $unique_id);
-                Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-                return redirect()->back();
-        }
+                Log::error('SectionController | Store() Error ' . $unique_id  ,[
+                    'message' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
+    
+        // Redirect back with the error message
+        return redirect()->back()
+                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+    }
+    
     }
 
     /**
@@ -100,14 +104,20 @@ class SectionController extends Controller
             $section->name = $request->name;
             $section->description = $request->description;
             $section->save();
-            Toastr::success('Successfully Updated()', 'Sucess');
-            return redirect()->back();
+        
+            return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-                Log::error('SectionController | Update() Error ' . $unique_id);
-                Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-                return redirect()->back();
-        }
+                Log::error('SectionController | Update() Error ' . $unique_id  ,[
+                    'message' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
+    
+        // Redirect back with the error message
+        return redirect()->back()
+                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+    }
+    
     }
 
     /**
@@ -123,13 +133,18 @@ class SectionController extends Controller
             ]);
             $section = Section::find($id);
             $section->delete();
-            Toastr::success('Successfully Updated()', 'Sucess');
-            return redirect()->back();
+            return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-                Log::error('SectionController | Destroy() Error ' . $unique_id);
-                Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-                return redirect()->back();
-        }
+                Log::error('SectionController | Destroy() Error ' . $unique_id  ,[
+                    'message' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
+    
+        // Redirect back with the error message
+        return redirect()->back()
+                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+    }
+    
     }
 }

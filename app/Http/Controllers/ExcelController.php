@@ -45,8 +45,6 @@ class ExcelController extends Controller
         ]);
         // dd($total_cost_of_parts_within_the_month,$url,$url_start,$url_end);
         return Excel::download(new SearchResultsExport($total_cost_of_parts_within_the_month), 'search_results.xlsx');
-        return redirect()->back();
-
 
 
     }

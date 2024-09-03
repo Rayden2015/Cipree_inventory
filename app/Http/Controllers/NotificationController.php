@@ -23,12 +23,18 @@ class NotificationController extends Controller
                 'message' => 'Notification marked as read successfully.',
             ]);
             return back();
-        } catch (\Throwable $th) {
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('NotificationController | Read() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-    }
+            Log::error('NotificationController | Read() Error ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
     public static function getNotificationCount()
     {
@@ -41,14 +47,20 @@ class NotificationController extends Controller
                 'message' => 'Notification count retrieved successfully.',
             ]);
             return $notificationCount;
-        } catch (\Throwable $th) {
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('NotificationController | getNotification() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
+            Log::error('NotificationController | getNotification() Error ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+   
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
         
-            return 0;
-            return redirect()->back();
-        }
     }
 
     public static function getNotification()
@@ -62,13 +74,17 @@ class NotificationController extends Controller
                 'message' => 'Notifications retrieved successfully.',
             ]);
             return $notification;
-        } catch (\Throwable $th) {
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('NotificationController | getNotification() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return collect();
-            return redirect()->back();
-           
-        }
+            Log::error('NotificationController | getNotification() Error ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 }

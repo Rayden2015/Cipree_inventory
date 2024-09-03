@@ -29,6 +29,17 @@
                                     <p>
                                         <a href="{{ route('orders.create') }}" class="btn btn-primary mr-3 my-3 float-right">Add New</a>
                                     </p>
+                                    @if (session('success'))
+                    <div class="alert alert-success">
+                        {{ session('success') }}
+                    </div>
+                @endif
+        
+                @if (session('error'))
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
+                    </div>
+                @endif
                                     <div class="responsive-table-plugin" style="padding-bottom: 15px;">
                                         @if (Session::has('success'))
                                             <div class="alert alert-success">

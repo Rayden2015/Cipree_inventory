@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-
+<title>Roles</title>
 @section('content')
 <div class="card">
     <div class="card-header">Manage Roles</div>

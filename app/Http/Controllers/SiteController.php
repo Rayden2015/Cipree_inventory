@@ -18,40 +18,33 @@ class SiteController extends Controller
         $this->middleware(['auth', 'permission:edit-site'])->only('edit');
     }
     
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+   
     public function index()
     {
         try {
             $sites = Site::paginate(20);
             return view('sites.index', compact('sites'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-                Log::error('SiteController | Index() Error ' . $unique_id);
-                Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-                return redirect()->back();
-        }
+                Log::error('SiteController | Index() Error ' . $unique_id ,[
+                    'message' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
+    
+        // Redirect back with the error message
+        return redirect()->back()
+                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+    }
+    
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+  
     public function create()
     {
         return view('sites.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+ 
     public function store(Request $request)
     {
         try {
@@ -67,53 +60,49 @@ class SiteController extends Controller
                 'message' => 'Site added successfully.',
             ]);
 
-            Toastr::success('Successfully Updated:)', 'Success');
-            return redirect()->route('sites.index');
-        } catch (\Throwable $th) {
+           
+            return redirect()->route('sites.index')->withSuccess('Successfully Updated');
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-                Log::error('SiteController | Store() Error ' . $unique_id);
-                Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-                return redirect()->back();
-        }
+                Log::error('SiteController | Store() Error ' . $unique_id ,[
+                    'message' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
+    
+        // Redirect back with the error message
+        return redirect()->back()
+                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+    }
+    
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+  
     public function show($id)
     {
         // You can implement this method if needed
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+    
     public function edit($id)
     {
         try {
             $site = Site::find($id);
             return view('sites.edit', compact('site'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('SiteController | Edit() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('SiteController | Edit() Error ' . $unique_id ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+   
     public function update(Request $request, $id)
     {
         try {
@@ -135,22 +124,23 @@ class SiteController extends Controller
                 'message' => 'Site updated successfully.',
             ]);
 
-            Toastr::success('Successfully Updated:)', 'Success');
-            return redirect()->back();
-        } catch (\Throwable $th) {
+          
+            return redirect()->back()->withSuccess('Successfully updated');
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-                Log::error('SiteController | Update() Error ' . $unique_id);
-                Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-                return redirect()->back();
-        }
+                Log::error('SiteController | Update() Error ' . $unique_id ,[
+                    'message' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
+    
+        // Redirect back with the error message
+        return redirect()->back()
+                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+    }
+    
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+  
     public function destroy($id)
     {
         try {
@@ -164,14 +154,18 @@ class SiteController extends Controller
             ]);
 
             $site->delete();
-
-            Toastr::success('Successfully Updated:)', 'Success');
-            return redirect()->back();
-        } catch (\Throwable $th) {
+            return redirect()->back()->withSuccess('Successfully Updated');
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-                Log::error('SiteController | Destroy() Error ' . $unique_id);
-                Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-                return redirect()->back();
-        }
+                Log::error('SiteController | Destroy() Error ' . $unique_id ,[
+                    'message' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
+    
+        // Redirect back with the error message
+        return redirect()->back()
+                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+    }
+    
     }
 }

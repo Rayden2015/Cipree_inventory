@@ -28,10 +28,16 @@ class MyAccountController extends Controller
             return view('myaccount.index', compact('my'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('MyAccountController | Index() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('MyAccountController | Index() Error ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function update(Request $request, $id)
@@ -72,14 +78,20 @@ class MyAccountController extends Controller
                 'message' => 'After editing user info'
             ]);
 
-            Toastr::success('Successfully Updated:)', 'Success');
-            return redirect()->route('myaccounts.index');
-        } catch (\Throwable $th) {
+           
+            return redirect()->route('myaccounts.index')->withSuccess('Successfully Updated');
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('MyAccountController | Update() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('MyAccountController | Update() Error ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function changepassword(Request $request)
@@ -120,13 +132,19 @@ class MyAccountController extends Controller
                 'message' => 'After changing user password'
             ]);
 
-            Toastr::success('Successfully Updated:)', 'Success');
-            return back()->with('success', 'Password Changed Successfully');
-        } catch (\Throwable $th) {
+            
+            return back()->withSuccess('Password Changed Successfully');
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('MyAccountController | ChangePassword() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('MyAccountController | ChangePassword() Error ' . $unique_id,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 }

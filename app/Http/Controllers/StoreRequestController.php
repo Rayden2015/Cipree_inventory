@@ -52,8 +52,8 @@ class StoreRequestController extends Controller
                 ]);
 
                 if ($inventory->isEmpty()) {
-                    Toastr::error('Item not in stock', 'Oops'); // Removed extra colon and smiley face
-                    return redirect()->back();
+
+                    return redirect()->back()->withError('Item not in stock', 'Oops');
                 } else {
                     return view('purchases.request_search', compact('inventory'));
                 }
@@ -62,9 +62,14 @@ class StoreRequestController extends Controller
             return view('purchases.request_search');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | RequestSearch() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
+            Log::error('StoreRequestController | RequestSearch() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
@@ -94,8 +99,8 @@ class StoreRequestController extends Controller
                 ]);
 
                 if ($inventory->isEmpty()) {
-                    Toastr::error('Item not in stock:)', 'Oops');
-                    return redirect()->back();
+
+                    return redirect()->back()->withError('Item not in stock', 'Oops');
                 } elseif ($inventory->isNotEmpty()) {
                     return view('purchases.request_search', compact('inventory'));
                 }
@@ -103,9 +108,14 @@ class StoreRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | RequesterSearch() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
+            Log::error('StoreRequestController | RequesterSearch() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
@@ -131,16 +141,17 @@ class StoreRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | Cart() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
+            Log::error('StoreRequestController | Cart() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
-    /**
-     * Write code on Method
-     *
-     * @return response()
-     */
+
     public function addToCart($id)
     {
         try {
@@ -179,17 +190,18 @@ class StoreRequestController extends Controller
             return redirect()->back()->with('success', 'Item added to cart successfully!');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | AddToCart() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
+            Log::error('StoreRequestController | AddToCart() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
-    /**
-     * Write code on Method
-     *
-     * @return response()
-     */
+
     public function update(Request $request)
     {
         try {
@@ -211,17 +223,17 @@ class StoreRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | Update() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
+            Log::error('StoreRequestController | Update() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
-    /**
-     * Write code on Method
-     *
-     * @return response()
-     */
     public function remove(Request $request)
     {
         try {
@@ -240,9 +252,14 @@ class StoreRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | Remove() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
+            Log::error('StoreRequestController | Remove() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
@@ -316,13 +333,17 @@ class StoreRequestController extends Controller
 
             ]);
 
-            return redirect()->route('stores.request_search')->with('success', 'Stock Requisition(SR) #' . $order->request_number . ' forwarded for Authorisation');
-            Toastr::success('Successfully Updated:)', 'Sucess');
-        } catch (\Throwable $th) {
+            return redirect()->route('stores.request_search')->withSuccess('Stock Requisition(SR) #' . $order->request_number . ' forwarded for Authorisation');
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | Store() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
+            Log::error('StoreRequestController | Store() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
@@ -351,39 +372,27 @@ class StoreRequestController extends Controller
     }
     public function generatesorderPDF($id)
     {
-        try{
-        //     $company = Company::latest()->first();
-        //     $sorder = Sorder::where('id', '=', $id)->first();
-        //     $inventories = SorderPart::where('sorder_id', '=', $id)->get();
-        //     $sorder = PDF::loadView('sorder.pdf', compact('sorder', 'company', 'sorder'))->setOptions(['defaultFont' => 'sans-serif']);
-        //     Log::info("Storerequest | generatesorderPDF() | ");
-        //     return $sorder->download('sorder.pdf');
+        try {
 
-        // }catch(\Exception $e){
-        $unique_id = floor(time() - 999999999);
-        Log::error('An error occurred with id ' . $unique_id);
-        Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-        //     Log::error('Storerequest| generatesorderPDF ()', [
-        //         'user_details' => Auth::user(),
-        //         //'request_payload', $request, 
-        //         'error_message' => $e->getMessage(),
-        //         // 'stack_trace' => $e->getTraceAsString(0)
-        //     ]);
-        // }
-        $company = Company::latest()->first();
-        $pdf_filename = Sorder::where('id', '=', $id)->value('request_number'); // Get the value directly
-        $sorder = Sorder::where('id', '=', $id)->first();
-        $sorder_parts = SorderPart::where('sorder_id', '=', $id)->get();
-        $sorder = PDF::loadView('stores.pdf', compact('sorder', 'company', 'sorder_parts'))->setOptions(['defaultFont' => 'sans-serif']);
-        Log::info("Storerequest | generatesorderPDF() | ");
-        $filename = $pdf_filename . '.pdf'; // Append '.pdf' to the filename
+            $company = Company::latest()->first();
+            $pdf_filename = Sorder::where('id', '=', $id)->value('request_number'); // Get the value directly
+            $sorder = Sorder::where('id', '=', $id)->first();
+            $sorder_parts = SorderPart::where('sorder_id', '=', $id)->get();
+            $sorder = PDF::loadView('stores.pdf', compact('sorder', 'company', 'sorder_parts'))->setOptions(['defaultFont' => 'sans-serif']);
+            Log::info("Storerequest | generatesorderPDF() | ");
+            $filename = $pdf_filename . '.pdf'; // Append '.pdf' to the filename
 
-        return $sorder->download($filename);
-         } catch(\Exception $e) {
+            return $sorder->download($filename);
+        } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | GenerateSorderPDF() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
+            Log::error('StoreRequestController | GenerateSorderPDF() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
@@ -401,9 +410,14 @@ class StoreRequestController extends Controller
             return view('stores.edit', compact('sorder', 'suppliers', 'endusers', 'sorder_parts'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | StoreListEdit() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
+            Log::error('StoreRequestController | StoreListEdit() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
@@ -431,9 +445,14 @@ class StoreRequestController extends Controller
             return redirect()->back();
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | StoreListUpdate() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
+            Log::error('StoreRequestController | StoreListUpdate() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
@@ -492,9 +511,14 @@ class StoreRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | SorderUpdate() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
+            Log::error('StoreRequestController | SorderUpdate() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
@@ -522,10 +546,6 @@ class StoreRequestController extends Controller
                             'details 2' => $request->quantity
                         ]);
                         return back()->with('message', 'Quantity not available!');
-                        Log::info('store request quantity Values', [
-
-                            'Details' => $quantity,
-                        ]);
                     } else
                         $val =     DB::table('sorder_parts')
                             ->where('id', $request->id)
@@ -555,9 +575,14 @@ class StoreRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | StoresAction() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
+            Log::error('StoreRequestController | StoresAction() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
@@ -576,9 +601,14 @@ class StoreRequestController extends Controller
             return redirect()->back();
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | ApprovedStatus() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
+            Log::error('StoreRequestController | ApprovedStatus() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
@@ -596,9 +626,14 @@ class StoreRequestController extends Controller
             return redirect()->back();
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | DeniedStatus() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
+            Log::error('StoreRequestController | DeniedStatus() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
@@ -615,9 +650,14 @@ class StoreRequestController extends Controller
             return view('stores.officer_lists', compact('officer_lists'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | StoreOfficerLists() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
+            Log::error('StoreRequestController | StoreOfficerLists() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
@@ -633,9 +673,14 @@ class StoreRequestController extends Controller
             return view('stores.requester_lists', compact('officer_lists'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | StoreRequesterLists() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
+            Log::error('StoreRequestController | StoreRequesterLists() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
@@ -655,12 +700,14 @@ class StoreRequestController extends Controller
             return view('stores.officer_edit', compact('sorder_parts', 'sorder', 'suppliers', 'endusers'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('StoreRequestController | store_officer_edit() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
@@ -769,32 +816,53 @@ class StoreRequestController extends Controller
                 GROUP BY t.item_id
             ) AS subquery ON i.id = subquery.item_id
             SET i.stock_quantity = subquery.calculated_quantity;');
-            Toastr::success('Successfully Updated:)', 'Sucess');
-            return redirect()->back();
+
+            return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            // An error occured; cancel the transaction...
-            DB::rollback();
-
-            // and throw the error again.
-            Log::error('StoreRequestController | store_officer_lists() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
+            DB::rollback();
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
 
     public function update_manual_remarks(Request $request, $id)
     {
-        $sorder = Sorder::find($id);
-        $sorder->manual_remarks = $request->manual_remarks;
-        $sorder->save();
-        Toastr::Success('Saved Successfully', 'success');
-        return redirect()->back();
+        try {
+            // Find the sales order by ID
+            $sorder = Sorder::find($id);
+    
+            if (!$sorder) {
+                return redirect()->back()->withError('Sales order not found.');
+            }
+    
+            // Update the manual remarks
+            $sorder->manual_remarks = $request->manual_remarks;
+            $sorder->save();
+    
+            // Redirect back with a success message
+            return redirect()->back()->withSuccess('Successfully Updated');
+        } catch (\Exception $e) {
+            // Generate a unique error ID
+            $unique_id = floor(time() - 999999999);
+    
+            // Log the error with details
+            Log::error('SorderController | update_manual_remarks() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+    
+            // Redirect back with the error message
+            return redirect()->back()
+                             ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
-
+    
 
     public function supply_history()
     {
@@ -819,13 +887,16 @@ class StoreRequestController extends Controller
             return view('stores.parts_witin_the_week', compact('total_cost_of_parts_within_the_month'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('StoreRequestController | supply_history() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function supply_history_search(Request $request)
@@ -859,13 +930,16 @@ class StoreRequestController extends Controller
             return view('stores.parts_witin_the_week', compact('total_cost_of_parts_within_the_month', 'start_date', 'end_date'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('StoreRequestController | supply_history_search() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function supply_history_search_item(Request $request)
@@ -927,13 +1001,16 @@ class StoreRequestController extends Controller
             return view('stores.supply_history_search_item', compact('total_cost_of_parts_within_the_month'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('StoreRequestController | store_officer_lists() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
 
@@ -947,19 +1024,21 @@ class StoreRequestController extends Controller
                 'user_details' => Auth::user(),
                 'sorder_part_id' => $sorderPartId
             ]);
-            Toastr::success('Success', 'Item Deleted Successfully');
-            return redirect()->back()->with('success', 'Item deleted successfully');
+       
+            return redirect()->back()->withSuccess('Item deleted successfully');
         } catch (\Exception $e) {
-            $uniqueId = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $uniqueId);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $uniqueId . ' via the Feedback Button', 'Error');
-            Log::error('StoreRequestController | sorderpart_delete() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            $unique_id = floor(time() - 999999999);
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
 
-            return redirect()->back()->with('error', 'Failed to delete sorder part');
-        }
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
+
     }
 
 
@@ -982,13 +1061,18 @@ class StoreRequestController extends Controller
             return redirect()->back();
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('StoreRequestController | destroy() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
+
+
     }
 
     public function requester_store_lists()
@@ -1004,13 +1088,17 @@ class StoreRequestController extends Controller
             return view('stores.requester_store_lists', compact('requester_store_lists'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('StoreRequestController | requester_store_lists() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
+
     }
 
     public function requester_edit($id)
@@ -1030,13 +1118,17 @@ class StoreRequestController extends Controller
             return view('stores.requester_edit', compact('sorder_parts', 'sorder', 'suppliers', 'endusers'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('StoreRequestController | store_officer_lists() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
+
     }
 
     public function requester_store_update(Request $request, $id)
@@ -1054,13 +1146,17 @@ class StoreRequestController extends Controller
             return redirect()->back();
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('StoreRequestController | RequesterStoreUpdate() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
+
     }
 
 
@@ -1114,18 +1210,22 @@ class StoreRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('StoreRequestController | RequesterSorderUpdate() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
+
     }
 
     public function requester_store_delete($id)
     {
-        try{
+        try {
             $sorder = SorderPart::find($id);
             $authid = Auth::user()->name;
             Log::info("Details before delete", [
@@ -1135,16 +1235,19 @@ class StoreRequestController extends Controller
             SorderPart::where("id", $sorder->id)->delete();
             // $sorder->delete();
             return redirect()->back();
-        } catch(\Exception $e){
+        } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('StoreRequestController | RequesterStoreDelete() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-        }
-       
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
+
     }
 
     public function store_officer_list_search(Request $request)
@@ -1164,8 +1267,8 @@ class StoreRequestController extends Controller
                     ->paginate(10);
 
                 if ($officer_lists->isEmpty()) {
-                    Toastr::error('Record not found', 'Oops');
-                    return redirect()->back();
+                  
+                    return redirect()->back()->withError('Record not found','Oops');
                 } elseif ($officer_lists->isNotEmpty()) {
                     return view('stores.officer_lists', compact('officer_lists'));
                 }
@@ -1181,13 +1284,17 @@ class StoreRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('StoreRequestController | StoreOfficerListSearch() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
+
     }
 
     public function received_history_page()
@@ -1205,13 +1312,17 @@ class StoreRequestController extends Controller
             // dd($received_history_page);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('StoreRequestController | ReceivedHistoryPage() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
+
     }
     public function authoriser_store_list_view_dash($id)
     {
@@ -1233,13 +1344,17 @@ class StoreRequestController extends Controller
             return view('stores.authoriser_store_list_view', compact('sorder', 'sorder_parts', 'company'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('StoreRequestController | AuthoriserStoreListViewDash() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
+
 
 
         // dd($sorder);
@@ -1261,13 +1376,17 @@ class StoreRequestController extends Controller
             return Response::json(['success' => true, 'info' => $fill]);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('StoreRequestController | FetchSingleEnduser() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
+
     }
 
 
@@ -1287,13 +1406,17 @@ class StoreRequestController extends Controller
             return Response::json(['success' => true, 'info' => $fill]);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('StoreRequestController | FetchSingleEnduser1() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
+
     }
     public function requester_store_list_view($id)
     {

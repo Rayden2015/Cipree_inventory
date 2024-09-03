@@ -37,10 +37,16 @@ class EnduserController extends Controller
             return view('endusers.index', compact('endusers','endusercategories'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('EndUserController | Index() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('EndUserController | Index() Error ' . $unique_id ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function search(Request $request)
@@ -118,10 +124,16 @@ class EnduserController extends Controller
             return view('endusers.edit', compact('enduser', 'sites', 'sections', 'departments','endusercategories'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('EndUserController | Edit() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('EndUserController | Edit() Error ' . $unique_id ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function store(Request $request)
@@ -139,10 +151,9 @@ class EnduserController extends Controller
                 // 'bic' => $request->bic,
                 'manufacturer' => $request->manufacturer,
                 'designation' => $request->designation,
-                'site_id' => $request->site_id,
                 'section_id' => $request->section_id,
                 'department_id' => $request->department_id,
-                'site_id'=>$site_id,
+                'site_id' => $site_id,
                 // 'enduser_category_id' => $request->enduser_category_id,
             ]);
             $authId = Auth::user()->name;
@@ -153,21 +164,27 @@ class EnduserController extends Controller
                     'response_payload' => $request->all(),
                 ]
             );
-            Toastr::success('Successfully Updated:)', 'Sucess');
-            return redirect()->route('endusers.index');
+          
+            return redirect()->route('endusers.index')->withSuccess('Successfully updated');
         }catch(\Exception $e){
             $unique_id = floor(time() - 999999999);
-            Log::error('EndUserController | Store() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('EndUserController | Store() Error ' . $unique_id ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
        
     }
 
     public function update(Request $request, $id)
     {
-        // try {
-            // Find the Enduser by ID
+        try {
+          
             $enduser = Enduser::find($id);
     
             $request->validate([
@@ -180,7 +197,7 @@ class EnduserController extends Controller
             
             // Check if Enduser exists
             if (!$enduser) {
-                return redirect()->back()->withErrors(['error' => 'Enduser not found']);
+                return redirect()->back()->withError(['Enduser not found']);
             }
     
             // Update the Enduser fields
@@ -211,14 +228,20 @@ class EnduserController extends Controller
             ]);
     
             // Redirect back with success message
-            Toastr::success('Successfully Updated', 'Success');
-            return redirect()->back();
-        // } catch (\Exception $e) {
-        //     $unique_id = floor(time() - 999999999);
-        //     Log::error('EndUserController | Update() Error ' . $unique_id);
-        //     Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id, 'Error');
-        //     return redirect()->back();
-        // }
+        
+            return redirect()->back()->withSuccess('Successfully Updated');
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('EndUserController | Update() Error ' . $unique_id ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
     
 
@@ -238,9 +261,15 @@ class EnduserController extends Controller
             return redirect()->route('endusers.index')->with('success','Deleted Successfuly');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('EndUserController | Destroy() Error ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            return redirect()->back();
-        }
+            Log::error('EndUserController | Destroy() Error ' . $unique_id ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 }

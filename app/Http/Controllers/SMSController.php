@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Log;
 use Brian2694\Toastr\Facades\Toastr;
 
-class SmsController extends Controller
+class SMSController extends Controller
 {
     public function sendSms($to, $content)
     {
@@ -55,12 +55,18 @@ class SmsController extends Controller
 
                 echo $response;
             }
-        } catch (\Throwable $th) {
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-                Log::error('SmsController | SendSms() Error ' . $unique_id);
-                Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-                return redirect()->back();
-            echo "An error occurred while sending SMS.";
-        }
+                Log::error('SmsController | SendSms() Error ' . $unique_id
+                ,[
+                    'message' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
+    
+        // Redirect back with the error message
+        return redirect()->back()
+                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+    }
+    
     }
 }

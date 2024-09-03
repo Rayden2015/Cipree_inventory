@@ -64,7 +64,7 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        // try {
+        try {
             $request->validate([
                 'email' => 'required|email|unique:users,email',
                 'name' => 'required',
@@ -128,32 +128,22 @@ class UserController extends Controller
                 'request_payload' => $request->all(),
             ]);
     
-            Toastr::success('Successfully Updated:)', 'Sucess');
-            return redirect()->route('users.index');
+            return redirect()->route('users.index')->withSuccess('Successfully Updated');
         }
-    //      catch (\Exception $e) {
-    //         $unique_id = floor(time() - 999999999);
-    //         Log::error('An error occurred with id ' . $unique_id);
-    //         Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-    //         Log::error('UserController | Store() | ', [
-    //             'user_details' => Auth::user(),
-    //             'error_message' => $e->getMessage()
-    //         ]);
-    //         return redirect()->back();
+         catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
        
-    // }
-
-
-    // The rest of the methods remain unchanged.
-
-
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     **/
+    }
 
 
     public function show($id)
@@ -162,8 +152,8 @@ class UserController extends Controller
             $user = User::find($id);
 
             if (!$user) {
-                Toastr::error('User not found.', 'Error');
-                return redirect()->route('users.index');
+            
+                return redirect()->route('users.index')->withError('User not found');
             }
 
             Log::info('UserControlller | show()', [
@@ -174,14 +164,16 @@ class UserController extends Controller
             return view('users.show', compact('user'));
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('UserController | Show() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back();
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public function edit($id)
@@ -190,8 +182,8 @@ class UserController extends Controller
             $user = User::find($id);
     
             if (!$user) {
-                Toastr::error('User not found.', 'Error');
-                return redirect()->route('users.index');
+              
+                return redirect()->route('users.index')->withError('User not found');
             }
     
             $roles = Role::all();
@@ -206,20 +198,22 @@ class UserController extends Controller
             return view('users.edit', compact('user', 'roles', 'sites', 'userRoles'));
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('UserController | Edit() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back();
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
     
 
     public function update(Request $request, $id)
     {
-        // try {
+        try {
             $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255',
@@ -259,14 +253,7 @@ class UserController extends Controller
             $user->password = Hash::make($request->input('password'));
         }
         $user->save();
-          // Assign roles to the user
-        //   if ($request->roles) {
-        //     foreach ($request->roles as $role) {
-        //         if (!$user->hasRole($role)) {
-        //             $user->assignRole($role);
-        //         }
-        //     }
-        // }
+      
 
          // Sync roles - this will update the user's roles, adding new roles and removing unchecked ones
     if ($request->roles) {
@@ -281,32 +268,25 @@ class UserController extends Controller
             $user->image = $imageName;
             $user->save();
         }
+        Log::info('UserController | update', [
+            'user_details' => Auth::user(),
+            'user_name' => $authId,
+            'user_name_before' => User::find($id),
+        ]);
+        return redirect()->back()->withSuccess('Successfully Updated');
 
+        } catch (\Throwable $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
 
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
 
-        Toastr::success('Successfully Updated:)', 'Sucess');
-        return redirect()->back();
-
-
-
-        //     Log::info('UserController | update', [
-        //         'user_details' => Auth::user(),
-        //         'user_name' => $authId,
-        //         'user_name_before' => User::find($id),
-        //     ]);
-
-        //     // ... (rest of the update method remains unchanged)
-    //     } catch (\Throwable $e) {
-    //         $unique_id = floor(time() - 999999999);
-    //         Log::error('An error occurred with id ' . $unique_id);
-    //         Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-    //         Log::error('UserController | Update() | ', [
-    //             'user_details' => Auth::user(),
-    //             'error_message' => $e->getMessage()
-    //         ]);
-    //         return redirect()->back();
-
-    // }
     }
     public function destroy($id)
     {
@@ -315,12 +295,12 @@ class UserController extends Controller
             $authId = Auth::user()->name;
     
             if (!$user) {
-                Toastr::error('User not found.', 'Error');
+               
                 Log::warning('UserController | destroy | User not found', [
                     'user_id' => $id,
                     'user_name' => $authId,
                 ]);
-                return redirect()->route('users.index');
+                return redirect()->route('users.index')->withError('User not found');
             }
     
             Log::info('UserController | destroy', [
@@ -330,19 +310,19 @@ class UserController extends Controller
             ]);
     
             $user->delete();
-    
-            Toastr::success('User deleted successfully.', 'Success');
-            return redirect()->route('users.index');
+            return redirect()->route('users.index')->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('UserController | Destroy() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back();
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
     
 
@@ -360,15 +340,16 @@ class UserController extends Controller
             return $first_name;
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('UserController | Username() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-      
-            return null; // or handle the error accordingly
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public static function logo()
@@ -380,17 +361,18 @@ class UserController extends Controller
                 'company_logo' => $logo,
             ]);
             return $logo;
-        } catch (\Throwable $th) {
+        } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('UserController | Logo() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $th->getMessage()
+            Log::error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
-            // return redirect()->back();
-            return null; // or handle the error accordingly
-        }
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
     }
 
     public static function lastlogin()
