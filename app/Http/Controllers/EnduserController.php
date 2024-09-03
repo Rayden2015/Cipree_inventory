@@ -184,22 +184,18 @@ class EnduserController extends Controller
     public function update(Request $request, $id)
     {
         try {
-          
             $enduser = Enduser::find($id);
-    
+
             $request->validate([
-               
                 'asset_staff_id' => 'unique:endusers,asset_staff_id,' . $id, // Unique validation except for the current user
-        
                 // Add other validation rules as needed
             ]);
-
             
             // Check if Enduser exists
             if (!$enduser) {
                 return redirect()->back()->withError(['Enduser not found']);
             }
-    
+            
             // Update the Enduser fields
             $enduser->asset_staff_id = $request->input('asset_staff_id');
             $enduser->name_description = $request->input('name_description');
@@ -211,23 +207,26 @@ class EnduserController extends Controller
             $enduser->designation = $request->input('designation');
             $enduser->manufacturer = $request->input('manufacturer');
             $enduser->status = $request->input('status');
-            $enduser->site_id = $request->input('site_id');
+            
+            // Only update the site_id if the user is a Super Admin
+            if (Auth::user()->hasRole('Super Admin')) {
+                $enduser->site_id = $request->input('site_id');
+            }
+            
             $enduser->department_id = $request->input('department_id');
             $enduser->section_id = $request->input('section_id');
             $enduser->enduser_category_id = $request->input('enduser_category_id');
-    
+            
             // Save the changes
             $enduser->save();
-    
-            // Log the update operation
-            $authId = Auth::user()->name;
-            Log::info('EnduserController| update() | Edited an Enduser', [
-                'user_details' => Auth::user(),
-                'user_name' => $authId,
-                'response_payload' => $enduser,
-            ]);
-    
-            // Redirect back with success message
+              // Log the update operation
+              $authId = Auth::user()->name;
+              Log::info('EnduserController| update() | Edited an Enduser', [
+                  'user_details' => Auth::user(),
+                  'user_name' => $authId,
+                  'response_payload' => $enduser,
+              ]);
+
         
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {

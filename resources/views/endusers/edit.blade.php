@@ -28,17 +28,7 @@
 
                 <a href="{{ route('endusers.index') }}" class="btn btn-primary float-right">Back</a>
             </div>
-            @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="alert alert-danger">
-                {{ session('error') }}
-            </div>
-        @endif
+           
             <div class="card-body">
 
                 <form action="{{ route('endusers.update', $enduser->id) }}" method="POST" enctype="multipart/form-data">
@@ -68,7 +58,7 @@
 
                     <div class="card card-primary">
                         <div class="card-header">
-                            <h3 class="card-title">Edit Site</h3>
+                            <h3 class="card-title">Edit Enduser</h3>
                         </div>
                         <!-- /.card-header -->
                         <!-- form start -->
@@ -198,7 +188,7 @@
                                     </div>
                                 </div>
 
-                                @if (Auth::user()->hasRole('Admin'))
+                                @if (Auth::user()->hasRole('Super Admin'))
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Sites: </label>

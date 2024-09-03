@@ -41,11 +41,11 @@ class NotificationController extends Controller
         try {
             $site_id = Auth::user()->site->id;
             $notificationCount = Notification::where('site_id', '=',$site_id)->where('read_at', '=', '0')->count();
-            Log::info('NotificationController | getNotificationCount', [
-                'user_details' => Auth::user(),
-                'notification_count' => $notificationCount,
-                'message' => 'Notification count retrieved successfully.',
-            ]);
+            // Log::info('NotificationController | getNotificationCount', [
+            //     'user_details' => Auth::user(),
+            //     'notification_count' => $notificationCount,
+            //     'message' => 'Notification count retrieved successfully.',
+            // ]);
             return $notificationCount;
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
@@ -68,11 +68,11 @@ class NotificationController extends Controller
         try {
             $site_id = Auth::user()->site->id;
             $notification = Notification::where('read_at', '=', '0')->where('site_id','=', $site_id)->latest()->paginate(8);
-            Log::info('NotificationController | getNotification', [
-                'user_details' => Auth::user(),
-                'notification' => $notification,
-                'message' => 'Notifications retrieved successfully.',
-            ]);
+            // Log::info('NotificationController | getNotification', [
+            //     'user_details' => Auth::user(),
+            //     'notification' => $notification,
+            //     'message' => 'Notifications retrieved successfully.',
+            // ]);
             return $notification;
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);

@@ -333,10 +333,10 @@ class UserController extends Controller
         try {
             $name = Auth::user()->name;
             $first_name = strtok($name, " ");
-            Log::info('UserController | username', [
-                'user_details' => Auth::user(),
-                'user_name' => $name,
-            ]);
+            // Log::info('UserController | username', [
+            //     'user_details' => Auth::user(),
+            //     'user_name' => $name,
+            // ]);
             return $first_name;
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
@@ -356,10 +356,10 @@ class UserController extends Controller
     {
         try {
             $logo = Company::first()->value('image');
-            Log::info('UserController | logo', [
-                'user_details' => Auth::user(),
-                'company_logo' => $logo,
-            ]);
+            // Log::info('UserController | logo', [
+            //     'user_details' => Auth::user(),
+            //     'company_logo' => $logo,
+            // ]);
             return $logo;
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
