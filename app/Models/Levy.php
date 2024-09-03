@@ -9,6 +9,6 @@ class Levy extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'description','others','rate','site_id'
+        'description','others','rate','site_id','updated_at'
     ];
 }

@@ -10,7 +10,7 @@ class Item extends Model
     use HasFactory;
    
     protected $fillable = [
-        'item_description','item_uom','item_category_id','item_stock_code','item_part_number','added_by','modified_by','reorder_level','stock_quantity','amount','new_category','site_id','uom_id'
+        'item_description','item_uom','item_category_id','item_stock_code','item_part_number','added_by','modified_by','reorder_level','stock_quantity','amount','new_category','site_id','uom_id','updated_at'
     ];
 
     public function category(){

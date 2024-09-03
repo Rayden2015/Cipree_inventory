@@ -9,7 +9,7 @@ class OrderPart extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'order_id','part_id','description','quantity','make','model','serial_number','unit_price','comments','request_number','remarks','priority','prefix','part_number','uom','site_id','uom_id'
+        'order_id','part_id','description','quantity','make','model','serial_number','unit_price','comments','request_number','remarks','priority','prefix','part_number','uom','site_id','uom_id','updated_at'
     ];
     protected $attributes = [
         'uom' => null,  // Default value for uom

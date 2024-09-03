@@ -12,7 +12,7 @@ class Purchase extends Model
         'part_id', 'description', 'quantity','make',
         'model','serial_number','tax','tax2','tax3',
         'unit_price','currency','supplier_id','comments',
-        'type_of_purchase','enduser_id','status','intended_recipient','user_id','image','approved_by','approved_on','site_id'
+        'type_of_purchase','enduser_id','status','intended_recipient','user_id','image','approved_by','approved_on','site_id','updated_at'
     ];
 
 

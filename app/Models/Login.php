@@ -9,7 +9,7 @@ class Login extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'user_id','attempt','site_id'
+        'user_id','attempt','site_id','updated_at'
     ];
 
 

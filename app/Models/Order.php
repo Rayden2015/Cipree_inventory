@@ -9,7 +9,7 @@ class Order extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'tax', 'tax2', 'tax3', 'currency', 'supplier_id', 'type_of_purchase', 'enduser_id', 'status', 'image', 'user_id', 'request_number', 'request_date', 'approval_status', 'work_order_ref', 'approved_by', 'approved_on', 'site_id'
+        'tax', 'tax2', 'tax3', 'currency', 'supplier_id', 'type_of_purchase', 'enduser_id', 'status', 'image', 'user_id', 'request_number', 'request_date', 'approval_status', 'work_order_ref', 'approved_by', 'approved_on', 'site_id','updated_at'
 
     ];
     public function products()

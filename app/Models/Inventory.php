@@ -12,7 +12,7 @@ class Inventory extends Model
 'location_id','waybill','designation','codes','items','part_number','category_id','uom','quantity','supplier_id',
 'dollar_rate','unit_cost_exc_vat_gh','unit_cost_exc_vat_usd',
 'total_value_gh','total_value_usd','srf','erf','ats','drq',
-'po_number','grn_number','invoice_number','delivered_by','supplier_id','trans_type','remarks','date','billing_currency','enduser_id','user_id','exchange_rate','site_id','manual_remarks'
+'po_number','grn_number','invoice_number','delivered_by','supplier_id','trans_type','remarks','date','billing_currency','enduser_id','user_id','exchange_rate','site_id','manual_remarks','updated_at'
     ];
 
 protected $attributes = [

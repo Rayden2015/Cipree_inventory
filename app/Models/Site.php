@@ -9,6 +9,6 @@ class Site extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'name','site_code'
+        'name','site_code','updated_at'
     ];
 }

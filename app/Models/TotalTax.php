@@ -9,7 +9,7 @@ class TotalTax extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'tax_id','sub_total','grand_total','site_id'
+        'tax_id','sub_total','grand_total','site_id','updated_at'
     ];
 
     public function tax(){

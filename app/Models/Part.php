@@ -10,7 +10,7 @@ class Part extends Model
     use HasFactory;
     protected $fillable = [
         'supplier_id','name','description','site_id','location_id',
-        'quantity','site_id'
+        'quantity','site_id','updated_at'
     ];
 
     public function supplier(){

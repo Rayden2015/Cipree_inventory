@@ -9,7 +9,7 @@ class SorderPart extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'order_id','inventory_id','description','quantity','make','model','serial_number','unit_cost_exc_vat_gh','comments','request_number','remarks','priority','prefix','part_number','purchasing_order_number','sub_total','grand_total','discount','item_id','qty_supplied','site_id'
+        'order_id','inventory_id','description','quantity','make','model','serial_number','unit_cost_exc_vat_gh','comments','request_number','remarks','priority','prefix','part_number','purchasing_order_number','sub_total','grand_total','discount','item_id','qty_supplied','site_id','updated_at'
     ];
 
     public function item_parts(){

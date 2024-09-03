@@ -15,6 +15,6 @@ class Uom extends Model
         'measurement_type',
         'description',
         'is_default',
-        'base_unit',
+        'base_unit','updated_at'
     ];
 }
