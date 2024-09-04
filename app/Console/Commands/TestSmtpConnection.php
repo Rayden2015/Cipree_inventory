@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class TestSmtpConnection extends Command
@@ -21,9 +22,11 @@ class TestSmtpConnection extends Command
             $this->info('Test email sent successfully!');
         } catch (\Exception $e) {
     $unique_id = floor(time() - 999999999);
-Log::error('An error occurred with id ' . $unique_id);
-Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            $this->error('Failed to send test email. Error: ' . $e->getMessage());
-        }
+
+Log::channel('error_log')->error('TestSmtpController | Handle() Error ' . $unique_id, [
+    'message' => $e->getMessage(),
+    'stack_trace' => $e->getTraceAsString()
+]);
+    }
     }
 }

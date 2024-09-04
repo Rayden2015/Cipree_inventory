@@ -43,7 +43,7 @@ class OrderController extends Controller
             // dd($orders);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('OrderController | Index() Error ' . $unique_id,[
+            Log::channel('error_log')->error('OrderController | Index() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -74,7 +74,7 @@ class OrderController extends Controller
             return view('orders.create', compact('customers', 'products', 'request_number', 'request_date','uom'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('OrderController | Create() Error ' . $unique_id,[
+            Log::channel('error_log')->error('OrderController | Create() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -102,7 +102,7 @@ class OrderController extends Controller
             return view('orders.admincreate', compact('customers', 'products', 'request_number', 'request_date'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('OrderController | AdminCreate() Error ' . $unique_id,[
+            Log::channel('error_log')->error('OrderController | AdminCreate() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -190,7 +190,7 @@ class OrderController extends Controller
             return back()->withSuccess('Order #' . $order->id . ' Placed Successfully');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('OrderController | Store() Error ' . $unique_id,[
+            Log::channel('error_log')->error('OrderController | Store() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -280,7 +280,7 @@ class OrderController extends Controller
             return back()->withSuccess('Order #' . $order->id . ' Placed Successfully');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('OrderController | OrderStore() Error ' . $unique_id,[
+            Log::channel('error_log')->error('OrderController | OrderStore() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -307,7 +307,7 @@ class OrderController extends Controller
             return view('orders.show', compact('order', 'company', 'order_parts'));
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('OrderController | Show() Error ' . $unique_id,[
+            Log::channel('error_log')->error('OrderController | Show() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -331,7 +331,7 @@ class OrderController extends Controller
             return view('orders.view', compact('order'));
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('OrderController | View() Error ' . $unique_id,[
+            Log::channel('error_log')->error('OrderController | View() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -359,7 +359,7 @@ class OrderController extends Controller
             return view('orders.edit', compact('purchase', 'suppliers', 'sites', 'locations', 'parts', 'endusers', 'order_parts','uom'));
         }catch (\Exception $e){
             $unique_id = floor(time() - 999999999);
-            Log::error('OrderController | Edit() Error ' . $unique_id,[
+            Log::channel('error_log')->error('OrderController | Edit() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -396,7 +396,7 @@ class OrderController extends Controller
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('OrderController | Update() Error ' . $unique_id,[
+            Log::channel('error_log')->error('OrderController | Update() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -429,7 +429,7 @@ class OrderController extends Controller
             }
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('OrderController | Destroy() Error ' . $unique_id,[
+            Log::channel('error_log')->error('OrderController | Destroy() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -463,7 +463,7 @@ class OrderController extends Controller
             return response()->json($product);
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('OrderController | FetchSingleProduct() Error ' . $unique_id,[
+            Log::channel('error_log')->error('OrderController | FetchSingleProduct() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -500,7 +500,7 @@ $product = DB::select('select price,quantity from products where id = ? and site
             return view('orders.search', compact('orders'));
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('OrderController | OrdersSearch() Error ' . $unique_id,[
+            Log::channel('error_log')->error('OrderController | OrdersSearch() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -528,7 +528,7 @@ $product = DB::select('select price,quantity from products where id = ? and site
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('OrderController | OrdersAction() Error ' . $unique_id,[
+            Log::channel('error_log')->error('OrderController | OrdersAction() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);

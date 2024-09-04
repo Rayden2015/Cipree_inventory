@@ -64,7 +64,7 @@ class SectionController extends Controller
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-                Log::error('SectionController | Store() Error ' . $unique_id  ,[
+                Log::channel('error_log')->error('SectionController | Store() Error ' . $unique_id  ,[
                     'message' => $e->getMessage(),
                     'stack_trace' => $e->getTraceAsString()
                 ]);
@@ -108,7 +108,7 @@ class SectionController extends Controller
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-                Log::error('SectionController | Update() Error ' . $unique_id  ,[
+                Log::channel('error_log')->error('SectionController | Update() Error ' . $unique_id  ,[
                     'message' => $e->getMessage(),
                     'stack_trace' => $e->getTraceAsString()
                 ]);
@@ -136,7 +136,7 @@ class SectionController extends Controller
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-                Log::error('SectionController | Destroy() Error ' . $unique_id  ,[
+                Log::channel('error_log')->error('SectionController | Destroy() Error ' . $unique_id  ,[
                     'message' => $e->getMessage(),
                     'stack_trace' => $e->getTraceAsString()
                 ]);

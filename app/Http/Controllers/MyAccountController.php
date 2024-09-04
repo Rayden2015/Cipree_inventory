@@ -28,7 +28,7 @@ class MyAccountController extends Controller
             return view('myaccount.index', compact('my'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('MyAccountController | Index() Error ' . $unique_id,[
+            Log::channel('error_log')->error('MyAccountController | Index() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -82,7 +82,7 @@ class MyAccountController extends Controller
             return redirect()->route('myaccounts.index')->withSuccess('Successfully Updated');
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('MyAccountController | Update() Error ' . $unique_id,[
+            Log::channel('error_log')->error('MyAccountController | Update() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -136,7 +136,7 @@ class MyAccountController extends Controller
             return back()->withSuccess('Password Changed Successfully');
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('MyAccountController | ChangePassword() Error ' . $unique_id,[
+            Log::channel('error_log')->error('MyAccountController | ChangePassword() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);

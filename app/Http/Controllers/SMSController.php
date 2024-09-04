@@ -39,7 +39,7 @@ class SMSController extends Controller
             curl_close($curl);
 
             if ($error) {
-                Log::error('SmsController | sendSms', [
+                Log::channel('error_log')->error('SmsController | sendSms', [
                     'to' => $to,
                     'content' => $content,
                     'error' => $error,
@@ -57,7 +57,7 @@ class SMSController extends Controller
             }
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-                Log::error('SmsController | SendSms() Error ' . $unique_id
+                Log::channel('error_log')->error('SmsController | SendSms() Error ' . $unique_id
                 ,[
                     'message' => $e->getMessage(),
                     'stack_trace' => $e->getTraceAsString()

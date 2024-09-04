@@ -153,12 +153,14 @@ class LoginController extends Controller
       Log::info("LoginController | logUserActivity() | User ID: {$userId} | Activity: {$activity} | URL: {$url} | User Agent: {$userAgent}");
     } catch (\Exception $e) {
       $unique_id = floor(time() - 999999999);
-      Log::error('An error occurred with id ' . $unique_id);
-      Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-      Log::error("Error logging user activity: {$e->getMessage()}");
-    }
+   
+      Log::channel('error_log')->error('LoginController | LogUserActivity() Error ' . $unique_id, [
+        'message' => $e->getMessage(),
+        'stack_trace' => $e->getTraceAsString()
+    ]);
   }
-
+  }
+  
   protected function sendFailedLoginResponse(Request $request)
   {
     Event::dispatch(new \Illuminate\Auth\Events\Failed($request->only($this->username()), false, 0));

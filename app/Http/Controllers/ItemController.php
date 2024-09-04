@@ -89,7 +89,7 @@ class ItemController extends Controller
         } catch (\Exception $e) {
             // Log errors
             $unique_id = floor(time() - 999999999);
-            Log::error('HomeController | Index() Error ' . $unique_id, [
+            Log::channel('error_log')->error('HomeController | Index() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -163,7 +163,7 @@ class ItemController extends Controller
             // dd($stock_codes );
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('ItemController | Store() Error ' . $unique_id, [
+            Log::channel('error_log')->error('ItemController | Store() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -208,7 +208,7 @@ class ItemController extends Controller
         } catch (\Exception $e) {
             // Log errors
             $unique_id = floor(time() - 999999999);
-            Log::error('HomeController | Index() Error ' . $unique_id, [
+            Log::channel('error_log')->error('HomeController | Index() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -266,7 +266,7 @@ class ItemController extends Controller
         } catch (\Exception $e) {
             // Log errors
             $unique_id = floor(time() - 999999999);
-            Log::error('ItemController | Update() Error ' . $unique_id ,[
+            Log::channel('error_log')->error('ItemController | Update() Error ' . $unique_id ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -300,7 +300,7 @@ class ItemController extends Controller
         } catch (\Exception $e) {
             // Log errors
             $unique_id = floor(time() - 999999999);
-            Log::error('ItemController | Destroy() Error ' . $unique_id ,[
+            Log::channel('error_log')->error('ItemController | Destroy() Error ' . $unique_id ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);

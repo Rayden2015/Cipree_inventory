@@ -30,7 +30,7 @@ class ReviewController extends Controller
             return view('feedback.index', compact('feedbacks', 'images'));
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('ReviewController | Index() Error ' . $unique_id  ,[
+            Log::channel('error_log')->error('ReviewController | Index() Error ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -60,7 +60,7 @@ class ReviewController extends Controller
             return $feedbacks;
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('ReviewController | Indexx() Error ' . $unique_id  ,[
+            Log::channel('error_log')->error('ReviewController | Indexx() Error ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -94,7 +94,7 @@ class ReviewController extends Controller
             return view('feedback.show', compact('feedback1', 'user'), ['feedback' => $feedback]);
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('ReviewController | Show() Error ' . $unique_id  ,[
+            Log::channel('error_log')->error('ReviewController | Show() Error ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -123,7 +123,7 @@ class ReviewController extends Controller
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('ReviewController | MarkAsReviewed() Error ' . $unique_id  ,[
+            Log::channel('error_log')->error('ReviewController | MarkAsReviewed() Error ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);

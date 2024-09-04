@@ -34,7 +34,7 @@ class CategoryController extends Controller
             return view('categories.index', compact('categories'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('CategoryController | Index() Error ' . $unique_id, [
+            Log::channel('error_log')->error('CategoryController | Index() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -79,7 +79,7 @@ class CategoryController extends Controller
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('CategoryController | Store() Error ' . $unique_id, [
+            Log::channel('error_log')->error('CategoryController | Store() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -135,7 +135,7 @@ class CategoryController extends Controller
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('CategoryController | Update() Error ' . $unique_id, [
+            Log::channel('error_log')->error('CategoryController | Update() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -164,7 +164,7 @@ class CategoryController extends Controller
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('CategoryController | Destroy() Error ' . $unique_id, [
+            Log::channel('error_log')->error('CategoryController | Destroy() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);

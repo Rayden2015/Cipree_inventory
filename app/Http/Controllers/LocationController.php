@@ -31,7 +31,7 @@ class LocationController extends Controller
             return view('locations.index', compact('locations'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('LocationController | Index() Error ' . $unique_id,[
+            Log::channel('error_log')->error('LocationController | Index() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -55,7 +55,7 @@ class LocationController extends Controller
             return view('locations.create');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('LocationController | Create() Error ' . $unique_id,[
+            Log::channel('error_log')->error('LocationController | Create() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -91,7 +91,7 @@ class LocationController extends Controller
             return redirect()->route('locations.index')->with('success','Successfully Added');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('LocationController | Store() Error ' . $unique_id,[
+            Log::channel('error_log')->error('LocationController | Store() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -124,7 +124,7 @@ class LocationController extends Controller
             return view('locations.edit', compact('location'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('LocationController | Edit() Error ' . $unique_id,[
+            Log::channel('error_log')->error('LocationController | Edit() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -165,7 +165,7 @@ class LocationController extends Controller
             return redirect()->back()->with('success','Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('LocationController | Update() Error ' . $unique_id,[
+            Log::channel('error_log')->error('LocationController | Update() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -195,7 +195,7 @@ class LocationController extends Controller
             return redirect()->route('locations.index')->with('success', 'Successfully Deleted');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('LocationController | Destroy() Error ' . $unique_id,[
+            Log::channel('error_log')->error('LocationController | Destroy() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);

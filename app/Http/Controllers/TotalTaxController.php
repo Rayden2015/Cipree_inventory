@@ -41,11 +41,10 @@ class TotalTaxController extends Controller
             return $output;
         }catch(\Exception $e){
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('TotalTaxController | GetTax() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+          
+            Log::channel('error_log')->error('TotalTaxController | GetTax() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
             return redirect()->back();
         }
@@ -59,11 +58,9 @@ class TotalTaxController extends Controller
             return response()->json($product);
         }catch(\Exception $e){
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id);
-            Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-            Log::error('TotalTaxController | FetchSingleTax() | ', [
-                'user_details' => Auth::user(),
-                'error_message' => $e->getMessage()
+            Log::channel('error_log')->error('TotalTaxController | FetchingSingleTax() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
             ]);
             return redirect()->back();
         }

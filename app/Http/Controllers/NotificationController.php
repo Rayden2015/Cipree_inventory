@@ -25,7 +25,7 @@ class NotificationController extends Controller
             return back();
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('NotificationController | Read() Error ' . $unique_id,[
+            Log::channel('error_log')->error('NotificationController | Read() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -49,7 +49,7 @@ class NotificationController extends Controller
             return $notificationCount;
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('NotificationController | getNotification() Error ' . $unique_id,[
+            Log::channel('error_log')->error('NotificationController | getNotification() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -76,7 +76,7 @@ class NotificationController extends Controller
             return $notification;
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('NotificationController | getNotification() Error ' . $unique_id,[
+            Log::channel('error_log')->error('NotificationController | getNotification() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);

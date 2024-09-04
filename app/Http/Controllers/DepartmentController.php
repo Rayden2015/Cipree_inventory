@@ -63,7 +63,7 @@ class DepartmentController extends Controller
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('DepartmentController | Store() Error ' . $unique_id ,[
+            Log::channel('error_log')->error('DepartmentController | Store() Error ' . $unique_id ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -106,7 +106,7 @@ class DepartmentController extends Controller
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('DepartmentController | Update() Error ' . $unique_id ,[
+            Log::channel('error_log')->error('DepartmentController | Update() Error ' . $unique_id ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -135,7 +135,7 @@ class DepartmentController extends Controller
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('DepartmentController | Destroy() Error ' . $unique_id ,[
+            Log::channel('error_log')->error('DepartmentController | Destroy() Error ' . $unique_id ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);

@@ -131,9 +131,9 @@ class LevyController extends Controller
         $unique_id = floor(time() - 999999999);
         
         // Log the error with details
-        Log::error('LevyController | update() Error ' . $unique_id ,[
+        Log::channel('error_log')->error('LevyController | update() Error ' . $unique_id, [
             'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
+            'stack_trace' => $e->getTraceAsString(),
         ]);
 
         // Redirect back with the error message
@@ -151,9 +151,8 @@ class LevyController extends Controller
     {
         $levy = Levy::find($id);
         $levy->delete();
-        // Toastr::Success('Successfully Updated:)','Success');
 
-        return redirect()->back()->with('success','Successfully Deleted');	
+        return redirect()->back()->withSuccess('Successfully Deleted');	
         //
     }
 }

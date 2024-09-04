@@ -41,7 +41,7 @@ class DashboardNavigationController extends Controller
          return view('homepages.pending_po_approvals', compact('pending_po_approvals'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | PendingPoApprovals() Error ' . $unique_id, [
+         Log::channel('error_log')->error('DashboardController | PendingPoApprovals() Error ' . $unique_id, [
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
          ]);
@@ -64,7 +64,7 @@ class DashboardNavigationController extends Controller
          return view('homepages.approved_request', compact('approved_request'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | ApprovedRequest() Error ' . $unique_id, [
+         Log::channel('error_log')->error('DashboardController | ApprovedRequest() Error ' . $unique_id, [
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
          ]);
@@ -87,7 +87,7 @@ class DashboardNavigationController extends Controller
          return view('homepages.approved_pos', compact('approved_pos'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | ApprovedPos() Error ' . $unique_id, [
+         Log::channel('error_log')->error('DashboardController | ApprovedPos() Error ' . $unique_id, [
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
          ]);
@@ -111,7 +111,7 @@ class DashboardNavigationController extends Controller
          // dd($processed_request);
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | ProcessedRequst() Error ' . $unique_id, [
+         Log::channel('error_log')->error('DashboardController | ProcessedRequst() Error ' . $unique_id, [
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
          ]);
@@ -134,7 +134,7 @@ class DashboardNavigationController extends Controller
          return view('homepages.pending_request_approvals', compact('pending_request_approvals'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | PendingRequestApprovals() Error ' . $unique_id, [
+         Log::channel('error_log')->error('DashboardController | PendingRequestApprovals() Error ' . $unique_id, [
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
          ]);
@@ -157,7 +157,7 @@ class DashboardNavigationController extends Controller
          return view('homepages.pending_stock_approvals', compact('pending_stock_approvals'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | PendingStockApprovals() Error ' . $unique_id, [
+         Log::channel('error_log')->error('DashboardController | PendingStockApprovals() Error ' . $unique_id, [
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
          ]);
@@ -181,7 +181,7 @@ class DashboardNavigationController extends Controller
          return view('homepages.processed_pos', compact('processed_pos'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | ProcessedPos() Error ' . $unique_id,[
+         Log::channel('error_log')->error('DashboardController | ProcessedPos() Error ' . $unique_id,[
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
         ]);
@@ -205,7 +205,7 @@ return redirect()->back()
          return view('homepages.stock_request_pending', compact('stock_request_pending'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | StockRequestPending() Error ' . $unique_id,[
+         Log::channel('error_log')->error('DashboardController | StockRequestPending() Error ' . $unique_id,[
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
         ]);
@@ -231,7 +231,7 @@ return redirect()->back()
          return view('homepages.sofficer_stock_request_pending', compact('sofficer_stock_request_pending'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | SofficerStockRequestPending() Error ' . $unique_id,[
+         Log::channel('error_log')->error('DashboardController | SofficerStockRequestPending() Error ' . $unique_id,[
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
         ]);
@@ -256,7 +256,7 @@ return redirect()->back()
          return view('homepages.rfi_pending_approval', compact('rfi_pending_approval'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | RfiPendingApproval() Error ' . $unique_id,[
+         Log::channel('error_log')->error('DashboardController | RfiPendingApproval() Error ' . $unique_id,[
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
         ]);
@@ -281,7 +281,7 @@ return redirect()->back()
          return view('homepages.rfi_approved_requests', compact('rfi_approved_requests'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | RfiApprovedRequests() Error ' . $unique_id,[
+         Log::channel('error_log')->error('DashboardController | RfiApprovedRequests() Error ' . $unique_id,[
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
         ]);
@@ -308,7 +308,7 @@ return redirect()->back()
          return view('homepages.rfi_processed_requests', compact('rfi_processed_requests'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | RfiProcessedRequests() Error ' . $unique_id,[
+         Log::channel('error_log')->error('DashboardController | RfiProcessedRequests() Error ' . $unique_id,[
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
         ]);
@@ -333,7 +333,7 @@ return redirect()->back()
          return view('homepages.rfi_denied', compact('rfi_denied'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | RfiDenied() Error ' . $unique_id,[
+         Log::channel('error_log')->error('DashboardController | RfiDenied() Error ' . $unique_id,[
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
         ]);
@@ -357,7 +357,7 @@ return redirect()->back()
          return view('homepages.po_total_value_of_approved_pos_mtd', compact('po_total_value_of_approved_pos_mtd'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | PoTotalValueOfApprovedPosMtd() Error ' . $unique_id,[
+         Log::channel('error_log')->error('DashboardController | PoTotalValueOfApprovedPosMtd() Error ' . $unique_id,[
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
         ]);
@@ -382,7 +382,7 @@ return redirect()->back()
          return view('homepages.po_total_value_of_supplied_pos_mtd', compact('po_total_value_of_supplied_pos_mtd'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | PoTotalValueOfSuppliedPosMtd() Error ' . $unique_id,[
+         Log::channel('error_log')->error('DashboardController | PoTotalValueOfSuppliedPosMtd() Error ' . $unique_id,[
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
         ]);
@@ -407,7 +407,7 @@ return redirect()->back()
          return view('homepages.po_total_value_of_pending_pos_mtd', compact('po_total_value_of_pending_pos_mtd'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | PoTotalValueOfPendingPosMtd() Error ' . $unique_id,[
+         Log::channel('error_log')->error('DashboardController | PoTotalValueOfPendingPosMtd() Error ' . $unique_id,[
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
         ]);
@@ -432,7 +432,7 @@ return redirect()->back()
          return view('homepages.po_approved_stock_requests', compact('po_approved_stock_requests'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | PoApprovedStockRequests() Error ' . $unique_id,[
+         Log::channel('error_log')->error('DashboardController | PoApprovedStockRequests() Error ' . $unique_id,[
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
         ]);
@@ -457,7 +457,7 @@ return redirect()->back()
          return view('homepages.po_approved_direct_requests', compact('po_approved_direct_requests'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | PoApprovedDirectRequests() Error ' . $unique_id,[
+         Log::channel('error_log')->error('DashboardController | PoApprovedDirectRequests() Error ' . $unique_id,[
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
         ]);
@@ -482,7 +482,7 @@ return redirect()->back()
          return view('homepages.po_approved_pos', compact('po_approved_pos'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | PoApprovedPos() Error ' . $unique_id,[
+         Log::channel('error_log')->error('DashboardController | PoApprovedPos() Error ' . $unique_id,[
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
         ]);
@@ -508,7 +508,7 @@ return redirect()->back()
          return view('homepages.po_denied_requests', compact('po_denied_requests'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | PoDeniedRequests() Error ' . $unique_id,[
+         Log::channel('error_log')->error('DashboardController | PoDeniedRequests() Error ' . $unique_id,[
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
         ]);
@@ -661,7 +661,7 @@ return redirect()->back()
          return view('homepages.out_of_stock', compact('unstocked'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
-         Log::error('DashboardController | OutOfStock() Error ' . $unique_id,[
+         Log::channel('error_log')->error('DashboardController | OutOfStock() Error ' . $unique_id,[
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
         ]);

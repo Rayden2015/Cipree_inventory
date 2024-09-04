@@ -92,7 +92,7 @@ class PurchaseController extends Controller
             return redirect()->route('purchases.index')->withSuccess('Successfully Updated');
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('PurchaseController | Store() Error ' . $unique_id,[
+            Log::channel('error_log')->error('PurchaseController | Store() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -127,7 +127,7 @@ class PurchaseController extends Controller
             return view('purchases.edit', compact('purchase', 'suppliers', 'sites', 'locations', 'parts', 'endusers', 'order_parts'));
         }catch (\Exception $e){
             $unique_id = floor(time() - 999999999);
-            Log::error('PurchaseController | Edit() Error ' . $unique_id,[
+            Log::channel('error_log')->error('PurchaseController | Edit() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -161,7 +161,7 @@ class PurchaseController extends Controller
             return redirect()->route('purchases.index')->withSuccess('Successfully Updated');
         }catch (\Exception $e){
             $unique_id = floor(time() - 999999999);
-            Log::error('PurchaseController | Destroy() Error ' . $unique_id,[
+            Log::channel('error_log')->error('PurchaseController | Destroy() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -361,7 +361,7 @@ class PurchaseController extends Controller
         }
         catch(\Exception $e){
             $unique_id = floor(time() - 999999999);
-            Log::error('PurchaseController | PurchaseOrderDraft() Error ' . $unique_id,[
+            Log::channel('error_log')->error('PurchaseController | PurchaseOrderDraft() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -403,7 +403,7 @@ class PurchaseController extends Controller
         }
             catch(\Exception $e){
                 $unique_id = floor(time() - 999999999);
-                Log::error('PurchaseController | GenerateOrder() Error ' . $unique_id,[
+                Log::channel('error_log')->error('PurchaseController | GenerateOrder() Error ' . $unique_id,[
                     'message' => $e->getMessage(),
                     'stack_trace' => $e->getTraceAsString()
                 ]);
@@ -448,7 +448,7 @@ class PurchaseController extends Controller
         }
             catch(\Exception $e){
                 $unique_id = floor(time() - 999999999);
-                Log::error('PurchaseController | PurchaseEdit() Error ' . $unique_id,[
+                Log::channel('error_log')->error('PurchaseController | PurchaseEdit() Error ' . $unique_id,[
                     'message' => $e->getMessage(),
                     'stack_trace' => $e->getTraceAsString()
                 ]);
@@ -510,7 +510,7 @@ class PurchaseController extends Controller
         } catch (\Throwable $e) {
            
                 $unique_id = floor(time() - 999999999);
-                Log::error('PurchaseController | PurchaseUpdate() Error ' . $unique_id,[
+                Log::channel('error_log')->error('PurchaseController | PurchaseUpdate() Error ' . $unique_id,[
                     'message' => $e->getMessage(),
                     'stack_trace' => $e->getTraceAsString()
                 ]);
@@ -554,7 +554,7 @@ class PurchaseController extends Controller
         } catch (\Exception $e) {
           
                 $unique_id = floor(time() - 999999999);
-                Log::error('PurchaseController | PurchaseUpdateRow() Error ' . $unique_id,[
+                Log::channel('error_log')->error('PurchaseController | PurchaseUpdateRow() Error ' . $unique_id,[
                     'message' => $e->getMessage(),
                     'stack_trace' => $e->getTraceAsString()
                 ]);
@@ -585,7 +585,7 @@ class PurchaseController extends Controller
         }
             catch(\Exception $e){
                 $unique_id = floor(time() - 999999999);
-                Log::error('PurchaseController | PurchaseDestroy() Error ' . $unique_id,[
+                Log::channel('error_log')->error('PurchaseController | PurchaseDestroy() Error ' . $unique_id,[
                     'message' => $e->getMessage(),
                     'stack_trace' => $e->getTraceAsString()
                 ]);
@@ -617,7 +617,7 @@ class PurchaseController extends Controller
         } 
             catch(\Exception $e){
                 $unique_id = floor(time() - 999999999);
-                Log::error('PurchaseController | ShowList() Error ' . $unique_id,[
+                Log::channel('error_log')->error('PurchaseController | ShowList() Error ' . $unique_id,[
                     'message' => $e->getMessage(),
                     'stack_trace' => $e->getTraceAsString()
                 ]);
@@ -654,7 +654,7 @@ class PurchaseController extends Controller
         } 
             catch(\Exception $e){
                 $unique_id = floor(time() - 999999999);
-                Log::error('PurchaseController | EditList() Error ' . $unique_id,[
+                Log::channel('error_log')->error('PurchaseController | EditList() Error ' . $unique_id,[
                     'message' => $e->getMessage(),
                     'stack_trace' => $e->getTraceAsString()
                 ]);
@@ -769,7 +769,7 @@ class PurchaseController extends Controller
         } 
             catch(\Exception $e){
                 $unique_id = floor(time() - 999999999);
-                Log::error('PurchaseController | GeneratePdf() Error ' . $unique_id,[
+                Log::channel('error_log')->error('PurchaseController | GeneratePdf() Error ' . $unique_id,[
                     'message' => $e->getMessage(),
                     'stack_trace' => $e->getTraceAsString()
                 ]);
@@ -812,7 +812,7 @@ class PurchaseController extends Controller
         } 
             catch(\Exception $e){
                 $unique_id = floor(time() - 999999999);
-                Log::error('PurchaseController | GeneratePurchaseOrderPDF() Error ' . $unique_id,[
+                Log::channel('error_log')->error('PurchaseController | GeneratePurchaseOrderPDF() Error ' . $unique_id,[
                     'message' => $e->getMessage(),
                     'stack_trace' => $e->getTraceAsString()
                 ]);
@@ -934,7 +934,7 @@ class PurchaseController extends Controller
         }
             catch(\Exception $e){
                 $unique_id = floor(time() - 999999999);
-                Log::error('PurchaseController | GenerateOrder() Error ' . $unique_id,[
+                Log::channel('error_log')->error('PurchaseController | GenerateOrder() Error ' . $unique_id,[
                     'message' => $e->getMessage(),
                     'stack_trace' => $e->getTraceAsString()
                 ]);

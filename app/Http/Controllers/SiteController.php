@@ -26,7 +26,7 @@ class SiteController extends Controller
             return view('sites.index', compact('sites'));
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-                Log::error('SiteController | Index() Error ' . $unique_id ,[
+                Log::channel('error_log')->error('SiteController | Index() Error ' . $unique_id ,[
                     'message' => $e->getMessage(),
                     'stack_trace' => $e->getTraceAsString()
                 ]);
@@ -64,7 +64,7 @@ class SiteController extends Controller
             return redirect()->route('sites.index')->withSuccess('Successfully Updated');
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-                Log::error('SiteController | Store() Error ' . $unique_id ,[
+                Log::channel('error_log')->error('SiteController | Store() Error ' . $unique_id ,[
                     'message' => $e->getMessage(),
                     'stack_trace' => $e->getTraceAsString()
                 ]);
@@ -90,7 +90,7 @@ class SiteController extends Controller
             return view('sites.edit', compact('site'));
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('SiteController | Edit() Error ' . $unique_id ,[
+            Log::channel('error_log')->error('SiteController | Edit() Error ' . $unique_id ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -128,7 +128,7 @@ class SiteController extends Controller
             return redirect()->back()->withSuccess('Successfully updated');
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-                Log::error('SiteController | Update() Error ' . $unique_id ,[
+                Log::channel('error_log')->error('SiteController | Update() Error ' . $unique_id ,[
                     'message' => $e->getMessage(),
                     'stack_trace' => $e->getTraceAsString()
                 ]);
@@ -157,7 +157,7 @@ class SiteController extends Controller
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-                Log::error('SiteController | Destroy() Error ' . $unique_id ,[
+                Log::channel('error_log')->error('SiteController | Destroy() Error ' . $unique_id ,[
                     'message' => $e->getMessage(),
                     'stack_trace' => $e->getTraceAsString()
                 ]);

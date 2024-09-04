@@ -33,7 +33,7 @@ class CompanyController extends Controller
             return view('company.index', compact('company'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('CategoryController | Index() Error ' . $unique_id, [
+            Log::channel('error_log')->error('CategoryController | Index() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -80,7 +80,7 @@ class CompanyController extends Controller
             return redirect()->route('company.index')->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('CompanyController | Store() Error ' . $unique_id, [
+            Log::channel('error_log')->error('CompanyController | Store() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -114,7 +114,7 @@ class CompanyController extends Controller
             return redirect()->route('company.index')->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('CompanyController | Update() Error ' . $unique_id,[
+            Log::channel('error_log')->error('CompanyController | Update() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -140,7 +140,7 @@ class CompanyController extends Controller
             return redirect()->route('company.index')->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('CompanyController | Destroy() Error ' . $unique_id,[
+            Log::channel('error_log')->error('CompanyController | Destroy() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);

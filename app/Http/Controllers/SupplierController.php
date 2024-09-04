@@ -31,7 +31,7 @@ class SupplierController extends Controller
             return view('suppliers.index', compact('suppliers'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -53,7 +53,7 @@ class SupplierController extends Controller
             return view('suppliers.create');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -105,7 +105,7 @@ class SupplierController extends Controller
             return redirect()->route('suppliers.index')->with('success', 'Supplier Added');
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -149,7 +149,7 @@ class SupplierController extends Controller
             return redirect()->back()->with('success','Successfully Updated');
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -175,7 +175,7 @@ class SupplierController extends Controller
             return redirect()->route('suppliers.index')->with('success', 'Successfully Deleted');
         }catch(\Exception $e){
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -202,7 +202,7 @@ class SupplierController extends Controller
             return view('suppliers.index', compact('suppliers'));
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);

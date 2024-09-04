@@ -132,7 +132,7 @@ class UserController extends Controller
         }
          catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('UserController | Store() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -164,7 +164,7 @@ class UserController extends Controller
             return view('users.show', compact('user'));
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('UserController | Show() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -198,7 +198,7 @@ class UserController extends Controller
             return view('users.edit', compact('user', 'roles', 'sites', 'userRoles'));
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('UserController | Edit() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -277,7 +277,7 @@ class UserController extends Controller
 
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('UserController | Update() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -313,7 +313,7 @@ class UserController extends Controller
             return redirect()->route('users.index')->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('UserController |Destroy() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -340,7 +340,7 @@ class UserController extends Controller
             return $first_name;
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -363,7 +363,7 @@ class UserController extends Controller
             return $logo;
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);

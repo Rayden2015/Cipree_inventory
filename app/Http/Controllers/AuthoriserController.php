@@ -45,7 +45,7 @@ class AuthoriserController extends Controller
         return view('authoriser.create');
     }
 
- 
+
     public function store(Request $request)
     {
         try {
@@ -85,9 +85,9 @@ class AuthoriserController extends Controller
             return redirect()->route('purchases.index')->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('AuthoriserController | Store() Error ' . $unique_id,[
+            Log::channel('error_log')->error('AuthoriserController | Store() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
+                'stack_trace' => $e->getTraceAsString(),
             ]);
 
             // Redirect back with the error message
@@ -113,9 +113,10 @@ class AuthoriserController extends Controller
             return view('authoriser.show', compact('purchase', 'order_parts', 'company'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('AuthoriserController | Show() Error ' . $unique_id  ,[
+
+            Log::channel('error_log')->error('AuthoriserController | show() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
+                'stack_trace' => $e->getTraceAsString(),
             ]);
             return redirect()->back()->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback  Button', 'Error');
         }
@@ -140,9 +141,9 @@ class AuthoriserController extends Controller
             return view('authoriser.edit', compact('purchase', 'suppliers', 'sites', 'locations', 'parts', 'endusers', 'order_parts'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('AuthoriserController | Edit() Error ' . $unique_id  ,[
+            Log::channel('error_log')->error('AuthoriserController | Edit() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
+                'stack_trace' => $e->getTraceAsString(),
             ]);
             return redirect()->back()
                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback  Button');
@@ -176,9 +177,11 @@ class AuthoriserController extends Controller
             return redirect()->route('home')->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('AuthoriserController | Edit() Error ' . $unique_id  ,[
+
+
+            Log::channel('error_log')->error('AuthoriserController | Update() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
+                'stack_trace' => $e->getTraceAsString(),
             ]);
             // Redirect back with the error message
             return redirect()->back()
@@ -197,9 +200,9 @@ class AuthoriserController extends Controller
             return redirect()->route('purchases.index')->withSuceess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('AuthoriserController | Destroy() Error ' . $unique_id  ,[
+            Log::channel('error_log')->error('AuthoriserController | Destroy() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
+                'stack_trace' => $e->getTraceAsString(),
             ]);
             // Redirect back with the error message
             return redirect()->back()
@@ -220,9 +223,9 @@ class AuthoriserController extends Controller
             return response()->json($movies);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('AuthoriserController | SelectPart() Error ' . $unique_id  ,[
+            Log::channel('error_log')->error('AuthoriserController | SelectPart() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
+                'stack_trace' => $e->getTraceAsString(),
             ]);
             // Redirect back with the error message
             return redirect()->back()
@@ -250,9 +253,10 @@ class AuthoriserController extends Controller
             return response()->json($movies);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('AuthoriserController | SelectPart() Error ' . $unique_id  ,[
+           
+            Log::channel('error_log')->error('AuthoriserController | SelectSearch() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
+                'stack_trace' => $e->getTraceAsString(),
             ]);
             // Redirect back with the error message
             return redirect()->back()
@@ -275,9 +279,9 @@ class AuthoriserController extends Controller
             return response()->json($movies);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('AuthoriserController | SelectEnduser() Error ' . $unique_id  ,[
+            Log::channel('error_log')->error('AuthoriserController | SelectEnduser() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
+                'stack_trace' => $e->getTraceAsString(),
             ]);
             // Redirect back with the error message
             return redirect()->back()
@@ -301,9 +305,9 @@ class AuthoriserController extends Controller
             return response()->json($movies);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('AuthoriserController | SelectRequester() Error ' . $unique_id  ,[
+            Log::channel('error_log')->error('AuthoriserController | SelectRequester() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
+                'stack_trace' => $e->getTraceAsString(),
             ]);
             // Redirect back with the error message
             return redirect()->back()
@@ -324,9 +328,9 @@ class AuthoriserController extends Controller
             // return ('hellow word');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('AuthoriserController | Requested() Error ' . $unique_id  ,[
+            Log::channel('error_log')->error('AuthoriserController | Requested() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
+                'stack_trace' => $e->getTraceAsString(),
             ]);
             // Redirect back with the error message
             return redirect()->back()
@@ -343,9 +347,10 @@ class AuthoriserController extends Controller
             return view('authoriser.initiated', compact('initiated'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('AuthoriserController | Initiated() Error ' . $unique_id  ,[
+           
+            Log::channel('error_log')->error('AuthoriserController | Initiated() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
+                'stack_trace' => $e->getTraceAsString(),
             ]);
             // Redirect back with the error message
             return redirect()->back()
@@ -361,9 +366,10 @@ class AuthoriserController extends Controller
             return view('authoriser.approved', compact('approved'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('AuthoriserController | Approved() Error ' . $unique_id  ,[
+           
+            Log::channel('error_log')->error('AuthoriserController | Approved() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
+                'stack_trace' => $e->getTraceAsString(),
             ]);
             // Redirect back with the error message
             return redirect()->back()
@@ -462,9 +468,10 @@ class AuthoriserController extends Controller
             $unique_id = floor(time() - 999999999);
 
             // Log the error with the unique ID
-            Log::error('OrderController | generate_order() Error ' . $unique_id   ,[
+            
+            Log::channel('error_log')->error('AuthoriserController | generateOrder() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
+                'stack_trace' => $e->getTraceAsString(),
             ]);
 
             // Redirect back with the error message
@@ -517,9 +524,10 @@ class AuthoriserController extends Controller
             return redirect()->back()->withSucess('Successfully Updated:');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('AuthoriserController | PurchaseUpdate() Error ' . $unique_id  ,[
+          
+            Log::channel('error_log')->error('AuthoriserController | PurchaseUpdate() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
+                'stack_trace' => $e->getTraceAsString(),
             ]);
             return redirect()->back()
                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
@@ -551,7 +559,7 @@ class AuthoriserController extends Controller
 
             // Log the error with the unique ID and user information
             $user = auth()->user();
-            Log::error('AuthoriserController | PurchaseDestroy() Error ' . $unique_id . ' by user ID: ' . $user->id . ', Email: ' . $user->email . '. Error message: ' . $th->getMessage());
+            Log::channel('error_log')->error('AuthoriserController | PurchaseDestroy() Error ' . $unique_id . ' by user ID: ' . $user->id . ', Email: ' . $user->email . '. Error message: ' . $th->getMessage());
 
             // Redirect back with the error message
             return redirect()->back()
@@ -607,7 +615,7 @@ class AuthoriserController extends Controller
             }
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('AuthoriserController | PurchaselistUpdate() Error ' . $unique_id  ,[
+            Log::channel('error_log')->error('AuthoriserController | PurchaselistUpdate() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -661,7 +669,7 @@ class AuthoriserController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('AuthoriserController | Actoin() Error ' . $unique_id  ,[
+            Log::channel('error_log')->error('AuthoriserController | Actoin() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -686,7 +694,7 @@ class AuthoriserController extends Controller
             return redirect()->back()->withSucess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('AuthoriserController | ApprovedStatus() Error ' . $unique_id  ,[
+            Log::channel('error_log')->error('AuthoriserController | ApprovedStatus() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -712,9 +720,9 @@ class AuthoriserController extends Controller
             return redirect()->back()->withSucess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('AuthorserController | DeniedStatus() Error ' . $unique_id  ,[
+            Log::channel('error_log')->error('AuthoriserController | DeniedStatus() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
+                'stack_trace' => $e->getTraceAsString(),
             ]);
             return redirect()->back()
                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');

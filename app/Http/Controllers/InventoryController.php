@@ -253,7 +253,7 @@ class InventoryController extends Controller
             DB::rollback();
 
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | Store() Error ' . $unique_id, [
+            Log::channel('error_log')->error('InventoryController | Store() Error ' . $unique_id, [
                 'exception' => $exception->getMessage(),
                 'trace' => $exception->getTraceAsString(),
             ]);
@@ -303,7 +303,7 @@ class InventoryController extends Controller
             return view('inventories.edit', compact('suppliers', 'deliveries', 'categories', 'locations', 'inventory', 'endusers', 'inventory_items', 'selectedRole', 'items'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | Edit() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | Edit() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -362,7 +362,7 @@ class InventoryController extends Controller
         $unique_id = floor(time() - 999999999);
         
         // Log the error with the exception message and stack trace
-        Log::error('InventoryController | Update() Error ' . $unique_id, [
+        Log::channel('error_log')->error('InventoryController | Update() Error ' . $unique_id, [
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString(),
             'user' => Auth::user(),
@@ -424,7 +424,7 @@ class InventoryController extends Controller
             // return back();
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | UpdateInventoryItem() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | UpdateInventoryItem() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -443,7 +443,7 @@ class InventoryController extends Controller
             dd($bookData);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | bookUpdate() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | bookUpdate() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -511,7 +511,7 @@ class InventoryController extends Controller
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | Destroy() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | Destroy() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -539,7 +539,7 @@ class InventoryController extends Controller
             return response()->json($movies);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | SelectCategory() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | SelectCategory() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -563,7 +563,7 @@ class InventoryController extends Controller
             return response()->json($movies);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | SelectLocation() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | SelectLocation() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -592,7 +592,7 @@ class InventoryController extends Controller
             return response()->json($movies);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | SelectDeliveredBy() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | SelectDeliveredBy() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -619,7 +619,7 @@ class InventoryController extends Controller
             // return response()->json($products);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | FetchLocations() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | FetchLocations() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -643,7 +643,7 @@ class InventoryController extends Controller
             return $output;
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | getItem() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | getItem() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -733,7 +733,7 @@ class InventoryController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | InventoryAction() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | InventoryAction() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -763,7 +763,7 @@ class InventoryController extends Controller
             return view('inventories.index', compact('inventories'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | InventorySearch() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | InventorySearch() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -794,7 +794,7 @@ class InventoryController extends Controller
             return view('inventories.index', compact('inventories'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | InventoryHomeSearch() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | InventoryHomeSearch() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -814,7 +814,7 @@ class InventoryController extends Controller
             return response()->json($product);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | FetchSingleProduct() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | FetchSingleProduct() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -835,7 +835,7 @@ class InventoryController extends Controller
             return view('inventories.history', compact('inventory_item_history'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | InventoryItemHistory() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | InventoryItemHistory() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -865,7 +865,7 @@ class InventoryController extends Controller
             // dd($inventory,$inventories);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | InventoryHistoryShow() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | InventoryHistoryShow() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -897,7 +897,7 @@ class InventoryController extends Controller
             return view('inventories.history_edit', compact('suppliers', 'deliveries', 'categories', 'locations', 'inventory', 'endusers', 'inventory_items', 'selectedRole', 'items'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | InventoryHistoryEdit() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | InventoryHistoryEdit() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -941,7 +941,7 @@ class InventoryController extends Controller
             return redirect()->back()->withSuccess('Successfully updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | InventoryHistoryUpdate() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | InventoryHistoryUpdate() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -992,7 +992,7 @@ class InventoryController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | InventoryHistoryAction() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | InventoryHistoryAction() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -1039,7 +1039,7 @@ class InventoryController extends Controller
             return back();
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | UpdateInventoryHistory() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | UpdateInventoryHistory() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -1071,7 +1071,7 @@ class InventoryController extends Controller
             return view('inventories.search_history', compact('inventory_item_history'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | InventoryHistorySearch() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | InventoryHistorySearch() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -1109,7 +1109,7 @@ class InventoryController extends Controller
             return view('inventories.search_history', compact('inventory_item_history'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | InventoryHistoryDateSearch() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | InventoryHistoryDateSearch() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -1135,7 +1135,7 @@ class InventoryController extends Controller
             return back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | InventoryHistoryDestroy() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | InventoryHistoryDestroy() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -1162,7 +1162,7 @@ class InventoryController extends Controller
             return $inventory->download($filename);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | GenerateInventoryPDF() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | GenerateInventoryPDF() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -1193,7 +1193,7 @@ class InventoryController extends Controller
             return view('inventories.unstocked', compact('unstocked'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | OutOfStock() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | OutOfStock() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -1228,7 +1228,7 @@ class InventoryController extends Controller
             return view('inventories.unstocked', compact('unstocked'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('InventoryController | OutOfStockSearch() Error ' . $unique_id,[
+            Log::channel('error_log')->error('InventoryController | OutOfStockSearch() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);

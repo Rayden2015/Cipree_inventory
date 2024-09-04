@@ -31,7 +31,7 @@ class PartsController extends Controller
             return view('parts.index', compact('parts'));
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('PartsController | Index() Error ' . $unique_id,[
+            Log::channel('error_log')->error('PartsController | Index() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -57,7 +57,7 @@ class PartsController extends Controller
             return view('parts.create');
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('PartsController | Create() Error ' . $unique_id,[
+            Log::channel('error_log')->error('PartsController | Create() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -97,7 +97,7 @@ class PartsController extends Controller
             return redirect()->route('parts.index')->withSuccess('Successfully Updated');
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('PartsController | Store() Error ' . $unique_id,[
+            Log::channel('error_log')->error('PartsController | Store() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -129,7 +129,7 @@ class PartsController extends Controller
             return redirect()->route('parts.index')->withSuccess('Updated Successfully');
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('PartsController | Destroy() Error ' . $unique_id,[
+            Log::channel('error_log')->error('PartsController | Destroy() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -163,7 +163,7 @@ class PartsController extends Controller
             return response()->json($movies);
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('PartsController | SelectSearch() Error ' . $unique_id,[
+            Log::channel('error_log')->error('PartsController | SelectSearch() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -199,7 +199,7 @@ class PartsController extends Controller
             return response()->json($movies);
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('PartsController | SelectSite() Error ' . $unique_id,[
+            Log::channel('error_log')->error('PartsController | SelectSite() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);

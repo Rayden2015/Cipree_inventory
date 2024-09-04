@@ -37,7 +37,7 @@ class EnduserController extends Controller
             return view('endusers.index', compact('endusers','endusercategories'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('EndUserController | Index() Error ' . $unique_id ,[
+            Log::channel('error_log')->error('EndUserController | Index() Error ' . $unique_id ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -124,7 +124,7 @@ class EnduserController extends Controller
             return view('endusers.edit', compact('enduser', 'sites', 'sections', 'departments','endusercategories'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('EndUserController | Edit() Error ' . $unique_id ,[
+            Log::channel('error_log')->error('EndUserController | Edit() Error ' . $unique_id ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -168,7 +168,7 @@ class EnduserController extends Controller
             return redirect()->route('endusers.index')->withSuccess('Successfully updated');
         }catch(\Exception $e){
             $unique_id = floor(time() - 999999999);
-            Log::error('EndUserController | Store() Error ' . $unique_id ,[
+            Log::channel('error_log')->error('EndUserController | Store() Error ' . $unique_id ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -231,7 +231,7 @@ class EnduserController extends Controller
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('EndUserController | Update() Error ' . $unique_id ,[
+            Log::channel('error_log')->error('EndUserController | Update() Error ' . $unique_id ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -260,7 +260,7 @@ class EnduserController extends Controller
             return redirect()->route('endusers.index')->with('success','Deleted Successfuly');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('EndUserController | Destroy() Error ' . $unique_id ,[
+            Log::channel('error_log')->error('EndUserController | Destroy() Error ' . $unique_id ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);

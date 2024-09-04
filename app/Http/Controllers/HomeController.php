@@ -203,7 +203,7 @@ class HomeController extends Controller
         } 
         // catch (\Exception $e) {
         //     $unique_id = floor(time() - 999999999);
-        //     Log::error('HomeController | Index() Error ' . $unique_id . ': ' . $e->getMessage());
+        //     Log::channel('error_log')->error('HomeController | Index() Error ' . $unique_id . ': ' . $e->getMessage());
         //     Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
         // }
         

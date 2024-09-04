@@ -62,7 +62,7 @@ class StoreRequestController extends Controller
             return view('purchases.request_search');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | RequestSearch() Error ' . $unique_id, [
+            Log::channel('error_log')->error('StoreRequestController | RequestSearch() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -108,7 +108,7 @@ class StoreRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | RequesterSearch() Error ' . $unique_id, [
+            Log::channel('error_log')->error('StoreRequestController | RequesterSearch() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -141,7 +141,7 @@ class StoreRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | Cart() Error ' . $unique_id, [
+            Log::channel('error_log')->error('StoreRequestController | Cart() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -190,7 +190,7 @@ class StoreRequestController extends Controller
             return redirect()->back()->with('success', 'Item added to cart successfully!');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | AddToCart() Error ' . $unique_id, [
+            Log::channel('error_log')->error('StoreRequestController | AddToCart() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -223,7 +223,7 @@ class StoreRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | Update() Error ' . $unique_id, [
+            Log::channel('error_log')->error('StoreRequestController | Update() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -252,7 +252,7 @@ class StoreRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | Remove() Error ' . $unique_id, [
+            Log::channel('error_log')->error('StoreRequestController | Remove() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -336,7 +336,7 @@ class StoreRequestController extends Controller
             return redirect()->route('stores.request_search')->withSuccess('Stock Requisition(SR) #' . $order->request_number . ' forwarded for Authorisation');
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | Store() Error ' . $unique_id, [
+            Log::channel('error_log')->error('StoreRequestController | Store() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -385,7 +385,7 @@ class StoreRequestController extends Controller
             return $sorder->download($filename);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | GenerateSorderPDF() Error ' . $unique_id, [
+            Log::channel('error_log')->error('StoreRequestController | GenerateSorderPDF() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -410,7 +410,7 @@ class StoreRequestController extends Controller
             return view('stores.edit', compact('sorder', 'suppliers', 'endusers', 'sorder_parts'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | StoreListEdit() Error ' . $unique_id, [
+            Log::channel('error_log')->error('StoreRequestController | StoreListEdit() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -445,7 +445,7 @@ class StoreRequestController extends Controller
             return redirect()->back();
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | StoreListUpdate() Error ' . $unique_id, [
+            Log::channel('error_log')->error('StoreRequestController | StoreListUpdate() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -511,7 +511,7 @@ class StoreRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | SorderUpdate() Error ' . $unique_id, [
+            Log::channel('error_log')->error('StoreRequestController | SorderUpdate() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -575,7 +575,7 @@ class StoreRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | StoresAction() Error ' . $unique_id, [
+            Log::channel('error_log')->error('StoreRequestController | StoresAction() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -601,7 +601,7 @@ class StoreRequestController extends Controller
             return redirect()->back();
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | ApprovedStatus() Error ' . $unique_id, [
+            Log::channel('error_log')->error('StoreRequestController | ApprovedStatus() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -626,7 +626,7 @@ class StoreRequestController extends Controller
             return redirect()->back();
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | DeniedStatus() Error ' . $unique_id, [
+            Log::channel('error_log')->error('StoreRequestController | DeniedStatus() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -650,7 +650,7 @@ class StoreRequestController extends Controller
             return view('stores.officer_lists', compact('officer_lists'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | StoreOfficerLists() Error ' . $unique_id, [
+            Log::channel('error_log')->error('StoreRequestController | StoreOfficerLists() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -673,7 +673,7 @@ class StoreRequestController extends Controller
             return view('stores.requester_lists', compact('officer_lists'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StoreRequestController | StoreRequesterLists() Error ' . $unique_id, [
+            Log::channel('error_log')->error('StoreRequestController | StoreRequesterLists() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -700,7 +700,7 @@ class StoreRequestController extends Controller
             return view('stores.officer_edit', compact('sorder_parts', 'sorder', 'suppliers', 'endusers'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id, [
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -820,7 +820,7 @@ class StoreRequestController extends Controller
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id, [
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -852,7 +852,7 @@ class StoreRequestController extends Controller
             $unique_id = floor(time() - 999999999);
     
             // Log the error with details
-            Log::error('SorderController | update_manual_remarks() Error ' . $unique_id, [
+            Log::channel('error_log')->error('SorderController | update_manual_remarks() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -887,7 +887,7 @@ class StoreRequestController extends Controller
             return view('stores.parts_witin_the_week', compact('total_cost_of_parts_within_the_month'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -930,7 +930,7 @@ class StoreRequestController extends Controller
             return view('stores.parts_witin_the_week', compact('total_cost_of_parts_within_the_month', 'start_date', 'end_date'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -1001,7 +1001,7 @@ class StoreRequestController extends Controller
             return view('stores.supply_history_search_item', compact('total_cost_of_parts_within_the_month'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -1028,7 +1028,7 @@ class StoreRequestController extends Controller
             return redirect()->back()->withSuccess('Item deleted successfully');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -1061,7 +1061,7 @@ class StoreRequestController extends Controller
             return redirect()->back();
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -1088,7 +1088,7 @@ class StoreRequestController extends Controller
             return view('stores.requester_store_lists', compact('requester_store_lists'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -1118,7 +1118,7 @@ class StoreRequestController extends Controller
             return view('stores.requester_edit', compact('sorder_parts', 'sorder', 'suppliers', 'endusers'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -1146,7 +1146,7 @@ class StoreRequestController extends Controller
             return redirect()->back();
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -1210,7 +1210,7 @@ class StoreRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -1237,7 +1237,7 @@ class StoreRequestController extends Controller
             return redirect()->back();
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -1284,7 +1284,7 @@ class StoreRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -1312,7 +1312,7 @@ class StoreRequestController extends Controller
             // dd($received_history_page);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -1344,7 +1344,7 @@ class StoreRequestController extends Controller
             return view('stores.authoriser_store_list_view', compact('sorder', 'sorder_parts', 'company'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -1376,7 +1376,7 @@ class StoreRequestController extends Controller
             return Response::json(['success' => true, 'info' => $fill]);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -1406,7 +1406,7 @@ class StoreRequestController extends Controller
             return Response::json(['success' => true, 'info' => $fill]);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);

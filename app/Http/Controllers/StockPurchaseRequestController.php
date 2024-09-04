@@ -44,7 +44,7 @@ class StockPurchaseRequestController extends Controller
             return view('stockpurchases.spr_lists', compact('spr_lists'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | SprLists() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | SprLists() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -95,7 +95,7 @@ class StockPurchaseRequestController extends Controller
             return view('stockpurchases.request_search', compact('inventory'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | Index() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | Index() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -131,7 +131,7 @@ class StockPurchaseRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | StockPurchaseCart() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | StockPurchaseCart() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -181,7 +181,7 @@ class StockPurchaseRequestController extends Controller
             return redirect()->back()->with('success', 'Item added to cart successfully!');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | AddToStock() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | AddToStock() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -215,7 +215,7 @@ class StockPurchaseRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | Update() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | Update() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -245,7 +245,7 @@ class StockPurchaseRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | Remove() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | Remove() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -338,7 +338,7 @@ class StockPurchaseRequestController extends Controller
           
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | Store() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | Store() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -367,7 +367,7 @@ class StockPurchaseRequestController extends Controller
             return view('stockpurchases.so_spr_edit', compact('sorder_parts', 'sorder', 'suppliers', 'endusers'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | StoreOfficerSprEdit() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | StoreOfficerSprEdit() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -488,7 +488,7 @@ class StockPurchaseRequestController extends Controller
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | StoreOfficerSprLists() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | StoreOfficerSprLists() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -525,7 +525,7 @@ public function authoriser_remarks_update(Request $request, $id)
         $unique_id = floor(time() - 999999999);
         
         // Log the error with details
-        Log::error('AuthoriserController | authoriser_remarks_update() Error ' . $unique_id ,[
+        Log::channel('error_log')->error('AuthoriserController | authoriser_remarks_update() Error ' . $unique_id ,[
             'message' => $e->getMessage(),
             'stack_trace' => $e->getTraceAsString()
         ]);
@@ -591,7 +591,7 @@ public function authoriser_remarks_update(Request $request, $id)
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | SoSprUpdate() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | SoSprUpdate() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -617,7 +617,7 @@ public function authoriser_remarks_update(Request $request, $id)
             return view('stockpurchases.auth_spr_lists', compact('spr_lists'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | AuthSprLists() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | AuthSprLists() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -643,7 +643,7 @@ public function authoriser_remarks_update(Request $request, $id)
             return view('stockpurchases.auth_spr_list_edit', compact('sorder', 'suppliers', 'endusers', 'sorder_parts'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | AuthSprListEdit() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | AuthSprListEdit() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -708,7 +708,7 @@ public function authoriser_remarks_update(Request $request, $id)
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | AuthSprAction() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | AuthSprAction() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -744,7 +744,7 @@ public function authoriser_remarks_update(Request $request, $id)
             return redirect()->back();
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | AuthSprApprovedStatus() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | AuthSprApprovedStatus() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -771,7 +771,7 @@ public function authoriser_remarks_update(Request $request, $id)
             return redirect()->back();
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | AuthSprDeniedStatus() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | AuthSprDeniedStatus() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -797,7 +797,7 @@ public function authoriser_remarks_update(Request $request, $id)
             return view('stockpurchases.po_spr_lists', compact('spr_lists'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | PoSprLists() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | PoSprLists() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -823,7 +823,7 @@ public function authoriser_remarks_update(Request $request, $id)
             return view('stockpurchases.po_spr_list_edit', compact('sorder', 'suppliers', 'endusers', 'sorder_parts'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | PoSprListEdit() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | PoSprListEdit() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -868,7 +868,7 @@ public function authoriser_remarks_update(Request $request, $id)
             // dd($id);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | GenerateSprPorder() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | GenerateSprPorder() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -901,7 +901,7 @@ public function authoriser_remarks_update(Request $request, $id)
             // dd($id,$purchase_order_no,$order_parts);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | SprPurchaseOrderDraft() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | SprPurchaseOrderDraft() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -1032,7 +1032,7 @@ public function authoriser_remarks_update(Request $request, $id)
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | SprPurchaseUpdate() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | SprPurchaseUpdate() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -1081,7 +1081,7 @@ public function authoriser_remarks_update(Request $request, $id)
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | SprSaveDraft() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | SprSaveDraft() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -1115,7 +1115,7 @@ public function authoriser_remarks_update(Request $request, $id)
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | SprPurchaseUpdateRow() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | SprPurchaseUpdateRow() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -1187,7 +1187,7 @@ public function authoriser_remarks_update(Request $request, $id)
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | SprPorderAction() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | SprPorderAction() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -1245,7 +1245,7 @@ public function authoriser_remarks_update(Request $request, $id)
             return view('stockpurchses.spr_edit', compact('purchase', 'suppliers', 'sites', 'locations', 'parts', 'endusers', 'order_parts', 'grandtotal'));
         }catch (\Exception $e){
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | SprPosEdit() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | SprPosEdit() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
@@ -1275,7 +1275,7 @@ public function authoriser_remarks_update(Request $request, $id)
             return redirect()->back()->withSuccess('Successfully Updated');
         }catch(\Exception $e){
             $unique_id = floor(time() - 999999999);
-            Log::error('StockPurchaseRequestController | SprPosDelete() Error ' . $unique_id
+            Log::channel('error_log')->error('StockPurchaseRequestController | SprPosDelete() Error ' . $unique_id
             ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
