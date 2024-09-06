@@ -14,8 +14,8 @@
                 @endhasrole
 
                 @hasrole('requester')
-                @include('dashboard.requester')
-            @endhasrole
+                    @include('dashboard.requester')
+                @endhasrole
 
                 @hasrole('store_officer')
                     @include('dashboard.store_officer')
@@ -40,7 +40,9 @@
                     @include('dashboard.finance_officer')
                 @endhasrole
 
-
+                @hasrole('Final Officer')
+                @include('dashboard.store_officer')
+            @endhasrole
             </div>
         </div>
     </div>
