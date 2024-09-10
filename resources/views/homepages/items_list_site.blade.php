@@ -81,8 +81,8 @@
                                 <td>{{ $rq->item->stock_quantity ?? '' }}</td>
                                 <td>{{ $rq->amount ?? '' }}</td>
                                 <td>
-                                    @if ($rq->item && $rq->item->created_at)
-                                        {{ \Carbon\Carbon::parse($rq->item->created_at)->diffInDays(now()) }} days
+                                    @if ($rq->created_at)
+                                        {{ \Carbon\Carbon::parse($rq->created_at)->diffInDays(now()) }} days
                                     @else
                                         N/A
                                     @endif

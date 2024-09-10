@@ -88,6 +88,7 @@
                             <th>Qty Received</th>
                             <th>Amount</th>
                             <th>Location</th>
+                            <th>GRN Number</th>
                           
 
                           
@@ -105,7 +106,7 @@
                                 <td>{{ $in->inv_quantity ?? '' }}</td>
                                 <td>{{ $in->inv_amount ?? '' }}</td>
                                 <td>{{ $in->location->name ?? '' }}</td>                             
-                              
+                                <td>{{ $in->grn_number ?? '' }}</td>  
 
                             @empty
                             <tr>

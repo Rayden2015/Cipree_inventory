@@ -736,7 +736,7 @@ class InventoryController extends Controller
         try {
             $site_id = Auth::user()->site->id;
             if ($request->search) {
-                $inventories = InventoryItemDetail::join('items', 'items.id', '=', 'inventory_item_details.item_id')
+                $inventories = InventoryItemDetail::leftjoin('items', 'items.id', '=', 'inventory_item_details.item_id')
                     // ->where('inventory_items.quantity', '>', '0')
                     ->where('items.item_description', 'like', "%" . $request->search . "%")->where('inventory_item_details.quantity', '>', '0')
                     ->orWhere('items.item_part_number', 'like', "%" . $request->search . "%")->where('inventory_item_details.quantity', '>', '0')
@@ -815,7 +815,7 @@ class InventoryController extends Controller
     {
         try {
             $site_id = Auth::user()->site->id;
-            $inventory_item_history = Inventory::join('inventory_item_details', 'inventories.id', '=', 'inventory_item_details.inventory_id')->where('inventory_item_details.site_id', '=', $site_id)->where('inventories.site_id', '=', $site_id)->latest('inventories.id')->paginate(20);
+            $inventory_item_history = Inventory::leftjoin('inventory_item_details', 'inventories.id', '=', 'inventory_item_details.inventory_id')->where('inventory_item_details.site_id', '=', $site_id)->where('inventories.site_id', '=', $site_id)->latest('inventories.id')->paginate(20);
             Log::info('InventoryController | inventory_item_history() |  search succesfull');
             return view('inventories.history', compact('inventory_item_history'));
         } catch (\Exception $e) {
@@ -1042,17 +1042,18 @@ class InventoryController extends Controller
         try {
             $site_id = Auth::user()->site->id;
             if ($request->search) {
-                $inventory_item_history = Inventory::join('inventory_item_details', 'inventories.id', '=', 'inventory_item_details.inventory_id')
-                    ->join('items', 'inventory_item_details.item_id', '=', 'items.id')
-                    ->join('endusers', 'inventories.enduser_id', '=', 'endusers.id')
+                $inventory_item_history = Inventory::leftjoin('inventory_item_details', 'inventories.id', '=', 'inventory_item_details.inventory_id')
+                    ->leftjoin('items', 'inventory_item_details.item_id', '=', 'items.id')
+                    ->leftjoin('endusers', 'inventories.enduser_id', '=', 'endusers.id')
                     ->where('endusers.asset_staff_id', 'like', "%" . $request->search . "%")
                     ->orWhere('items.item_description', 'like', "%" . $request->search . "%")
                     ->orWhere('items.item_part_number', 'like', "%" . $request->search . "%")
                     ->orWhere('items.item_stock_code', 'like', "%" . $request->search . "%")
                     ->orWhere('inventories.po_number', 'like', "%" . $request->search . "%")
                     ->where('inventory_item_details.site_id', '=', $site_id)
+                    ->orderBy('inventories.created_at', 'desc')
                     ->get(['inventories.*', 'items.*', 'inventory_item_details.*', 'inventory_item_details.amount as inv_amount', 'inventory_item_details.quantity as inv_quantity', 'inventory_item_details.created_at as inv_created_at']);
-            } else $inventory_item_history = Inventory::join('inventory_item_details', 'inventories.id', '=', 'inventory_item_details.inventory_id')->where('inventory_item_details.site_id', '=', $site_id)->latest('inventories.id')->paginate(20);
+            } else $inventory_item_history = Inventory::leftjoin('inventory_item_details', 'inventories.id', '=', 'inventory_item_details.inventory_id')->where('inventory_item_details.site_id', '=', $site_id)->latest('inventories.id')->paginate(20);
             return view('inventories.search_history', compact('inventory_item_history'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
