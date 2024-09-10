@@ -82,6 +82,7 @@
                             <th>ID</th>
                             <th>Supply Date</th>
                             <th>SR Number</th>
+                        <th>GRN Number</th>
                             <th>Description</th>
                             <th>Part Number</th>
                             <th>Stock Code</th>
@@ -97,12 +98,14 @@
                                 <td>{{ $in->id }}</td>
                                 <td>{{ date('d-m-Y (H:i)', strtotime($in->delivered_on)) }}</td>
                                 <td>{{ $in->delivery_reference_number ?? '' }}</td>
+                                <td>{{ $in->grn_number ?? 'Not Found or Deleted' }}</td>
                                 <td>{{ $in->item_details->item_description ?? ' ' }}</td>
                                 <td>{{ $in->item_details->item_part_number ?? ' ' }}</td>
                                 <td>{{ $in->item_details->item_stock_code ?? ' ' }}</td>
                                 <td>{{ $in->qty_supplied ?? '' }}</td>
                                 <td>{{ $in->sub_total ?? '' }}</td>
-                                <td>{{ $in->enduser->asset_staff_id ?? 'Not Set' }}</td>
+                                <td>{{ $in->asset_staff_id ?? 'Not Set' }}</td>
+
                                 <td>{{ $in->location->name ?? 'Not Set' }}</td>
                             </tr>
                         @empty

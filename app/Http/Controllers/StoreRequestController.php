@@ -724,26 +724,23 @@ class StoreRequestController extends Controller
         $request->validate([
             'supplier_id' => 'nullable',
             'type_of_purchase' => 'nullable',
-            'quantity' => 'gte:0',
+            'quantity' => 'gte:0', // Ensure quantity is not negative during validation
         ]);
-
+    
         $deliverynum = Sorder::where('id', '=', $id)->value('request_number');
-        //   
+        
         try {
             DB::beginTransaction();
-
+    
             $delivered_on_date = Carbon::now()->toDateTimeString();
-
-            // if ($request->status == 'Supplied' || $request->status == 'Partially Supplied') {
-
-            // dd($data, $sorder_id);
+    
             $genDeliveryNum = $deliverynum;
-            $purchase->tax = $request->tax; //10
-            $purchase->tax2 = $request->tax2; //11
-            $purchase->tax3 = $request->tax3; //12
-            $purchase->supplier_id = $request->supplier_id; //1
-            $purchase->type_of_purchase = $request->type_of_purchase; //3
-            $purchase->enduser_id = $request->enduser_id; //4
+            $purchase->tax = $request->tax;
+            $purchase->tax2 = $request->tax2;
+            $purchase->tax3 = $request->tax3;
+            $purchase->supplier_id = $request->supplier_id;
+            $purchase->type_of_purchase = $request->type_of_purchase;
+            $purchase->enduser_id = $request->enduser_id;
             $purchase->status = 'Supplied';
             $purchase->delivery_reference_number = $genDeliveryNum;
             $purchase->invoice_number = $request->invoice_number;
@@ -752,71 +749,88 @@ class StoreRequestController extends Controller
             $purchase->delivered_on = $delivered_on_date;
             $purchase->edited_at = '1';
             $purchase->supplied_to = $request->supplied_to;
-
+    
             $purchase->save();
+            
             Log::info('StoreReqquestController | store_officer_update() | Sorder Details', [
                 'Details' => $request->all(),
                 'genDeliveryNum' => $deliverynum,
                 'status' => $purchase->status,
-                'delivered_by' => $purchase->delivered_by = $authid,
-                'delivered_on' =>  $purchase->delivered_on = $delivered_on_date,
-                'purchase_edited_at' =>   $purchase->edited_at = '1',
+                'delivered_by' => $purchase->delivered_by,
+                'delivered_on' => $purchase->delivered_on,
+                'purchase_edited_at' => $purchase->edited_at,
             ]);
-
+    
             $sorder_id = SorderPart::where('sorder_id', $id)->pluck('inventory_id')->toArray();
             $quantity = SorderPart::where('sorder_id', $id)->pluck('qty_supplied')->toArray();
-
+    
             $data['items'] = DB::table('inventory_items')
                 ->select('inventory_items.*')
                 ->join('sorder_parts', 'inventory_items.id', '=', 'sorder_parts.inventory_id')
                 ->where('sorder_parts.sorder_id', '=', $id)
                 ->selectRaw('inventory_items.id, inventory_items.quantity - sorder_parts.qty_supplied AS new_quantity')
                 ->get();
-            Log::info("Data Items Before Edit", [
-                'DataItems' => $data['items'],
-            ]);
-
+    
+            // Check for negative quantities
             foreach ($data['items'] as $product_item) {
-                $r1 =  InventoryItem::updateOrCreate(
-                    ['id' => $product_item->id], // Use $product_item->id instead of $product_item['items']['id']
-                    ['quantity' => $product_item->new_quantity] // Use $product_item->new_quantity instead of $product_item['quantity']['new_quantity']
+                if ($product_item->new_quantity < 0) {
+                    Log::error("Negative value detected", [
+                        'inventory_item_id' => $product_item->id,
+                        'new_quantity' => $product_item->new_quantity
+                    ]);
+    
+                    // Rollback the transaction and throw an error
+                    DB::rollback();
+                    return redirect()->back()->withError('Negative value detected for inventory item ID: ' . $product_item->id . '. No changes were made.');
+                }
+    
+                $r1 = InventoryItem::updateOrCreate(
+                    ['id' => $product_item->id],
+                    ['quantity' => $product_item->new_quantity]
                 );
+    
                 if ($r1->wasRecentlyCreated) {
-                    Log::info("Itemsa which was newly created", [
+                    Log::info("New inventory item created", [
                         'Details' => $r1
                     ]);
                     $r1->delete();
                 }
             }
+    
             $data2['items'] = DB::table('inventory_items')
                 ->select('inventory_items.*')
                 ->join('sorder_parts', 'inventory_items.id', '=', 'sorder_parts.inventory_id')
                 ->where('sorder_parts.sorder_id', '=', $id)
                 ->selectRaw('inventory_items.id, inventory_items.quantity * inventory_items.unit_cost_exc_vat_gh AS new_amount')
                 ->get();
+    
             foreach ($data2['items'] as $product_itemb) {
-                $r2 =    InventoryItem::updateOrCreate(
-                    ['id' => $product_itemb->id], // Use $product_item->id instead of $product_item['items']['id']
-                    ['amount' => $product_itemb->new_amount] // Use $product_item->new_quantity instead of $product_item['quantity']['new_quantity']
+                $r2 = InventoryItem::updateOrCreate(
+                    ['id' => $product_itemb->id],
+                    ['amount' => $product_itemb->new_amount]
                 );
+    
                 if ($r2->wasRecentlyCreated) {
-                    Log::info("Itemsa which was newly created", [
+                    Log::info("New inventory item created", [
                         'Details' => $r2
                     ]);
                     $r2->delete();
                 }
             }
-
+    
             DB::commit();
+    
+            // Update stock quantities
             DB::select('UPDATE items i
-            JOIN (
-                SELECT t.item_id, SUM(t.quantity) AS calculated_quantity
-                FROM items i
-                JOIN inventory_items t ON i.id = t.item_id
-                GROUP BY t.item_id
-            ) AS subquery ON i.id = subquery.item_id
-            SET i.stock_quantity = subquery.calculated_quantity;');
-
+                JOIN (
+                    SELECT t.item_id, SUM(t.quantity) AS calculated_quantity
+                    FROM items i
+                    JOIN inventory_items t ON i.id = t.item_id
+                    GROUP BY t.item_id
+                ) AS subquery ON i.id = subquery.item_id
+                SET i.stock_quantity = subquery.calculated_quantity;'
+            );
+    
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
@@ -825,11 +839,12 @@ class StoreRequestController extends Controller
                 'stack_trace' => $e->getTraceAsString()
             ]);
             DB::rollback();
-            // Redirect back with the error message
+    
             return redirect()->back()
-                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id);
         }
     }
+    
 
     public function update_manual_remarks(Request $request, $id)
     {
@@ -868,23 +883,39 @@ class StoreRequestController extends Controller
     {
         try {
             $site_id = Auth::user()->site->id;
+
             $total_cost_of_parts_within_the_month =
-                SorderPart::join('sorders', 'sorders.id', '=', 'sorder_parts.sorder_id')
-                ->join('items', 'items.id', '=', 'sorder_parts.item_id')
-                ->join('endusers', 'sorders.enduser_id', '=', 'endusers.id')
-                ->join('inventory_items', 'sorder_parts.inventory_id', '=', 'inventory_items.id')
+                SorderPart::leftJoin('sorders', 'sorders.id', '=', 'sorder_parts.sorder_id')
+                ->leftJoin('items', 'items.id', '=', 'sorder_parts.item_id')
+                ->leftJoin('endusers', 'sorders.enduser_id', '=', 'endusers.id')
+                ->leftJoin('inventory_items', 'sorder_parts.inventory_id', '=', 'inventory_items.id')
+                ->leftJoin('inventories', 'inventory_items.inventory_id', '=', 'inventories.id')
                 ->where('sorders.site_id', '=', $site_id)
                 ->where('sorder_parts.site_id', '=', $site_id)
                 ->where('sorders.status', '=', 'Supplied')
                 ->latest('sorders.delivered_on')
-                ->select('sorder_parts.id', 'sorder_parts.qty_supplied', 'sorder_parts.sub_total', 'sorders.delivery_reference_number', 'sorders.delivered_on', 'items.item_description', 'items.item_part_number', 'items.item_stock_code', 'sorders.enduser_id', 'inventory_items.location_id')
+                ->select(
+                    'sorder_parts.id', 
+                    'sorder_parts.qty_supplied', 
+                    'sorder_parts.sub_total', 
+                    'sorders.delivery_reference_number', 
+                    'sorders.delivered_on', 
+                    'items.item_description', 
+                    'items.item_part_number', 
+                    'items.item_stock_code', 
+                    'sorders.enduser_id', 
+                    'inventory_items.location_id',
+                    'inventories.grn_number'
+                  
+                )
                 ->paginate(100);
+            
             Log::info("StoreReqquestController | store_officer_update() | Sorder before edit", [
                 'user_details' => Auth::user(),
                 'response_message' => 'Supply history displayed succesfully'
             ]);
             // dd($total_cost_of_parts_within_the_month);
-            return view('stores.parts_witin_the_week', compact('total_cost_of_parts_within_the_month'));
+            return view('stores.supply_history', compact('total_cost_of_parts_within_the_month'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
             Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
@@ -906,41 +937,57 @@ class StoreRequestController extends Controller
             $start_date = Carbon::parse(request()->start_date)->toDateString();
             $end_date = Carbon::parse(request()->end_date)->toDateString();
             $total_cost_of_parts_within_the_month = null;
+    
             if ($request->start_date && $request->end_date) {
                 $total_cost_of_parts_within_the_month =
-                    SorderPart::join('sorders', 'sorders.id', '=', 'sorder_parts.sorder_id')
-                    ->join('items', 'items.id', '=', 'sorder_parts.item_id')
-                    ->join('endusers', 'sorders.enduser_id', '=', 'endusers.id')
-                    ->join('inventory_items', 'sorder_parts.inventory_id', '=', 'inventory_items.id')
+                    SorderPart::leftjoin('sorders', 'sorders.id', '=', 'sorder_parts.sorder_id')
+                    ->leftjoin('items', 'items.id', '=', 'sorder_parts.item_id')
+                    ->leftjoin('endusers', 'sorders.enduser_id', '=', 'endusers.id')
+                    ->leftjoin('inventory_items', 'sorder_parts.inventory_id', '=', 'inventory_items.id')
+                    ->leftJoin('inventories', 'inventory_items.inventory_id', '=', 'inventories.id')
                     ->where('sorders.status', '=', 'Supplied')
                     ->where('sorders.site_id', '=', $site_id)
                     ->where('sorder_parts.site_id', '=', $site_id)
                     ->whereDate('sorders.delivered_on', '>=', $start_date)
                     ->whereDate('sorders.delivered_on', '<=', $end_date)
-                    ->latest('sorders.created_at')->paginate(10000);
+                    ->select(
+                        'sorder_parts.id',
+                        'sorder_parts.qty_supplied',
+                        'sorder_parts.sub_total',
+                        'sorders.delivery_reference_number',
+                        'sorders.delivered_on',
+                        'items.item_description',
+                        'items.item_part_number',
+                        'items.item_stock_code',
+                        'endusers.asset_staff_id', // Select the required enduser column
+                        'inventory_items.location_id'
+                    )
+                    ->latest('sorders.created_at')
+                    ->paginate(10000);
             }
-
+    
             Log::info("StoreReqquestController | supply_history_search()", [
                 'user_details' => Auth::user(),
                 'request_payload' => $request,
                 'response_message' => 'Supply history search successful',
                 'response_payload' => $total_cost_of_parts_within_the_month
             ]);
-
-            return view('stores.parts_witin_the_week', compact('total_cost_of_parts_within_the_month', 'start_date', 'end_date'));
+    
+            return view('stores.supply_history', compact('total_cost_of_parts_within_the_month', 'start_date', 'end_date'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
             Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
+    
+            return redirect()->back()
+                             ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
+    
+
+    
 
     public function supply_history_search_item(Request $request)
     {
@@ -954,10 +1001,12 @@ class StoreRequestController extends Controller
             $site_id = Auth::user()->site->id;
 
             // Initialize the query builder with your base join and where conditions
-            $query = SorderPart::join('sorders', 'sorders.id', '=', 'sorder_parts.sorder_id')
-                ->join('items', 'items.id', '=', 'sorder_parts.item_id')
-                ->join('endusers', 'sorders.enduser_id', '=', 'endusers.id')
-                ->join('inventory_items', 'sorder_parts.inventory_id', '=', 'inventory_items.id')
+            $query = SorderPart::leftjoin('sorders', 'sorders.id', '=', 'sorder_parts.sorder_id')
+                ->leftjoin('items', 'items.id', '=', 'sorder_parts.item_id')
+                ->leftjoin('endusers', 'sorders.enduser_id', '=', 'endusers.id')
+                ->leftjoin('inventory_items', 'sorder_parts.inventory_id', '=', 'inventory_items.id')
+             
+                ->leftJoin('inventories', 'inventory_items.inventory_id', '=', 'inventories.id')
                 ->where('sorders.site_id', '=', $site_id)
                 ->where('sorder_parts.site_id', '=', $site_id)
                 ->where('sorders.status', '=', 'Supplied');

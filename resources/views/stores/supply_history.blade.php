@@ -81,6 +81,7 @@
                             <th>ID</th>
                             <th>Supply Date</th>
                             <th>SR Number</th>
+                            <th>GRN Number</th>
                             <th>Description</th>
                             <th>Part Number</th>
                             <th>Stock Code</th>
@@ -106,6 +107,7 @@
 
                                 <td>{{ date('d-m-Y (H:i)', strtotime($in->delivered_on ?? '')) }}</td>
                                 <td>{{ $in->delivery_reference_number ?? '' }}</td>
+                                <td>{{ $in->grn_number ?? 'Not Found or Deleted' }}</td>
                                 <td>{{ $in->item_description ?? ' ' }}</td>
                                 <td>{{ $in->item_part_number ?? ' ' }}</td>
                                 <td>{{ $in->item_stock_code ?? ' ' }}</td>

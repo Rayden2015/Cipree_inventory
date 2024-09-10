@@ -4,7 +4,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
 
-    @if (Auth::user()->hasRole('store_officer') || Auth::user()->hasRole('store_assistant'))
+    @if (Auth::user()->hasRole('store_officer') || Auth::user()->hasRole('store_assistant') || Auth::user()->hasRole('finance_officer'))
         <style>
             #rcorners1 {
                 border-radius: 25px;

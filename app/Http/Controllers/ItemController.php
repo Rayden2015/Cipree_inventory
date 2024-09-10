@@ -30,47 +30,47 @@ class ItemController extends Controller
     public function index()
     {
         try {
-            $data['itemsa'] = DB::table('inventory_items')
-                ->select('inventory_items.*')
-                ->where('inventory_items.quantity', '>', '0')
-                ->join('items', 'inventory_items.item_id', '=', 'items.id')
+            // $data['itemsa'] = DB::table('inventory_items')
+            //     ->select('inventory_items.*')
+            //     ->where('inventory_items.quantity', '>', '0')
+            //     ->join('items', 'inventory_items.item_id', '=', 'items.id')
 
-                ->select('inventory_items.item_id', DB::raw('SUM(quantity) as new_stock_quantity'))
-                ->groupBy('inventory_items.item_id')
-                ->get();
+            //     ->select('inventory_items.item_id', DB::raw('SUM(quantity) as new_stock_quantity'))
+            //     ->groupBy('inventory_items.item_id')
+            //     ->get();
 
-            $data['itemsb'] = DB::table('inventory_items')
-                ->select('inventory_items.*')
-                ->where('inventory_items.quantity', '>', '0')
-                ->join('items', 'inventory_items.item_id', '=', 'items.id')
-                ->select('inventory_items.item_id', DB::raw('SUM(inventory_items.amount) as amount'))
-                ->groupBy('inventory_items.item_id')
-                ->get();
+            // $data['itemsb'] = DB::table('inventory_items')
+            //     ->select('inventory_items.*')
+            //     ->where('inventory_items.quantity', '>', '0')
+            //     ->join('items', 'inventory_items.item_id', '=', 'items.id')
+            //     ->select('inventory_items.item_id', DB::raw('SUM(inventory_items.amount) as amount'))
+            //     ->groupBy('inventory_items.item_id')
+            //     ->get();
 
-            foreach ($data['itemsa'] as $product_item) {
-                $r1 =   Item::updateOrCreate(
-                    ['id' => $product_item->item_id], // Use $product_item->id instead of $product_item['items']['id']
-                    ['stock_quantity' => $product_item->new_stock_quantity] // Use $product_item->new_quantity instead of $product_item['quantity']['new_quantity']
-                );
-                if ($r1->wasRecentlyCreated) {
-                    Log::info("Itemsa which was newly created", [
-                        'Details' => $r1
-                    ]);
-                    $r1->delete();
-                }
-            }
-            foreach ($data['itemsb'] as $product_item) {
-                $r2 =  Item::updateOrCreate(
-                    ['id' => $product_item->item_id], // Use $product_item->id instead of $product_item['items']['id']
-                    ['amount' => $product_item->amount] // Use $product_item->new_quantity instead of $product_item['quantity']['new_quantity']
-                );
-                if ($r2->wasRecentlyCreated) {
-                    Log::info("Itemsb which was newly created", [
-                        'Details' => $r2
-                    ]);
-                    $r2->delete();
-                }
-            }
+            // foreach ($data['itemsa'] as $product_item) {
+            //     $r1 =   Item::updateOrCreate(
+            //         ['id' => $product_item->item_id], // Use $product_item->id instead of $product_item['items']['id']
+            //         ['stock_quantity' => $product_item->new_stock_quantity] // Use $product_item->new_quantity instead of $product_item['quantity']['new_quantity']
+            //     );
+            //     if ($r1->wasRecentlyCreated) {
+            //         Log::info("Itemsa which was newly created", [
+            //             'Details' => $r1
+            //         ]);
+            //         $r1->delete();
+            //     }
+            // }
+            // foreach ($data['itemsb'] as $product_item) {
+            //     $r2 =  Item::updateOrCreate(
+            //         ['id' => $product_item->item_id], // Use $product_item->id instead of $product_item['items']['id']
+            //         ['amount' => $product_item->amount] // Use $product_item->new_quantity instead of $product_item['quantity']['new_quantity']
+            //     );
+            //     if ($r2->wasRecentlyCreated) {
+            //         Log::info("Itemsb which was newly created", [
+            //             'Details' => $r2
+            //         ]);
+            //         $r2->delete();
+            //     }
+            // }
 
             // $items = Item::all();
             $items = Item::orderBy('item_description')->paginate(20);

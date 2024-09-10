@@ -37,12 +37,9 @@
                 @endhasrole
 
                 @hasrole('finance_officer')
-                    @include('dashboard.finance_officer')
+                @include('dashboard.store_officer')
                 @endhasrole
 
-                @hasrole('Final Officer')
-                @include('dashboard.store_officer')
-            @endhasrole
             </div>
         </div>
     </div>

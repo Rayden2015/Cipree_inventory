@@ -66,10 +66,7 @@ class LoginController extends Controller
     }
     return $request->only($this->username(), 'password');
     $email = $request->get('email');
-    $data = ([
-
-      'email' => $request->get('email'),
-
+    $data = (['email' => $request->get('email'),
     ]);
     Mail::to($email)->send(new WelcomeMail($data));
     Mail::to($email)->send(new LoggedinMail($request));
@@ -81,7 +78,6 @@ class LoginController extends Controller
 
       return $this->sendLockoutResponse($request);
     }
-
     $credentials = $this->credentials($request);
 
     $user = User::where('email', $credentials['email'])->first();

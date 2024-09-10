@@ -64,6 +64,7 @@
                             <th>Stock Code</th>
                             <th>Qty in Stock</th>
                             <th>Amount</th>
+                            <th>Age</th>
                             <th>Location</th>
                             <th>Puchase Type</th>
 
@@ -79,6 +80,14 @@
                                 <td>{{ $rq->item->item_stock_code ?? '' }}</td>
                                 <td>{{ $rq->item->stock_quantity ?? '' }}</td>
                                 <td>{{ $rq->amount ?? '' }}</td>
+                                <td>
+                                    @if ($rq->item && $rq->item->created_at)
+                                        {{ \Carbon\Carbon::parse($rq->item->created_at)->diffInDays(now()) }} days
+                                    @else
+                                        N/A
+                                    @endif
+                                </td>
+                                
                                 <td>{{ $rq->location->name ?? '' }}</td>
                                 <td>{{ $rq->trans_type ?? '' }}</td>
                             @empty

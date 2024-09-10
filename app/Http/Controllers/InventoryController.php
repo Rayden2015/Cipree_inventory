@@ -81,24 +81,42 @@ class InventoryController extends Controller
                 'method' => 'store',
                 'request_payload' => $request->all(),
             ]);
-
+    
             // Validate the request
             $request->validate([
                 'photo' => 'sometimes|nullable|image|mimes:jpeg,gif,png,jpg|max:9048',
                 'desc' => 'nullable',
-                'quantity' => 'min:0',
+                'quantity' => 'required|array',
+                'quantity.*' => 'numeric|min:0', // Ensure that quantity is not negative
                 'invoice_number' => 'nullable|unique:inventories,invoice_number',
                 'grn_number' => 'unique:inventories,grn_number',
             ]);
-
-            // Log validation success
-            Log::info('InventoryController@store - Validation Success', [
-                'timestamp' => now(),
-                'method' => 'store',
-                'validation_status' => 'success',
-            ]);
-
-            // Create inventory
+    
+            // Check for negative quantities or amounts in the request
+            $products = $request->products;
+            $quantities = $request->quantity;
+            $amounts = $request->unit_cost_exc_vat_gh;
+    
+            for ($i = 0; $i < count($quantities); $i++) {
+                if ($quantities[$i] < 0 || $amounts[$i] < 0) {
+                    // Rollback the transaction
+                    DB::rollback();
+    
+                    // Log the error
+                    Log::error('InventoryController@store - Negative Value Detected', [
+                        'timestamp' => now(),
+                        'method' => 'store',
+                        'product_index' => $i,
+                        'quantity' => $quantities[$i],
+                        'amount' => $amounts[$i],
+                    ]);
+    
+                    // Return an error message to the user
+                    return redirect()->back()->withError('Negative values are not allowed. Please check your input and try again.');
+                }
+            }
+    
+            // Create the inventory
             $date = Carbon::now();
             $authid = Auth::id();
             $site_id = Auth::user()->site->id;
@@ -120,48 +138,25 @@ class InventoryController extends Controller
                 'exchange_rate' => $request->exchange_rate,
                 'site_id' => $site_id
             ]);
-
+    
             // Log inventory creation success
             Log::info('InventoryController@store - Inventory Created Successfully', [
                 'user' => Auth::user(),
                 'inventory_id' => $inventory->id,
                 'Inventory Details' => $inventory
             ]);
-
+    
+            // Process products and create inventory items
             if ($inventory) {
-                $products = [
-                    'products' => $request->products,
-                    'quantity' => $request->quantity,
-                    'location_id' => $request->location_id,
-                    'codes' => $request->codes,
-                    'uom' => $request->uom,
-                    'category_id' => $request->category_id,
-                    'unit_cost_exc_vat_gh' => $request->unit_cost_exc_vat_gh,
-                    'remarks' => $request->remarks,
-                    'unit_cost_exc_vat_usd' => $request->unit_cost_exc_vat_usd,
-                    'total_value_gh' => $request->total_value_gh,
-                    'total_value_usd' => $request->total_value_usd,
-                    'srf' => $request->srf,
-                    'erf' => $request->erf,
-                    'ats' => $request->ats,
-                    'drq' => $request->drq,
-                    'discount' => $request->discount,
-                    'amount' => $request->amount,
-                    'item_id' => $request->item_id,
-                    'before_discount' => $request->before_discount,
-                    'site_id' => $request->site_id
-                ];
-
-                // Create inventory items and details
-                for ($i = 0; $i < count($products['products']); $i++) {
-                    $newamount = ($products['unit_cost_exc_vat_gh'][$i] * $products['quantity'][$i]);
-                    $newdiscount = ($products['discount'][$i] / 100) * $newamount;
+                for ($i = 0; $i < count($products); $i++) {
+                    $newamount = ($amounts[$i] * $quantities[$i]);
+                    $newdiscount = ($request->discount[$i] / 100) * $newamount;
                     $totalamount = $newamount - $newdiscount;
-
-                    $singlediscount = ($products['unit_cost_exc_vat_gh'][$i] * 1);
-                    $singlediscount1 = ($products['discount'][$i] / 100) * $singlediscount;
+    
+                    $singlediscount = ($amounts[$i] * 1);
+                    $singlediscount1 = ($request->discount[$i] / 100) * $singlediscount;
                     $singlediscount2 = $singlediscount - $singlediscount1;
-
+    
                     // Log start of inventory item creation
                     Log::info('InventoryController | Store()| Inventory Item Creation Start', [
                         'timestamp' => now(),
@@ -170,20 +165,20 @@ class InventoryController extends Controller
                         'product_index' => $i,
                         'product_data' => $products,
                     ]);
-
+    
                     // Create inventory item
                     InventoryItem::create([
                         'inventory_id' => $inventory->id,
-                        'location_id' => $products['location_id'][$i],
-                        'quantity' => $products['quantity'][$i],
-                        'item_id' => $products['item_id'][$i],
+                        'location_id' => $request->location_id[$i],
+                        'quantity' => $quantities[$i],
+                        'item_id' => $request->item_id[$i],
                         'unit_cost_exc_vat_gh' => $singlediscount2,
-                        'discount' => $products['discount'][$i],
-                        'before_discount' => $products['unit_cost_exc_vat_gh'][$i],
+                        'discount' => $request->discount[$i],
+                        'before_discount' => $amounts[$i],
                         'amount' => $totalamount,
                         'site_id' => $site_id,
                     ]);
-
+    
                     // Log inventory item creation success
                     Log::info('InventoryController@store - Inventory Item Created Successfully', [
                         'timestamp' => now(),
@@ -191,20 +186,20 @@ class InventoryController extends Controller
                         'inventory_id' => $inventory->id,
                         'product_index' => $i,
                     ]);
-
+    
                     // Create inventory item detail
                     InventoryItemDetail::create([
                         'inventory_id' => $inventory->id,
-                        'location_id' => $products['location_id'][$i],
-                        'quantity' => $products['quantity'][$i],
-                        'item_id' => $products['item_id'][$i],
+                        'location_id' => $request->location_id[$i],
+                        'quantity' => $quantities[$i],
+                        'item_id' => $request->item_id[$i],
                         'unit_cost_exc_vat_gh' => $singlediscount2,
-                        'discount' => $products['discount'][$i],
-                        'before_discount' => $products['unit_cost_exc_vat_gh'][$i],
+                        'discount' => $request->discount[$i],
+                        'before_discount' => $amounts[$i],
                         'amount' => $totalamount,
                         'site_id' => $site_id,
                     ]);
-
+    
                     // Log inventory item detail creation success
                     Log::info('InventoryController@store - Inventory Item Detail Created Successfully', [
                         'timestamp' => now(),
@@ -212,17 +207,9 @@ class InventoryController extends Controller
                         'inventory_id' => $inventory->id,
                         'product_index' => $i,
                     ]);
-
-                    // Log end of inventory item creation
-                    Log::info('InventoryController@store - Inventory Item Creation End', [
-                        'timestamp' => now(),
-                        'method' => 'store',
-                        'inventory_id' => $inventory->id,
-                        'product_index' => $i,
-                    ]);
                 }
             }
-
+    
             // Update stock quantities
             DB::select(
                 'UPDATE items i
@@ -234,36 +221,34 @@ class InventoryController extends Controller
                 ) AS subquery ON i.id = subquery.item_id
                 SET i.stock_quantity = subquery.calculated_quantity'
             );
-
-
-
+    
             // Log success message
             Log::info('InventoryController@store - Success', [
                 'timestamp' => now(),
                 'method' => 'store',
                 'status' => 'success',
             ]);
-
+    
             // Commit the transaction
             DB::commit();
-
+    
             return back()->withSuccess('Successfully Updated');
         } catch (\Exception $exception) {
             // Rollback the transaction
             DB::rollback();
-
+    
             $unique_id = floor(time() - 999999999);
             Log::channel('error_log')->error('InventoryController | Store() Error ' . $unique_id, [
                 'exception' => $exception->getMessage(),
                 'trace' => $exception->getTraceAsString(),
             ]);
-
+    
             // Redirect back with the error message
             return redirect()->back()
                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
-
+    
 
 
     /**
