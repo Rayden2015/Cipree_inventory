@@ -149,7 +149,7 @@
                     <div style="background-color: #0e6258;" class="small-box" id="rcorners1">
                         <div class="inner">
 
-                            <h4 style="color: white; font-family: 'Segoe UI Light';"></h4>
+                            <h4 style="color: white; font-family: 'Segoe UI Light';">{{ $reorder_level }}</h4>
 
                             <p style="color: white; font-family: 'Segoe UI Light';">Low Stock</p>
                         </div>
@@ -168,7 +168,7 @@
                     <div class="small-box bg-danger" id="rcorners1">
                         <div class="inner">
 
-                            <h4 style="color: white; font-family: 'Segoe UI Light';"></h4>
+                            <h4 style="color: white; font-family: 'Segoe UI Light';">{{ $out_of_stock }}</h4>
 
                             <p style="color: white; font-family: 'Segoe UI Light';">Out of Stock </p>
                         </div>
@@ -176,7 +176,7 @@
                             <i class="ion ion-stats-bars"></i>
                         </div>
                         <a href="{{ route('dashboard.out_of_stock') }}" class="small-box-footer">More info <i
-                                class="fas fa-arrow-circle-right"></i></a>
+                                class="fas fa-arrow-circle-right"></i> </a>
                     </div>
                 </div>
             </div>

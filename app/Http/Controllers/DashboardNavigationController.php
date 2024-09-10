@@ -643,14 +643,29 @@ return redirect()->back()
       try {
          $site_id = Auth::user()->site->id;
          // $unstocked = Item::where('stock_quantity', '=', '0')->get();
-         $unstocked = InventoryItem::select('items.id', 'items.item_description', 'items.item_part_number', 'items.item_stock_code', 'items.stock_quantity', 'items.reorder_level')
-            ->join('inventories', 'inventory_items.inventory_id', '=', 'inventories.id')
-            ->join('items', 'inventory_items.item_id', '=', 'items.id')
-            ->where('stock_quantity', '=', '0')
-            ->where('inventories.trans_type', '=', 'Stock Purchase')
-            ->where('inventory_items.site_id', '=', $site_id)
-            ->groupBy('inventory_items.item_id')
-            ->get();
+         $unstocked = InventoryItem::select(
+            'items.id', 
+            'items.item_description', 
+            'items.item_part_number', 
+            'items.item_stock_code', 
+            'items.stock_quantity', 
+            'items.reorder_level'
+        )
+        ->join('inventories', 'inventory_items.inventory_id', '=', 'inventories.id')
+        ->join('items', 'inventory_items.item_id', '=', 'items.id')
+        ->where('stock_quantity', '=', '0')
+        ->where('inventories.trans_type', '=', 'Stock Purchase')
+        ->where('inventory_items.site_id', '=', $site_id)
+        ->groupBy(
+            'items.id', 
+            'items.item_description', 
+            'items.item_part_number', 
+            'items.item_stock_code', 
+            'items.stock_quantity', 
+            'items.reorder_level'
+        )
+        ->get();
+
 
          Log::info("InventoryController| out_of_stock() | ", [
             'user_details' => Auth::user(),

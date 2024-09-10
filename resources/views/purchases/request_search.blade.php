@@ -38,16 +38,16 @@
             <div class="content-page">
                 <div class="content">
                     @if (session('success'))
-                    <div class="alert alert-success">
-                        {{ session('success') }}
-                    </div>
-                @endif
-        
-                @if (session('error'))
-                    <div class="alert alert-danger">
-                        {{ session('error') }}
-                    </div>
-                @endif
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if (session('error'))
+                        <div class="alert alert-danger">
+                            {{ session('error') }}
+                        </div>
+                    @endif
 
                     <!-- Start Content-->
                     <div class="container-fluid">
@@ -108,7 +108,7 @@
                                                                 <th>Age</th>
                                                             @endif
                                                             {{-- <th>Site</th> --}}
-                                                        <th>Site</th>
+                                                            <th>Site</th>
                                                             <th>Action</th>
 
 
@@ -123,20 +123,20 @@
                                                                 <tr>
                                                                     <td>{{ $order->id }}</td>
                                                                     {{-- @if (Auth::user()->role->name != 'requester') --}}
-                                                                     @if (!Auth::user()->hasRole('requester'))
+                                                                    @if (!Auth::user()->hasRole('requester'))
                                                                         <td>{{ $order->location->name ?? 'not set' }}</td>
                                                                     @endif
                                                                     <th>{{ $order->item_description ?? 'not set ' }}</th>
                                                                     <th>{{ $order->item_part_number ?? 'not set ' }}</th>
                                                                     <th>{{ $order->item_stock_code ?? 'not set ' }}</th>
                                                                     <td>{{ $order->quantity ?? '' }}</td>
-                                                                    
+
                                                                     <?php
                                                                     $date = \Carbon\Carbon::parse($order->created_at);
                                                                     $difference = $date->diffInDays(\Carbon\Carbon::now());
                                                                     ?>
                                                                     {{-- @if (Auth::user()->role->name != 'requester') --}}
-                                                                     @if (!Auth::user()->hasRole('requester'))
+                                                                    @if (!Auth::user()->hasRole('requester'))
                                                                         <td>{{ $difference }}</td>
                                                                     @endif
 
@@ -147,20 +147,8 @@
                                                                     @else
                                                                         <td><a href="{{ route('add.to.cart', $order->id) }}"
                                                                                 class="btn btn-primary">Add</a></td>
-
-                                                 @endif                      
-                                                  <td class="text-center">
-
-                                                                        </td>
-
-                                                                        @hasrole('admin')
-                                                                            <td>
-
-
-                                                                            </td>
-
-                                                                        @endrole
-
+                                                                    @endif
+                                                                
                                                                 </tr>
                                                             @endforeach
                                                         @else
