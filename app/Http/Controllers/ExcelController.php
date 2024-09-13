@@ -16,7 +16,8 @@ use Illuminate\Support\Facades\Route;
 
 class ExcelController extends Controller
 {
-    public function __construct(){
+    public function __construct()
+    {
         $this->middleware('auth');
     }
     public function exportSearchResults(Request $request)
@@ -24,15 +25,15 @@ class ExcelController extends Controller
 
         // try{
 
-            $site_id = Auth::user()->site->id;
+        $site_id = Auth::user()->site->id;
 
         $start_date = Carbon::parse(request()->start_date)->toDateString();
         $end_date = Carbon::parse(request()->end_date)->toDateString();
 
         $total_cost_of_parts_within_the_month = SorderPart::select('sorders.delivered_on', 'sorders.request_number', 'items.item_description', 'items.item_part_number', 'items.item_stock_code', 'sorder_parts.quantity', 'sorder_parts.sub_total')
-        ->where('sorder_parts.site_id','=', $site_id)
-            ->join('sorders', 'sorders.id', '=', 'sorder_parts.sorder_id')->where('sorders.status', '=', 'Supplied')->where('sorders.site_id','=',$site_id)
-            ->join('items', 'sorder_parts.item_id', '=', 'items.id')
+            ->where('sorder_parts.site_id', '=', $site_id)
+            ->leftjoin('sorders', 'sorders.id', '=', 'sorder_parts.sorder_id')->where('sorders.status', '=', 'Supplied')->where('sorders.site_id', '=', $site_id)
+            ->leftjoin('items', 'sorder_parts.item_id', '=', 'items.id')
             ->whereDate('sorders.delivered_on', '>=', $start_date)->whereDate('sorders.delivered_on', '<=', $end_date)
             ->latest('sorders.created_at')->get();
 
@@ -45,8 +46,6 @@ class ExcelController extends Controller
         ]);
         // dd($total_cost_of_parts_within_the_month,$url,$url_start,$url_end);
         return Excel::download(new SearchResultsExport($total_cost_of_parts_within_the_month), 'search_results.xlsx');
-
-
     }
     public function exportItemsListSite()
     {
