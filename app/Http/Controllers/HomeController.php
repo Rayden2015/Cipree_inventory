@@ -192,14 +192,17 @@ class HomeController extends Controller
         // Count the filtered results
         $out_of_stock = $out_of_stock_filtered->count();
 
-        $reorder_level =  InventoryItem::select('inventory_items.id','inventory_items.item_id')
-        ->join('items', 'items.id', '=', 'inventory_items.item_id')
-        // ->join('inventories', 'inventory_items.inventory_id', '=', 'inventories.id')
+        $reorder_level = InventoryItem::select('inventory_items.id', 'inventory_items.item_id')
+        ->leftJoin('items', 'items.id', '=', 'inventory_items.item_id')
+        ->leftJoin('inventories', function($join) {
+            $join->on('inventory_items.inventory_id', '=', 'inventories.id')
+                 ->where('inventories.trans_type', '=', 'Stock Purchase');
+        })
         ->whereRaw('items.stock_quantity <= items.reorder_level')
-        ->where('inventory_items.quantity', '>', '0')
-        // ->where('trans_type', '=', 'Stock Purchase')
-        ->where('inventory_items.site_id','=',$site_id)
+        ->where('inventory_items.quantity', '>', 0)
+        ->where('inventory_items.site_id', '=', $site_id)
         ->count();
+    
 
 
 

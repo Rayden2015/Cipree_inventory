@@ -522,16 +522,21 @@ return redirect()->back()
 
    public function reorder_level()
    {
-      $site_id = Auth::user()->site->id;
-      $reorder_level =  InventoryItem::select('inventory_items.id', 'inventory_items.item_id', 'inventory_items.site_id')->join('items', 'items.id', '=', 'inventory_items.item_id')
-         ->where('inventory_items.site_id', '=', $site_id)
-         ->join('inventories', 'inventory_items.inventory_id', '=', 'inventories.id')
-
-         ->whereRaw('items.stock_quantity <= items.reorder_level')->where('inventory_items.quantity', '>', '0')->where('trans_type', '=', 'Stock Purchase')
-
-         ->get();
-      return view('homepages.reorder_level', compact('reorder_level'));
+       $site_id = Auth::user()->site->id;
+       $reorder_level = InventoryItem::select('inventory_items.id', 'inventory_items.item_id', 'inventory_items.site_id')
+           ->leftJoin('items', 'items.id', '=', 'inventory_items.item_id')
+           ->leftJoin('inventories', function($join) {
+               $join->on('inventory_items.inventory_id', '=', 'inventories.id')
+                    ->where('inventories.trans_type', '=', 'Stock Purchase');
+           })
+           ->where('inventory_items.site_id', '=', $site_id)
+           ->whereRaw('items.stock_quantity <= items.reorder_level')
+           ->where('inventory_items.quantity', '>', 0)
+           ->get();
+   
+       return view('homepages.reorder_level', compact('reorder_level'));
    }
+   
 
    public function reorder_level_search(Request $request)
    {
