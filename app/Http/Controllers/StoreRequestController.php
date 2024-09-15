@@ -1130,7 +1130,7 @@ class StoreRequestController extends Controller
             $site_id = Auth::user()->site->id;
             $auth = Auth::id();
             $requester_store_lists = Sorder::where('requested_by', '=', $auth)->where('site_id', '=', $site_id)->latest()->paginate(15);
-            Log::info("StoreReqquestController | store_officer_update() ", [
+            Log::info("StoreReqquestController | requester_store_lists() ", [
                 'user_details' => Auth::user(),
                 'response_payload' => $requester_store_lists
             ]);
