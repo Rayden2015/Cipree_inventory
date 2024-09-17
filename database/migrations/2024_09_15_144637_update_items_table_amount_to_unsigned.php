@@ -10,23 +10,19 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-{
-    Schema::table('items', function (Blueprint $table) {
-        $table->unsignedInteger('stock_quantity')->change();
-        $table->unsignedDecimal('amount', 8, 2)->change();
-    });
-}
-
+    {
+        Schema::table('items', function (Blueprint $table) {
+            $table->unsignedDecimal('amount', 10, 2)->change();
+        });
+    }
 
     /**
      * Reverse the migrations.
      */
-    public function down()
+    public function down(): void
     {
         Schema::table('items', function (Blueprint $table) {
-            $table->integer('stock_quantity')->change();
-            $table->decimal('amount', 8, 2)->change();
+            $table->decimal('amount', 10, 2)->change();
         });
     }
-    
 };

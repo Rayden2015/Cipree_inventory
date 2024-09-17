@@ -822,7 +822,7 @@ class StoreRequestController extends Controller
     
             // Update stock quantities
             DB::select('UPDATE items i
-                JOIN (
+               LEFT JOIN (
                     SELECT t.item_id, SUM(t.quantity) AS calculated_quantity
                     FROM items i
                     JOIN inventory_items t ON i.id = t.item_id
