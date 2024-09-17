@@ -30,7 +30,7 @@
                 <th>Location</th>
                 <th>Purchase Type</th>
                 <th>GRN Number</th>
-                <th>Age</th>
+                {{-- <th>Age</th> --}}
             </tr>
         </thead>
         <tbody>
@@ -45,13 +45,13 @@
                     <td>{{ $rq->location->name ?? '' }}</td>
                     <td>{{ $rq->inventory->trans_type ?? '' }}</td>
                     <td>{{ $rq->grn_number ?? '' }}</td>
-                    <td>
+                    {{-- <td>
                         @if ($rq->created_at)
                             {{ \Carbon\Carbon::parse($rq->created_at)->diffInDays(now()) }} days
                         @else
                             N/A
                         @endif
-                    </td>
+                    </td> --}}
                 </tr>
             @empty
                 <tr>

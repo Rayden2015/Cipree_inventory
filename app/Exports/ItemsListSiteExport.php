@@ -33,7 +33,7 @@ class ItemsListSiteExport implements FromCollection, WithHeadings
                 'locations.name', 
                 'inventories.trans_type',
                 'inventories.grn_number',
-                'inventory_items.created_at'
+                // 'inventory_items.created_at'
             )
             ->get();
 
@@ -52,7 +52,7 @@ class ItemsListSiteExport implements FromCollection, WithHeadings
                 'location_name'      => $item->name,
                 'trans_type'         => $item->trans_type,
                 'grn_number'         => $item->grn_number,
-                'age'                => $age // Calculated age in days
+                // 'age'                => $age // Calculated age in days
             ];
         });
     }
@@ -68,7 +68,7 @@ class ItemsListSiteExport implements FromCollection, WithHeadings
             'Location',
             'Purchase Type',
             'GRN Number',
-            'Age (Days)'
+            // 'Age (Days)'
         ];
     }
 }
