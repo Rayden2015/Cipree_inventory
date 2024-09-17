@@ -726,14 +726,14 @@ class StoreRequestController extends Controller
             'type_of_purchase' => 'nullable',
             'quantity' => 'gte:0', // Ensure quantity is not negative during validation
         ]);
-    
+
         $deliverynum = Sorder::where('id', '=', $id)->value('request_number');
-        
+
         try {
             DB::beginTransaction();
-    
+
             $delivered_on_date = Carbon::now()->toDateTimeString();
-    
+
             $genDeliveryNum = $deliverynum;
             $purchase->tax = $request->tax;
             $purchase->tax2 = $request->tax2;
@@ -749,9 +749,9 @@ class StoreRequestController extends Controller
             $purchase->delivered_on = $delivered_on_date;
             $purchase->edited_at = '1';
             $purchase->supplied_to = $request->supplied_to;
-    
+
             $purchase->save();
-            
+
             Log::info('StoreReqquestController | store_officer_update() | Sorder Details', [
                 'Details' => $request->all(),
                 'genDeliveryNum' => $deliverynum,
@@ -760,17 +760,17 @@ class StoreRequestController extends Controller
                 'delivered_on' => $purchase->delivered_on,
                 'purchase_edited_at' => $purchase->edited_at,
             ]);
-    
+
             $sorder_id = SorderPart::where('sorder_id', $id)->pluck('inventory_id')->toArray();
             $quantity = SorderPart::where('sorder_id', $id)->pluck('qty_supplied')->toArray();
-    
+
             $data['items'] = DB::table('inventory_items')
                 ->select('inventory_items.*')
                 ->join('sorder_parts', 'inventory_items.id', '=', 'sorder_parts.inventory_id')
                 ->where('sorder_parts.sorder_id', '=', $id)
                 ->selectRaw('inventory_items.id, inventory_items.quantity - sorder_parts.qty_supplied AS new_quantity')
                 ->get();
-    
+
             // Check for negative quantities
             foreach ($data['items'] as $product_item) {
                 if ($product_item->new_quantity < 0) {
@@ -778,17 +778,17 @@ class StoreRequestController extends Controller
                         'inventory_item_id' => $product_item->id,
                         'new_quantity' => $product_item->new_quantity
                     ]);
-    
+
                     // Rollback the transaction and throw an error
                     DB::rollback();
                     return redirect()->back()->withError('Negative value detected for inventory item ID: ' . $product_item->id . '. No changes were made.');
                 }
-    
+
                 $r1 = InventoryItem::updateOrCreate(
                     ['id' => $product_item->id],
                     ['quantity' => $product_item->new_quantity]
                 );
-    
+
                 if ($r1->wasRecentlyCreated) {
                     Log::info("New inventory item created", [
                         'Details' => $r1
@@ -796,20 +796,20 @@ class StoreRequestController extends Controller
                     $r1->delete();
                 }
             }
-    
+
             $data2['items'] = DB::table('inventory_items')
                 ->select('inventory_items.*')
                 ->join('sorder_parts', 'inventory_items.id', '=', 'sorder_parts.inventory_id')
                 ->where('sorder_parts.sorder_id', '=', $id)
                 ->selectRaw('inventory_items.id, inventory_items.quantity * inventory_items.unit_cost_exc_vat_gh AS new_amount')
                 ->get();
-    
+
             foreach ($data2['items'] as $product_itemb) {
                 $r2 = InventoryItem::updateOrCreate(
                     ['id' => $product_itemb->id],
                     ['amount' => $product_itemb->new_amount]
                 );
-    
+
                 if ($r2->wasRecentlyCreated) {
                     Log::info("New inventory item created", [
                         'Details' => $r2
@@ -817,20 +817,21 @@ class StoreRequestController extends Controller
                     $r2->delete();
                 }
             }
-    
-            DB::commit();
-    
             // Update stock quantities
-            DB::select('UPDATE items i
-               LEFT JOIN (
-                    SELECT t.item_id, SUM(t.quantity) AS calculated_quantity
-                    FROM items i
-                    JOIN inventory_items t ON i.id = t.item_id
-                    GROUP BY t.item_id
-                ) AS subquery ON i.id = subquery.item_id
-                SET i.stock_quantity = subquery.calculated_quantity;'
+            DB::select(
+                'UPDATE items i
+     LEFT JOIN (
+          SELECT t.item_id, SUM(t.quantity) AS calculated_quantity
+          FROM items i
+          JOIN inventory_items t ON i.id = t.item_id
+          GROUP BY t.item_id
+      ) AS subquery ON i.id = subquery.item_id
+      SET i.stock_quantity = subquery.calculated_quantity;'
             );
-    
+            DB::commit();
+
+
+
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
@@ -839,45 +840,45 @@ class StoreRequestController extends Controller
                 'stack_trace' => $e->getTraceAsString()
             ]);
             DB::rollback();
-    
+
             return redirect()->back()
                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id);
         }
     }
-    
+
 
     public function update_manual_remarks(Request $request, $id)
     {
         try {
             // Find the sales order by ID
             $sorder = Sorder::find($id);
-    
+
             if (!$sorder) {
                 return redirect()->back()->withError('Sales order not found.');
             }
-    
+
             // Update the manual remarks
             $sorder->manual_remarks = $request->manual_remarks;
             $sorder->save();
-    
+
             // Redirect back with a success message
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             // Generate a unique error ID
             $unique_id = floor(time() - 999999999);
-    
+
             // Log the error with details
             Log::channel('error_log')->error('SorderController | update_manual_remarks() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
-    
+
             // Redirect back with the error message
             return redirect()->back()
-                             ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
-    
+
 
     public function supply_history()
     {
@@ -895,21 +896,21 @@ class StoreRequestController extends Controller
                 ->where('sorders.status', '=', 'Supplied')
                 ->latest('sorders.delivered_on')
                 ->select(
-                    'sorder_parts.id', 
-                    'sorder_parts.qty_supplied', 
-                    'sorder_parts.sub_total', 
-                    'sorders.delivery_reference_number', 
-                    'sorders.delivered_on', 
-                    'items.item_description', 
-                    'items.item_part_number', 
-                    'items.item_stock_code', 
-                    'sorders.enduser_id', 
+                    'sorder_parts.id',
+                    'sorder_parts.qty_supplied',
+                    'sorder_parts.sub_total',
+                    'sorders.delivery_reference_number',
+                    'sorders.delivered_on',
+                    'items.item_description',
+                    'items.item_part_number',
+                    'items.item_stock_code',
+                    'sorders.enduser_id',
                     'inventory_items.location_id',
                     'inventories.grn_number'
-                  
+
                 )
                 ->paginate(100);
-            
+
             Log::info("StoreReqquestController | store_officer_update() | Sorder before edit", [
                 'user_details' => Auth::user(),
                 'response_message' => 'Supply history displayed succesfully'
@@ -918,16 +919,15 @@ class StoreRequestController extends Controller
             return view('stores.supply_history', compact('total_cost_of_parts_within_the_month'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
     public function supply_history_search(Request $request)
@@ -937,7 +937,7 @@ class StoreRequestController extends Controller
             $start_date = Carbon::parse(request()->start_date)->toDateString();
             $end_date = Carbon::parse(request()->end_date)->toDateString();
             $total_cost_of_parts_within_the_month = null;
-    
+
             if ($request->start_date && $request->end_date) {
                 $total_cost_of_parts_within_the_month =
                     SorderPart::leftjoin('sorders', 'sorders.id', '=', 'sorder_parts.sorder_id')
@@ -965,29 +965,29 @@ class StoreRequestController extends Controller
                     ->latest('sorders.created_at')
                     ->paginate(10000);
             }
-    
+
             Log::info("StoreReqquestController | supply_history_search()", [
                 'user_details' => Auth::user(),
                 'request_payload' => $request,
                 'response_message' => 'Supply history search successful',
                 'response_payload' => $total_cost_of_parts_within_the_month
             ]);
-    
+
             return view('stores.supply_history', compact('total_cost_of_parts_within_the_month', 'start_date', 'end_date'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
-    
+
             return redirect()->back()
-                             ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
-    
 
-    
+
+
 
     public function supply_history_search_item(Request $request)
     {
@@ -1005,7 +1005,7 @@ class StoreRequestController extends Controller
                 ->leftjoin('items', 'items.id', '=', 'sorder_parts.item_id')
                 ->leftjoin('endusers', 'sorders.enduser_id', '=', 'endusers.id')
                 ->leftjoin('inventory_items', 'sorder_parts.inventory_id', '=', 'inventory_items.id')
-             
+
                 ->leftJoin('inventories', 'inventory_items.inventory_id', '=', 'inventories.id')
                 ->where('sorders.site_id', '=', $site_id)
                 ->where('sorder_parts.site_id', '=', $site_id)
@@ -1050,16 +1050,15 @@ class StoreRequestController extends Controller
             return view('stores.supply_history_search_item', compact('total_cost_of_parts_within_the_month'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('An error occurred with id ' . $unique_id ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
 
@@ -1073,21 +1072,19 @@ class StoreRequestController extends Controller
                 'user_details' => Auth::user(),
                 'sorder_part_id' => $sorderPartId
             ]);
-       
+
             return redirect()->back()->withSuccess('Item deleted successfully');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
-
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
 
@@ -1110,18 +1107,15 @@ class StoreRequestController extends Controller
             return redirect()->back();
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
-
-
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
     public function requester_store_lists()
@@ -1137,17 +1131,15 @@ class StoreRequestController extends Controller
             return view('stores.requester_store_lists', compact('requester_store_lists'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
-
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
     public function requester_edit($id)
@@ -1167,17 +1159,15 @@ class StoreRequestController extends Controller
             return view('stores.requester_edit', compact('sorder_parts', 'sorder', 'suppliers', 'endusers'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
-
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
     public function requester_store_update(Request $request, $id)
@@ -1195,17 +1185,15 @@ class StoreRequestController extends Controller
             return redirect()->back();
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
-
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
 
@@ -1259,17 +1247,15 @@ class StoreRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
-
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
     public function requester_store_delete($id)
@@ -1286,17 +1272,15 @@ class StoreRequestController extends Controller
             return redirect()->back();
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
-
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
     public function store_officer_list_search(Request $request)
@@ -1316,8 +1300,8 @@ class StoreRequestController extends Controller
                     ->paginate(10);
 
                 if ($officer_lists->isEmpty()) {
-                  
-                    return redirect()->back()->withError('Record not found','Oops');
+
+                    return redirect()->back()->withError('Record not found', 'Oops');
                 } elseif ($officer_lists->isNotEmpty()) {
                     return view('stores.officer_lists', compact('officer_lists'));
                 }
@@ -1333,17 +1317,15 @@ class StoreRequestController extends Controller
             }
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
-
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
     public function received_history_page()
@@ -1361,17 +1343,15 @@ class StoreRequestController extends Controller
             // dd($received_history_page);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
-
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
     public function authoriser_store_list_view_dash($id)
     {
@@ -1393,15 +1373,15 @@ class StoreRequestController extends Controller
             return view('stores.authoriser_store_list_view', compact('sorder', 'sorder_parts', 'company'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
 
 
 
@@ -1425,17 +1405,15 @@ class StoreRequestController extends Controller
             return Response::json(['success' => true, 'info' => $fill]);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
-
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
 
@@ -1455,17 +1433,15 @@ class StoreRequestController extends Controller
             return Response::json(['success' => true, 'info' => $fill]);
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
-
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
     public function requester_store_list_view($id)
     {
