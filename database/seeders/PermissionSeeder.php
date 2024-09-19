@@ -23,6 +23,7 @@ class PermissionSeeder extends Seeder
             'navigate-module',
             'purchase-management-module',
             'reports-module',
+            'employee-management-module',
 
             // Info & Reviews
             'info',
@@ -138,11 +139,17 @@ class PermissionSeeder extends Seeder
             'edit-tax',
             'delete-tax',
 
-             // uom Permissions
-             'view-uom',
-             'add-uom',
-             'edit-uom',
-             'delete-uom',
+            // uom Permissions
+            'view-uom',
+            'add-uom',
+            'edit-uom',
+            'delete-uom',
+
+            //employee management module
+            'view-employee',
+            'add-employee',
+            'edit-employee',
+            'delete-employee',
 
             // Site Admin Permissions
             // Add your site admin permissions here

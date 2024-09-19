@@ -49,9 +49,9 @@
                     {{-- @if (Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'site_admin') --}}
                     @can('company-module')
                     <li
-                        class="nav-item {{ request()->routeIs('company.index', 'users.index', 'reviews.index', 'sites*','roles*','permissions*','uom*') ? 'menu-open' : '' }}">
+                        class="nav-item {{ request()->routeIs('company.index', 'users.index', 'reviews.index', 'sites*', 'roles*', 'permissions*', 'uom*') ? 'menu-open' : '' }}">
                         <a href="#"
-                            class="nav-link {{ request()->routeIs('company.index', 'users.index', 'reviews.index', 'sites*','roles*','permissions*','uom*') ? 'active' : '' }}">
+                            class="nav-link {{ request()->routeIs('company.index', 'users.index', 'reviews.index', 'sites*', 'roles*', 'permissions*', 'uom*') ? 'active' : '' }}">
                             <i>
                                 <img src="{{ asset('assets/images/icons/comp.png') }}"width="26" height="26"
                                     alt="" />
@@ -102,14 +102,14 @@
                             @endcan
 
                             @can('view-uom')
-                            <li class="nav-item">
-                                <a href="{{ route('uom.index') }}"
-                                    class="nav-link {{ request()->routeIs('uom.index') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>UoM</p>
-                                </a>
-                            </li>
-                        @endcan
+                                <li class="nav-item">
+                                    <a href="{{ route('uom.index') }}"
+                                        class="nav-link {{ request()->routeIs('uom.index') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>UoM</p>
+                                    </a>
+                                </li>
+                            @endcan
 
                             @can('view-role')
                                 <li class="nav-item">
@@ -137,6 +137,55 @@
                 @endcan
                 {{-- @endif --}}
                 {{-- end of company tab --}}
+
+
+                {{-- employee management tab --}}
+                {{-- @if (Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'site_admin') --}}
+                @can('employee-management-module')
+                    <li class="nav-item {{ request()->routeIs('employees*') ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ request()->routeIs('employees*') ? 'active' : '' }}">
+                            <i>
+                                <img src="{{ asset('assets/images/icons/emp.png') }}"width="26" height="26"
+                                    alt="" />
+                            </i>
+                            <p>
+                                Employee Management
+                                <i class="fas fa-angle-left right"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+
+                            <li class="nav-item">
+                                <a href="{{ route('employees.index') }}"
+                                    class="nav-link {{ request()->routeIs('employees.index') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Employees</p>
+                                </a>
+                            </li>
+
+
+
+                        </ul>
+                    </li>
+                @endcan
+                {{-- @endif --}}
+                {{-- end of employees management tab --}}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                 {{-- endusers tab --}}
                 {{-- @if (Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'site_admin') --}}
@@ -641,30 +690,30 @@
                         </li>
                         {{-- end of reports module --}}
 
-@endcan
+                    @endcan
 
-                    </ul>
-                    {{--  --}}
+                </ul>
+                {{--  --}}
 
-                    <a href="{{ route('myaccounts.index') }}"
-                        class="nav-link {{ request()->routeIs('myaccounts.index') ? 'active' : '' }}">
-                        <i>
-                            <img src="{{ asset('assets/images/icons/myaccount.png') }}" width="26" height="26"
-                                alt="" />
-                        </i>
-                        <span>My Account</span>
-                    </a>
+                <a href="{{ route('myaccounts.index') }}"
+                    class="nav-link {{ request()->routeIs('myaccounts.index') ? 'active' : '' }}">
+                    <i>
+                        <img src="{{ asset('assets/images/icons/myaccount.png') }}" width="26" height="26"
+                            alt="" />
+                    </i>
+                    <span>My Account</span>
+                </a>
 
-                    <a href="{{ route('logout') }}" class="nav-link {{ request()->routeIs('logout') ? 'active' : '' }}">
-                        <i>
-                            <img src="{{ asset('assets/images/icons/logout.jpg') }}" width="26" height="26"
-                                alt="" />
-                        </i>
-                        <span>Logout</span>
-                    </a>
-                    {{--  --}}
-                </nav>
-                <!-- /.sidebar-menu -->
-            </div>
-            <!-- /.sidebar -->
-        </aside>
+                <a href="{{ route('logout') }}" class="nav-link {{ request()->routeIs('logout') ? 'active' : '' }}">
+                    <i>
+                        <img src="{{ asset('assets/images/icons/logout.jpg') }}" width="26" height="26"
+                            alt="" />
+                    </i>
+                    <span>Logout</span>
+                </a>
+                {{--  --}}
+            </nav>
+            <!-- /.sidebar-menu -->
+        </div>
+        <!-- /.sidebar -->
+    </aside>
