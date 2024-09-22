@@ -68,7 +68,7 @@
 
                                 </td>
                           
-                             @hasanyrole('purchasing_officer|Admin')
+                             @hasanyrole('purchasing_officer|admin')
                                 <td>
                                     <a href="{{ route('purchases.edit', $ap->id) }}" class="btn btn-success">Edit</a>
 

@@ -79,7 +79,7 @@
                              
                                 
                                 {{-- @if(Auth::user()->role->name == 'purchasing_officer'|| Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'store_officer' || Auth::user()->role->name == 'authoriser') --}}
-                                @hasanyrole('purchasing_officer|authoriser|store_officer|Admin')
+                                @hasanyrole('purchasing_officer|authoriser|store_officer|admin')
                                 <td>
                                     <a href="{{ route('purchases.editlist', $rq->id) }}" class="btn btn-success">Edit</a>
 
@@ -88,7 +88,7 @@
 
                                
                                 {{-- @if(Auth::user()->role->name == 'purchasing_officer'|| Auth::user()->role->name == 'admin') --}}
-                                @hasanyrole('purchasing_officer|Admin')
+                                @hasanyrole('purchasing_officer|admin')
                                 <td>
 
                                     <form action="{{ route('purchases.purchase_destroy', $rq->id) }}" method="post">

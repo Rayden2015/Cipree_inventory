@@ -58,7 +58,7 @@
                             <th>Edit</th>
                             <th>View</th>
 
-                            @if(Auth::user()->hasRole('Admin'))
+                            @if(Auth::user()->hasRole('admin'))
                                 <th>Delete</th>
                             @endif
                             <th>Export</th>
@@ -78,7 +78,7 @@
                                     <a href="{{ route('purchases.show', $ph->id) }}" class="btn btn-secondary">View</a>
 
                                 </td>
-                                @if(Auth::user()->hasRole('Admin'))
+                                @if(Auth::user()->hasRole('admin'))
                                     <td>
 
                                         <form action="{{ route('purchases.destroy', $ph->id) }}" method="post">

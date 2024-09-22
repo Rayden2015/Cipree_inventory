@@ -68,7 +68,7 @@
                             Auth::user()->hasRole('store_officer'))
                         <th>Edit</th>
                     @endif
-                     @if (Auth::user()->hasRole('purchasing_officer') || Auth::user()->hasRole('Admin'))
+                     @if (Auth::user()->hasRole('purchasing_officer') || Auth::user()->hasRole('admin'))
                         <th>Delete</th>
                     @endif
                         </tr>
@@ -106,7 +106,7 @@
                         @endif
 
 
-                        @if (Auth::user()->hasRole('purchasing_officer') || Auth::user()->hasRole('Admin'))
+                        @if (Auth::user()->hasRole('purchasing_officer') || Auth::user()->hasRole('admin'))
                             <td>
 
                                 <form action="{{ route('purchases.purchase_destroy', $rq->id) }}"

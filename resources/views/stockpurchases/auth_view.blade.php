@@ -217,7 +217,7 @@
                 <a href="{{ URL::previous() }}" id="backbtn" class="float-right"><img
                         src="{{ asset('assets/images/icons/back.png') }}" style="width:30px; height:30px;"></a>
             @endif --}}
-            @if (Auth::user()->hasRole('Admin') || Auth::user()->hasRole('authoriser'))
+            @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('authoriser'))
                 <a href="{{ route('auth_spr_lists') }}" id="printbtn" class="btn btn-primary float-right">Back</a>
             @endif
             @if (Auth::user()->hasRole('purchasing_officer'))
@@ -454,7 +454,7 @@
                     </div>
                     @endif
                     {{-- <a href="#" id="printbtn" onclick="window.print()" class="btn btn-primary float-right">Print</a> --}}
-                    @if (Auth::user()->hasRole('Admin') || Auth::user()->hasRole('authoriser'))
+                    @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('authoriser'))
                         {{-- <a href="{{ URL::previous() }}" class="btn btn-primary float-left">Approve</a> --}}
                         @if ($sorder->approval_status == '')
                             {{-- {{ 'not yet ' }} --}}

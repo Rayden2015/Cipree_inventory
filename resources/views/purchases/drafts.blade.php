@@ -81,7 +81,7 @@
 
                                
                                 {{-- @if(Auth::user()->role->name == 'purchasing_officer'|| Auth::user()->role->name == 'admin') --}}
-                                @hasanyrole('purchasing_officer|Admin')
+                                @hasanyrole('purchasing_officer|admin')
                                 <td>
 
                                     <form action="{{ route('purchases.purchase_destroy', $rq->id) }}" method="post">

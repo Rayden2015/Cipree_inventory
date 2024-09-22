@@ -68,7 +68,7 @@
                                 <th>Edit</th>
                             @endif
                             {{-- @if (Auth::user()->role->name == 'admin') --}}
-                            @if (Auth::user()->hasRole('Admin'))
+                            @if (Auth::user()->hasRole('admin'))
                                 <th>Delete</th>
                             @endif
 
@@ -104,7 +104,7 @@
                                 @if ($order->status == 'Supplied')
                                     <td>Items Already Supplied</td>
                                 @else
-                                    @if (Auth::user()->hasRole('Admin'))
+                                    @if (Auth::user()->hasRole('admin'))
                                         <td>
                                             <form action="" method="post">
                                                 @csrf

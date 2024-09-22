@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-@if (Auth::user()->hasRole('Admin') || Auth::user()->hasRole('purchasing_officer'))
+@if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('purchasing_officer'))
     <!DOCTYPE html>
     <html lang="en">
 

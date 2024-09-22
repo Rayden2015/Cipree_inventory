@@ -50,7 +50,7 @@
                             <th>Status</th>
                             <th>View</th>
                             {{-- @if(Auth::user()->role->name == 'purchasing_officer'|| Auth::user()->role->name == 'admin') --}}
-                            @hasanyrole('purchasing_officer|Admin')
+                            @hasanyrole('purchasing_officer|admin')
                                 <th>Edit</th>
                             @endhasanyrole
                             <th>Delete</th>
@@ -71,13 +71,13 @@
 
                                 </td>
                                 {{-- @if(Auth::user()->role->name == 'purchasing_officer'|| Auth::user()->role->name == 'admin') --}}
-                                @hasanyrole('purchasing_officer|Admin')
+                                @hasanyrole('purchasing_officer|admin')
                                 <td>
                                     <a href="{{ route('purchases.edit', $ap->id) }}" class="btn btn-success">Edit</a>
 
                                 </td>
                                 @endhasanyrole
-@hasrole('Admin')
+@hasrole('admin')
                                 <td>
 
                                     <form action="{{ route('purchases.destroy', $ap->id) }}" method="post">

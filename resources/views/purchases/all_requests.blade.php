@@ -50,20 +50,20 @@
                             <th>Status</th>
                             <th>View</th>
                             {{-- @if (Auth::user()->role->name == 'purchasing_officer') --}}
-                             @hasanyrole('purchasing_officer|Admin')
+                             @hasanyrole('purchasing_officer|admin')
                                 <th>Generate Order</th>
                             @endhasanyrole
                             {{-- @if (Auth::user()->role->name == 'purchasing_officer' ||
                                     Auth::user()->role->name == 'admin' ||
                                     Auth::user()->role->name == 'store_officer' ||
                                     Auth::user()->role->name == 'store_assistant') --}}
-                                    @hasanyrole('purchasing_officer|Admin|store_officer|store_assistant')
+                                    @hasanyrole('purchasing_officer|admin|store_officer|store_assistant')
                                 <th>Edit</th>
                             @endhasanyrole
                             <th>Export</th>
 
                             {{-- @if (Auth::user()->role->name == 'admin') --}}
-                            @hasrole('Admin')
+                            @hasrole('admin')
                                 <th>Delete</th>
                             @endhasrole
 
@@ -82,14 +82,14 @@
 
                                 </td>
                                 {{-- @if (Auth::user()->role->name == 'purchasing_officer') --}}
-                                 @hasanyrole('purchasing_officer|Admin')
+                                 @hasanyrole('purchasing_officer|admin')
                                     <td>
                                         <a href="{{ route('purchases.generate_order', $rq->id) }}"
                                             class="btn btn-info">Generate</a>
 
                                     </td>
                                 @endhasanyrole
-                                @hasanyrole('purchasing_officer|Admin|store_officer|store_assistant')
+                                @hasanyrole('purchasing_officer|admin|store_officer|store_assistant')
                                     <td>
                                         <a href="{{ route('orders.edit', $rq->id) }}" class="btn btn-success">Edit</a>
 
@@ -100,7 +100,7 @@
                                         class="btn btn-primary">Export</a>
 
                                 </td>
-                                @hasrole('Admin')
+                                @hasrole('admin')
                                     <td>
 
                                         <form action="{{ route('orders.destroy', $rq->id) }}" method="post">

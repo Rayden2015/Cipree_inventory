@@ -49,7 +49,7 @@
                             <th>Type of purchase</th>
                             <th>Status</th>
                             <th>View</th>
-                            @hasanyrole('purchasing_officer|Admin')
+                            @hasanyrole('purchasing_officer|admin')
                                 <th>Edit</th>
                             @endhasanyrole
                             <th>Delete</th>
@@ -69,7 +69,7 @@
                                     <a href="{{ route('purchases.show', $rq->id) }}" class="btn btn-secondary">View</a>
 
                                 </td>
-                                @hasanyrole('purchasing_officer|Admin')
+                                @hasanyrole('purchasing_officer|admin')
                                     <td>
                                         <a href="{{ route('purchases.edit', $rq->id) }}" class="btn btn-success">Edit</a>
 

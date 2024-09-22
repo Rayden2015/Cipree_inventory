@@ -49,7 +49,7 @@
                             <th>Type of purchase</th>
                             <th>Status</th>
                             <th>View</th>
-                             @if(Auth::user()->hasRole('Admin') || Auth::user()->hasRole('purchasing_officer'))
+                             @if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('purchasing_officer'))
                                 <th>Edit</th>
                             @endif
                             <th>Delete</th>
@@ -68,7 +68,7 @@
                                     <a href="{{ route('purchases.show', $dl->id) }}" class="btn btn-secondary">View</a>
 
                                 </td>
-                                 @if(Auth::user()->hasRole('Admin') || Auth::user()->hasRole('purchasing_officer'))
+                                 @if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('purchasing_officer'))
                                     <td>
                                         <a href="{{ route('purchases.edit', $dl->id) }}" class="btn btn-success">Edit</a>
 

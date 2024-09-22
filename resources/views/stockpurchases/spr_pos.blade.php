@@ -64,7 +64,7 @@
                             @hasanyrole('purchasing_officer|authoriser|store_officer')
                                 <th>Edit</th>
                             @endhasanyrole
-                            @hasanyrole('purchasing_officer|Admin')
+                            @hasanyrole('purchasing_officer|admin')
                             <th>Delete</th>
                         @endhasanyrole
                         {{-- <th>Export</th> --}}
@@ -96,7 +96,7 @@
                                 @endhasanyrole
 
                                
-                                @hasanyrole('purchasing_officer|Admin')
+                                @hasanyrole('purchasing_officer|admin')
                                 <td>
 
                                     <form action="{{ route('spr_pos_delete', $rq->id) }}" method="post">

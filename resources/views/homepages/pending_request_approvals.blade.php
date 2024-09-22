@@ -62,7 +62,7 @@
                             <th>Enduser</th>
                             <th>Status</th>
                              <th>View</th>
-                             @if(Auth::user()->hasRole('purchasing_officer') || Auth::user()->hasRole('Admin'))
+                             @if(Auth::user()->hasRole('purchasing_officer') || Auth::user()->hasRole('admin'))
                                  <th>Edit</th>
                              @endif
                         </tr>
@@ -81,7 +81,7 @@
                                     <a href="{{ route('orders.show', $ap->id) }}" class="btn btn-secondary">View</a>
 
                                 </td>
-                                @if(Auth::user()->hasRole('purchasing_officer') || Auth::user()->hasRole('Admin'))
+                                @if(Auth::user()->hasRole('purchasing_officer') || Auth::user()->hasRole('admin'))
                                 <td>
                                     <a href="{{ route('orders.edit', $ap->id) }}" class="btn btn-success">Edit</a>
 

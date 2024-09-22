@@ -68,7 +68,7 @@
                                 <th>Edit</th>
                             @endif
 
-                            @if (Auth::user()->hasRole('Admin'))
+                            @if (Auth::user()->hasRole('admin'))
                                 <th>Delete</th>
                             @endif
                             <th>Export</th>
@@ -102,7 +102,7 @@
                                     </td>
                                 @endif
 
-                                @if (Auth::user()-hasRole('Admin'))
+                                @if (Auth::user()-hasRole('admin'))
                                     <td>
 
                                         <form action="{{ route('purchases.purchase_destroy', $rq->id) }}" method="post">

@@ -49,10 +49,10 @@
                            <th>Requested Date</th>
                            <th>Status</th>
                             <th>View</th>
-                            @if(Auth::user()->hasRole('Admin') || Auth::user()->hasRole('purchasing_officer'))
+                            @if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('purchasing_officer'))
                                 <th>Edit</th>
                             @endif
-                            @if(Auth::user()->hasRole('Admin') || Auth::user()->hasRole('purchasing_officer'))
+                            @if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('purchasing_officer'))
                             <th>Delete</th>
                         @endif
                         <th>Export</th>
@@ -74,7 +74,7 @@
 
                                 </td>
                              
-                                @if(Auth::user()->hasRole('Admin') || Auth::user()->hasRole('purchasing_officer'))
+                                @if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('purchasing_officer'))
                                 <td>
                                     <a href="{{ route('purchases.editlist', $rq->id) }}" class="btn btn-success">Edit</a>
 
