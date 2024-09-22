@@ -151,6 +151,8 @@ class PermissionSeeder extends Seeder
             'edit-employee',
             'delete-employee',
 
+            // product history
+            'view-product_history'
             // Site Admin Permissions
             // Add your site admin permissions here
         ];

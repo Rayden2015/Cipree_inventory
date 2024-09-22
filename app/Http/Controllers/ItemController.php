@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Uom;
 use App\Models\Item;
 use App\Models\Category;
+use App\Models\SorderPart;
 use Illuminate\Http\Request;
 use App\Models\InventoryItem;
 use Illuminate\Support\Facades\DB;
 use App\Models\InventoryItemDetail;
+use Illuminate\Support\Facades\Log;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use App\Models\Uom;
 
 class ItemController extends Controller
 {
@@ -30,48 +31,7 @@ class ItemController extends Controller
     public function index()
     {
         try {
-            // $data['itemsa'] = DB::table('inventory_items')
-            //     ->select('inventory_items.*')
-            //     ->where('inventory_items.quantity', '>', '0')
-            //     ->join('items', 'inventory_items.item_id', '=', 'items.id')
-
-            //     ->select('inventory_items.item_id', DB::raw('SUM(quantity) as new_stock_quantity'))
-            //     ->groupBy('inventory_items.item_id')
-            //     ->get();
-
-            // $data['itemsb'] = DB::table('inventory_items')
-            //     ->select('inventory_items.*')
-            //     ->where('inventory_items.quantity', '>', '0')
-            //     ->join('items', 'inventory_items.item_id', '=', 'items.id')
-            //     ->select('inventory_items.item_id', DB::raw('SUM(inventory_items.amount) as amount'))
-            //     ->groupBy('inventory_items.item_id')
-            //     ->get();
-
-            // foreach ($data['itemsa'] as $product_item) {
-            //     $r1 =   Item::updateOrCreate(
-            //         ['id' => $product_item->item_id], // Use $product_item->id instead of $product_item['items']['id']
-            //         ['stock_quantity' => $product_item->new_stock_quantity] // Use $product_item->new_quantity instead of $product_item['quantity']['new_quantity']
-            //     );
-            //     if ($r1->wasRecentlyCreated) {
-            //         Log::info("Itemsa which was newly created", [
-            //             'Details' => $r1
-            //         ]);
-            //         $r1->delete();
-            //     }
-            // }
-            // foreach ($data['itemsb'] as $product_item) {
-            //     $r2 =  Item::updateOrCreate(
-            //         ['id' => $product_item->item_id], // Use $product_item->id instead of $product_item['items']['id']
-            //         ['amount' => $product_item->amount] // Use $product_item->new_quantity instead of $product_item['quantity']['new_quantity']
-            //     );
-            //     if ($r2->wasRecentlyCreated) {
-            //         Log::info("Itemsb which was newly created", [
-            //             'Details' => $r2
-            //         ]);
-            //         $r2->delete();
-            //     }
-            // }
-
+           
             // $items = Item::all();
             $items = Item::orderBy('item_description')->paginate(20);
             // $items = Item::join('inventory_items','items.id', '=','inventory_items.item_id')->latest('items.created_at')->paginate(20);
@@ -83,8 +43,7 @@ class ItemController extends Controller
                 //'itmes' => $items
             ]);
             return view('items.index', compact('items'));
-            // dd($items);
-            // dd($data['itemsa']);
+          
 
         } catch (\Exception $e) {
             // Log errors
@@ -100,7 +59,6 @@ class ItemController extends Controller
         }
     }
 
-
     /**
      * Show the form for creating a new resource.
      */
@@ -109,9 +67,6 @@ class ItemController extends Controller
 
         $categories = Category::all();
         $uom = Uom::all();
-
-
-
         return view('items.create', compact('categories', 'uom'));
     }
 
@@ -173,8 +128,6 @@ class ItemController extends Controller
                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
-
-
     /**
      * Display the specified resource.
      */
@@ -261,21 +214,20 @@ class ItemController extends Controller
                 // Add other relevant information
             ]);
 
-            
+
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             // Log errors
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('ItemController | Update() Error ' . $unique_id ,[
+            Log::channel('error_log')->error('ItemController | Update() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
     /**
@@ -295,21 +247,20 @@ class ItemController extends Controller
                 // Add other relevant information
             ]);
 
-          
+
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
             // Log errors
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('ItemController | Destroy() Error ' . $unique_id ,[
+            Log::channel('error_log')->error('ItemController | Destroy() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
     public function item_search(Request $request)
@@ -322,7 +273,7 @@ class ItemController extends Controller
                 ->orWhere('item_stock_code', 'like', "%" . $request->search . "%")
                 ->latest()->paginate();
             if ($items->isEmpty()) {
-             
+
                 return redirect()->back()->withError('Item not found');
             } elseif ($items->isNotEmpty()) {
                 return view('items.index', compact('items'));
@@ -330,5 +281,37 @@ class ItemController extends Controller
         } else     $items = Item::latest()->paginate(20);
 
         return view('items.index', compact('items'));
+    }
+
+    public function product_history(Request $request)
+    {
+        $query = Item::query();
+    
+        // Check if there's a search query and apply filters
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('item_description', 'like', "%{$search}%")
+                  ->orWhere('item_part_number', 'like', "%{$search}%")
+                  ->orWhere('item_stock_code', 'like', "%{$search}%");
+            });
+        }
+    
+        // Paginate results
+        $product_history = $query->latest()->paginate(20);
+        
+        return view('product_history.index', compact('product_history'));
+    }
+    
+
+    public function product_history_show($id)
+    {
+        $product_history = Item::find($id);
+        $received = InventoryItemDetail::where('item_id','=',$id)->get();
+        $supplied = SorderPart::
+        leftjoin('sorders','sorders.id','=','sorder_parts.sorder_id')->
+        where('sorder_parts.item_id','=',$id)->
+        where('sorders.status','=','Supplied')->get();
+        return view('product_history.show', compact('product_history','received','supplied'));
     }
 }
