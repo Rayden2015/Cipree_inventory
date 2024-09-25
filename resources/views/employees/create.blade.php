@@ -30,8 +30,22 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label for="name">Name:</label>
-                        <input type="text" name="name" class="form-control" value="{{ old('name') }}" required>
+                        <label for="first name">First Name:</label>
+                        <input type="text" name="fname" class="form-control" value="{{ old('fname') }}" required>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="name">Last Name:</label>
+                        <input type="text" name="lname" class="form-control" value="{{ old('lname') }}" required>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="name">Other Name:</label>
+                        <input type="text" name="oname" class="form-control" value="{{ old('oname') }}" required>
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -57,7 +71,8 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="national_id_passport_number">National ID/Passport Number:</label>
-                        <input type="text" name="national_id_passport_number" class="form-control" value="{{ old('national_id_passport_number') }}">
+                        <input type="text" name="national_id_passport_number" class="form-control"
+                            value="{{ old('national_id_passport_number') }}">
                     </div>
                 </div>
 
@@ -76,7 +91,15 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="nationality">Nationality:</label>
-                        <input type="text" name="nationality" class="form-control" value="{{ old('nationality') }}">
+                        <select class="form-control" id="nationality" name="nationality">
+                            @foreach ($countries as $code => $country)
+                                <option value="{{ $code }}" {{ $country['name'] == 'Ghana' ? 'selected' : '' }}>
+                                    {{ $country['name'] }}
+                                </option>
+                            @endforeach
+                        </select>
+                        
+                        
                     </div>
                 </div>
 
@@ -107,7 +130,16 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="department">Department:</label>
-                        <input type="text" name="department" class="form-control" value="{{ old('department') }}">
+                        <select id="department_id" type="text" required
+                        class="form-control @error('department_id') is-invalid @enderror"
+                        name="department_id" autocomplete="department_id" autofocus>
+                        <option value="" selected hidden>Please Select</option>
+
+                        @foreach ($departments as $dt)
+                            <option {{ old('dt') == $dt->id ? 'selected' : '' }}
+                                value="{{ $dt->id }}">{{ $dt->name }}</option>
+                        @endforeach
+                    </select>
                     </div>
                 </div>
 
@@ -156,21 +188,24 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="contract_start_date">Contract Start Date:</label>
-                        <input type="date" name="contract_start_date" class="form-control" value="{{ old('contract_start_date') }}">
+                        <input type="date" name="contract_start_date" class="form-control"
+                            value="{{ old('contract_start_date') }}">
                     </div>
                 </div>
 
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="contract_end_date">Contract End Date:</label>
-                        <input type="date" name="contract_end_date" class="form-control" value="{{ old('contract_end_date') }}">
+                        <input type="date" name="contract_end_date" class="form-control"
+                            value="{{ old('contract_end_date') }}">
                     </div>
                 </div>
 
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="probation_period">Probation Period (months):</label>
-                        <input type="number" name="probation_period" class="form-control" value="{{ old('probation_period') }}">
+                        <input type="number" name="probation_period" class="form-control"
+                            value="{{ old('probation_period') }}">
                     </div>
                 </div>
             </div>

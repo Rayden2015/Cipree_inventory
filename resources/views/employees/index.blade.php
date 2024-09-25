@@ -18,7 +18,8 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Name</th>
+                <th>First Name</th>
+                <th>Last Name</th>
                 <th>Email</th>
                 <th>Job Title</th>
                 <th>Action</th>
@@ -28,7 +29,8 @@
             @foreach ($employees as $employee)
                 <tr>
                     <td>{{ $employee->id }}</td>
-                    <td>{{ $employee->name }}</td>
+                    <td>{{ $employee->fname }}</td>
+                    <td>{{ $employee->lname }}</td>
                     <td>{{ $employee->email }}</td>
                     <td>{{ $employee->job_title }}</td>
                     
@@ -36,11 +38,11 @@
              
                     <td>
                         @can('edit-employee')
-                        <a href="{{ route('employees.edit', $employee->id) }}" class="btn btn-primary">Edit</a>
+                        <a href="{{ route('employees.edit', $employee->id) }}" class="btn btn-success">Edit</a>
                         @endcan
 
                         @can('view-employee')
-                        <a href="{{ route('employees.show', $employee->id) }}" class="btn btn-success">Show</a>
+                        <a href="{{ route('employees.show', $employee->id) }}" class="btn btn-secondary">Show</a>
                         @endcan
                         @can('delete-employee')
                         <form action="{{ route('employees.destroy', $employee->id) }}" method="POST" style="display:inline-block;">

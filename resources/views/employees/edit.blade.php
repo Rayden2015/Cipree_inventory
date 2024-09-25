@@ -30,8 +30,20 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label for="name">Name:</label>
-                        <input type="text" name="name" class="form-control" value="{{ $employee->name }}" required>
+                        <label for="name">First Name:</label>
+                        <input type="text" name="fname" class="form-control" value="{{ $employee->fname }}" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="name">Last Name:</label>
+                        <input type="text" name="lname" class="form-control" value="{{ $employee->lname }}" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="name">Other Name:</label>
+                        <input type="text" name="oname" class="form-control" value="{{ $employee->oname }}" required>
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -75,7 +87,13 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="nationality">Nationality:</label>
-                        <input type="text" name="nationality" class="form-control" value="{{ $employee->nationality }}">
+                        <select class="form-control" id="nationality" name="nationality">
+                            @foreach ($countries as $code => $country)
+                                <option value="{{ $code }}" {{ $code == $employee->nationality ? 'selected' : '' }}>
+                                    {{ $country['name'] }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
 
@@ -105,7 +123,14 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="department">Department:</label>
-                        <input type="text" name="department" class="form-control" value="{{ $employee->department }}">
+                        <select data-placeholder="Choose..." name="department_id" id="department_id"
+                        class="select-search form-control">
+                        <option value=""></option>
+                        @foreach ($departments as $dt)
+                            <option {{ $employee->department_id == $dt->id ? 'selected' : '' }}
+                                value="{{ $dt->id }}">{{ $dt->name }}</option>
+                        @endforeach
+                    </select>
                     </div>
                 </div>
 

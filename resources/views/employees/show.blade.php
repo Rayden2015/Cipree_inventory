@@ -15,8 +15,20 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="form-group">
-                    <label>Name:</label>
-                    <p>{{ $employee->name }}</p>
+                    <label>First Name:</label>
+                    <p>{{ $employee->fname }}</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Last Name:</label>
+                    <p>{{ $employee->lname }}</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Other Name:</label>
+                    <p>{{ $employee->oname }}</p>
                 </div>
             </div>
             <div class="col-md-6">
@@ -57,7 +69,17 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label>Nationality:</label>
-                    <p>{{ $employee->nationality }}</p>
+                    <p>
+                        @if (!empty($employee->nationality) && isset($countries[strtolower($employee->nationality)]))
+                            {{ $countries[strtolower($employee->nationality)]['name'] }}
+                        @else
+                            Unknown
+                        @endif
+                    </p>
+                    
+                    
+                    
+                    
                 </div>
             </div>
 
@@ -82,7 +104,7 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label>Department:</label>
-                    <p>{{ $employee->department }}</p>
+                    <p>{{ $employee->department->name ?? '' }}</p>
                 </div>
             </div>
 
