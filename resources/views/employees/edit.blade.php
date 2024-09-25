@@ -37,13 +37,13 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="name">Last Name:</label>
-                        <input type="text" name="lname" class="form-control" value="{{ $employee->lname }}" required>
+                        <input type="text" name="lname" class="form-control" value="{{ $employee->lname }}">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="name">Other Name:</label>
-                        <input type="text" name="oname" class="form-control" value="{{ $employee->oname }}" required>
+                        <input type="text" name="oname" class="form-control" value="{{ $employee->oname }}">
                     </div>
                 </div>
                 <div class="col-md-6">

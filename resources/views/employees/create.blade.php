@@ -38,14 +38,14 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="name">Last Name:</label>
-                        <input type="text" name="lname" class="form-control" value="{{ old('lname') }}" required>
+                        <input type="text" name="lname" class="form-control" value="{{ old('lname') }}">
                     </div>
                 </div>
 
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="name">Other Name:</label>
-                        <input type="text" name="oname" class="form-control" value="{{ old('oname') }}" required>
+                        <input type="text" name="oname" class="form-control" value="{{ old('oname') }}">
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -130,7 +130,7 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="department">Department:</label>
-                        <select id="department_id" type="text" required
+                        <select id="department_id" type="text" 
                         class="form-control @error('department_id') is-invalid @enderror"
                         name="department_id" autocomplete="department_id" autofocus>
                         <option value="" selected hidden>Please Select</option>
