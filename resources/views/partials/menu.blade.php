@@ -49,9 +49,9 @@
                     {{-- @if (Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'site_admin') --}}
                     @can('company-module')
                     <li
-                        class="nav-item {{ request()->routeIs('company.index', 'users.index', 'reviews.index', 'sites*', 'roles*', 'permissions*', 'uom*') ? 'menu-open' : '' }}">
+                        class="nav-item {{ request()->routeIs('company.index', 'users.index', 'reviews.index', 'sites*', 'roles*', 'permissions*', 'uom*','send.bulk.email') ? 'menu-open' : '' }}">
                         <a href="#"
-                            class="nav-link {{ request()->routeIs('company.index', 'users.index', 'reviews.index', 'sites*', 'roles*', 'permissions*', 'uom*') ? 'active' : '' }}">
+                            class="nav-link {{ request()->routeIs('company.index', 'users.index', 'reviews.index', 'sites*', 'roles*', 'permissions*', 'uom*','send.bulk.email') ? 'active' : '' }}">
                             <i>
                                 <img src="{{ asset('assets/images/icons/comp.png') }}"width="26" height="26"
                                     alt="" />
@@ -99,6 +99,16 @@
                                         <p>Sites</p>
                                     </a>
                                 </li>
+                            @endcan
+
+                            @can('bulk-mails')
+                            <li class="nav-item">
+                                <a href="{{ route('send.bulk.email') }}"
+                                    class="nav-link {{ request()->routeIs('send.bulk.email') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Bulk Emails</p>
+                                </a>
+                            </li>
                             @endcan
 
                             @can('view-uom')

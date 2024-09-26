@@ -28,6 +28,7 @@ use App\Http\Controllers\AuthoriserController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\StoreRequestController;
+use App\Http\Controllers\EmailController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -309,7 +310,8 @@ Route::get('spr_pos_show/{id}', [\App\Http\Controllers\StockPurchaseRequestContr
 Route::get('spr_pos_edit/{id}', [\App\Http\Controllers\StockPurchaseRequestController::class, 'spr_pos_edit'])->name('spr_pos_edit');
 Route::delete('spr_pos_delete/{id}', [\App\Http\Controllers\StockPurchaseRequestController::class, 'spr_pos_delete'])->name('spr_pos_delete');
 
-
+Route::get('/send-bulk-email', [EmailController::class, 'showForm'])->name('send.bulk.email');
+Route::post('/send-bulk-email', [EmailController::class, 'sendBulkEmail'])->name('send.bulk.email.submit');
 
 Route::resource('taxes', TaxLeviesController::class);
 Route::resource('levies', LevyController::class);
