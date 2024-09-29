@@ -1,17 +1,4 @@
-@extends('layouts.admin')
-@section('content')
-    @if (Auth::user()->hasRole('site_admin'))
-        <style>
-            #rcorners1 {
-                border-radius: 25px;
-
-            }
-        </style>
-        @php
-            $first_name = App\Http\Controllers\UserController::username();
-            $logo = App\Http\Controllers\UserController::logo();
-        @endphp
-       
+@can('site-admin-dashboard')
         <div class="container-fluid">
             <br>
             <!-- Small boxes (Stat box) -->
@@ -161,10 +148,5 @@
                 <!-- /.row (main row) -->
             </div>
         </div>
-        <script>
-            setTimeout(function() {
-                window.location.reload();
-            }, 60000);
-        </script>
-    @endif
-@endsection
+    @endcan
+    {{-- end of site admin dashboard --}}

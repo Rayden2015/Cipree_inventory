@@ -152,9 +152,21 @@ class PermissionSeeder extends Seeder
             'delete-employee',
 
             // product history
-            'view-product_history'
+            'view-product_history',
             // Site Admin Permissions
             // Add your site admin permissions here
+
+            'bulk-emails',
+
+            // dashboards
+            'admin-dashboard',
+            'authoriser-dashboard,',
+            'finance-officer-dashboard',
+            'purchasing-officer-dashboard',
+            'requester-dashboard',
+            'site-admin-dashboard',
+            'store-officer-dashboard',
+            'super-admin-dashboard',
         ];
 
         // Looping and inserting permissions into the Permission table

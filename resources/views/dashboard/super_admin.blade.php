@@ -1,17 +1,4 @@
-@extends('layouts.admin')
-@section('content')
-@if(Auth::user()->hasRole('Super Admin'))
-<style>
-    #rcorners1 {
-  border-radius: 25px;
- 
-}
-</style>
-@php
-    $first_name = App\Http\Controllers\UserController::username();
-    $logo = App\Http\Controllers\UserController::logo();
-@endphp
-    
+@can('super-admin-dashboard')
 <div class="container-fluid">
     <!-- Small boxes (Stat box) -->
     <div class="row">
@@ -106,10 +93,6 @@
 
     <!-- /.row (main row) -->
 </div>
-<script>
-    setTimeout(function(){
-window.location.reload();
-}, 60000);
-</script>
-@endif 
-@endsection
+@endcan
+
+{{-- end of super admin dashboard --}}

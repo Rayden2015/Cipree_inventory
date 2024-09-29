@@ -1,46 +1,44 @@
 @extends('layouts.admin')
 
 @section('content')
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <h1>Dashboard</h1>
-                @hasrole('Super Admin')
-                    @include('dashboard.superadmin')
-                @endhasrole
+    <style>
+        #rcorners1 {
+            border-radius: 25px;
 
-                @hasrole('Admin')
-                    @include('dashboard.admin')
-                @endhasrole
+        }
+    </style>
+    @php
+        $first_name = App\Http\Controllers\UserController::username();
+        $logo = App\Http\Controllers\UserController::logo();
+    @endphp
+    <br>
+    {{-- admin dashboard --}}
+    @include('dashboard.admin')
 
-                @hasrole('requester')
-                    @include('dashboard.requester')
-                @endhasrole
+    {{-- authoriser dashboard --}}
+    @include('dashboard.authoriser')
 
-                @hasrole('store_officer')
-                    @include('dashboard.store_officer')
-                @endhasrole
+    {{-- finance officer dashboard --}}
+    @include('dashboard.finance_officer')
 
-                @hasrole('store_assistant')
-                    @include('dashboard.store_officer')
-                @endhasrole
+    {{-- purchasing officer dashboard --}}
+    @include('dashboard.purchasing_officer')
 
-                @hasrole('purchasing_officer')
-                    @include('dashboard.purchasing_officer')
-                @endhasrole
+    {{-- requester dashboard --}}
+    @include('dashboard.requester')
 
-                @hasrole('authoriser')
-                    @include('dashboard.authoriser')
-                @endhasrole
-                @hasrole('site_admin')
-                    @include('dashboard.site_admin')
-                @endhasrole
+    {{-- site admin dashboard --}}
+    @include('dashboard.site_admin')
 
-                @hasrole('finance_officer')
-                @include('dashboard.store_officer')
-                @endhasrole
+    {{-- store officer dashboard --}}
+    @include('dashboard.store_officer')
 
-            </div>
-        </div>
-    </div>
+    {{-- super admin dashboard --}}
+    @include('dashboard.super_admin')
+
+    <script>
+        setTimeout(function() {
+            window.location.reload();
+        }, 60000);
+    </script>
 @endsection
