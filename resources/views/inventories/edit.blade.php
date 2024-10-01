@@ -319,7 +319,7 @@
                                                 </td>
                                                 <td>
                                                     @if (Auth::user()->hasRole('store_officer'))
-                                                    <button type="submit" onclick="test()"
+                                                    <button type="submit" onclick="editable()"
                                                     class="btn btn-primary">Submit</button>
                                                     @else
                                                        
@@ -527,7 +527,7 @@
             }
         </script>
         <script>
-            function test() {
+            function editable() {
                 $('#editable').load(document.URL + ' #editable tr');
                 // document.getElementById("editable").innerHTML = "Hello World";
                 // event.preventDefault();

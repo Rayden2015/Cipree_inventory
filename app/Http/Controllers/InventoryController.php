@@ -461,7 +461,7 @@ class InventoryController extends Controller
                 // Handle the case where deletion is not allowed
                 // For example, you can return a response indicating that deletion is not allowed
              
-                return redirect()->back()->withError('Contact Admin' . $conflictingItemIds);
+                return redirect()->back()->withError('Contact Admin, Cannot delete inventory record as it has associated items supplied' . $conflictingItemIds);
 
                 // return response()->json(['error' => 'Cannot delete inventory record as it has associated item_ids in sorder_parts'], 422);
             }
