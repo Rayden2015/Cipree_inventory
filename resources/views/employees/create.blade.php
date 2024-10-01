@@ -64,9 +64,10 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="date_of_birth">Date of Birth:</label>
-                        <input type="date" name="date_of_birth" class="form-control" value="{{ old('date_of_birth') }}">
+                        <input type="date" name="date_of_birth" class="form-control" value="{{ old('date_of_birth') }}" max="{{ date('Y-m-d') }}">
                     </div>
                 </div>
+                
 
                 <div class="col-md-6">
                     <div class="form-group">
@@ -196,11 +197,10 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="contract_end_date">Contract End Date:</label>
-                        <input type="date" name="contract_end_date" class="form-control"
-                            value="{{ old('contract_end_date') }}">
+                        <input type="date" name="contract_end_date" class="form-control" value="{{ old('contract_end_date') }}" min="{{ date('Y-m-d') }}">
                     </div>
                 </div>
-
+                
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="probation_period">Probation Period (months):</label>
