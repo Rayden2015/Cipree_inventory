@@ -38,5 +38,8 @@ class Item extends Model
         return $this->belongsTo(Uom::class, 'uom_id');
     }
 
+    public function supplier(){
+        return $this->belongsTo(Supplier::class,'supplier_id');
+    }
 
 }

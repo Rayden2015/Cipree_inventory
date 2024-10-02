@@ -718,7 +718,7 @@ return redirect()->back()
          ->join('inventories', 'inventories.id', '=', 'inventory_items.inventory_id')
          ->where('inventory_items.site_id', '=', $site_id)
          ->where('items.stock_quantity', '>', 0)
-         ->select('items.*', 'inventory_items.*', 'inventories.trans_type')
+         ->select('items.*', 'inventory_items.*', 'inventories.trans_type','inventories.grn_number','inventories.po_number','inventories.supplier_id')
          ->get();
 
       return view('homepages.items_list_site', compact('items'));
