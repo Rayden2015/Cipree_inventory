@@ -63,14 +63,10 @@
                             <th data-priority="1">Part Number</th>
                             <th>Stock Code</th>
                             <th>Qty in Stock</th>
-                            <th>Unit Cost</th>
                             <th>Amount</th>
                             <th>Age</th>
                             <th>Location</th>
                             <th>Puchase Type</th>
-                            <th>GRN Number</th>
-                            <th>PO Number</th>
-                            <th>Supplier</th>
 
                         </tr>
                     </thead>
@@ -83,7 +79,6 @@
                                 <td>{{ $rq->item->item_part_number ?? '' }}</td>
                                 <td>{{ $rq->item->item_stock_code ?? '' }}</td>
                                 <td>{{ $rq->item->stock_quantity ?? '' }}</td>
-                                <td>{{ $rq->unit_cost_exc_vat_gh ?? '' }}</td>
                                 <td>{{ $rq->amount ?? '' }}</td>
                                 <td>
                                     @if ($rq->created_at)
@@ -95,9 +90,6 @@
                                 
                                 <td>{{ $rq->location->name ?? '' }}</td>
                                 <td>{{ $rq->trans_type ?? '' }}</td>
-                                <td>{{ $rq->grn_number ?? '' }}</td>
-                                <td>{{ $rq->po_number ?? '' }}</td>
-                                <td>{{ $rq->supplier->name ?? '' }}</td>
                             @empty
                             <tr>
                                 <td class="text-center" colspan="12">Data Not Found!</td>
