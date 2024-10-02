@@ -51,17 +51,26 @@ return [
     |
     */
 
-    'channels' => [
-        'stack' => [
-            'driver' => 'stack',
-            'channels' => ['single','error_log'],
-            'ignore_exceptions' => false,
-        ],
-'error_log' => [
-        'driver' => 'single',
-        'path' => storage_path('logs/errors/error.log'),
-        'level' => 'error',
+   'channels' => [
+    'stack' => [
+        'driver' => 'stack',
+        'channels' => ['single', 'error_log'],
+        'ignore_exceptions' => false,
     ],
+
+    'update_inventory_item' => [
+        'driver' => 'custom',
+        'via' => \App\Logging\CustomInventoryLogger::class,
+        'level' => 'info', // Set the desired logging level
+        'name' => 'update_inventory_item', // Name it as you like
+    ],
+
+
+        'error_log' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/errors/error.log'),
+            'level' => 'error',
+        ],
         'single' => [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
@@ -93,7 +102,7 @@ return [
             'handler_with' => [
                 'host' => env('PAPERTRAIL_URL'),
                 'port' => env('PAPERTRAIL_PORT'),
-                'connectionString' => 'tls://'.env('PAPERTRAIL_URL').':'.env('PAPERTRAIL_PORT'),
+                'connectionString' => 'tls://' . env('PAPERTRAIL_URL') . ':' . env('PAPERTRAIL_PORT'),
             ],
             'processors' => [PsrLogMessageProcessor::class],
         ],

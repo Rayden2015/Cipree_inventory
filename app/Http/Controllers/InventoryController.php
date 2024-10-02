@@ -358,68 +358,81 @@ class InventoryController extends Controller
         // Redirect back with the error message
         return redirect()->back()->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
     }
-}
+}public function update_inventory_item(Request $request, $id)
+{
+    try {
+        $request->validate([
+            'quantity' => 'gte:0',
+            'unit_cost_exc_vat_gh' => 'required|numeric|min:0',
+            // Validate other required fields as needed
+        ]);
 
+        $auth = Auth::user()->id;
+        $inventory = InventoryItem::find($id);
 
-    public function update_inventory_item(Request $request, $id)
-    {
-        try {
-            $request->validate([
-                'quantity' => 'gte:0',
-            ]);
-            $auth = Auth::user()->id;
-            $inventory = InventoryItem::find($id);
-            $invid = InventoryItem::where('id', '=', $id)->value('inventory_id');
-            $latest_date = Carbon::now();
+        // Check if inventory item exists
+        if (!$inventory) {
+            return redirect()->back()->withError('Inventory item not found.');
+        }
 
-            Log::info('InventoryController| Update Inventory Item', [
-                'user_details' => Auth::user(),
-                'before_InventoryItemDetail_edit' => InventoryItem::find($id),
-            ]);
+        // Clone the inventory item to log its current state before making changes
+        $inventoryBeforeUpdate = clone $inventory;
 
-            $sum = $request->quantity * $request->unit_cost_exc_vat_gh;
+        // Log the current state before making changes
+        Log::info('InventoryController | Update Inventory Item', [
+            'user_details' => Auth::user(),
+            'before_InventoryItemDetail_edit' => json_encode($inventoryBeforeUpdate), // Log the clone
+        ]);
 
-            $newdiscount =  (($request->discount / 100) * $sum);
-            $newamount = $sum - $newdiscount;
+        // Calculate amounts
+        $sum = $request->quantity * $request->unit_cost_exc_vat_gh;
+        $newdiscount = (($request->discount / 100) * $sum);
+        $newamount = $sum - $newdiscount;
 
-            $inventory->description = $request->description;
-            $inventory->uom = $request->uom;
-            $inventory->part_number = $request->part_number;
-            $inventory->stock_code = $request->stock_code;
-            $inventory->quantity = $request->quantity;
-            $inventory->unit_cost_exc_vat_gh = $request->unit_cost_exc_vat_gh;
-            $inventory->amount = $newamount;
-            $inventory->discount = $request->discount;
-            $inventory->location_id = $request->location_id;
-            $inventory->item_id = $request->item_id;
-            Inventory::where('id', '=', $invid)->update(['updated_at' => $latest_date, 'edited_by' => $auth]);
-            $inventory->save();
+        // Prepare data for the inventory item update
+        $inventory->description = $request->description; // Optional field
+        $inventory->uom = $request->uom; // Optional field
+        $inventory->part_number = $request->part_number; // Optional field
+        $inventory->stock_code = $request->stock_code; // Optional field
+        $inventory->quantity = $request->quantity;
+        $inventory->unit_cost_exc_vat_gh = $request->unit_cost_exc_vat_gh;
+        $inventory->amount = $newamount; // Ensure this value is consistently used
+        $inventory->discount = $request->discount; // Optional field
+        $inventory->location_id = $request->location_id; // Optional field
+        $inventory->item_id = $request->item_id; // Optional field
 
-            Log::info(
-                'edited an InventoryItemDetail',
-                [
-                    'user_name' => $auth,
-                    'InventoryItemDetail_after' => $request->all(),
-                    'new_amount' => $newamount,
+        // Save the updated inventory item
+        $inventory->save();
 
-                ]
-            );
-            return redirect()->back();
-         
-            // return back();
-        } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | UpdateInventoryItem() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
+        // Prepare data for logging the update
+        $data = [
+            'user_id' => $auth,
+            'before_InventoryItemDetail_edit' => json_encode($inventoryBeforeUpdate), // Log the clone
+            'after_InventoryItemDetail_edit' => json_encode($request->all()), // Request data after modification
+            'new_amount' => $newamount, // Use the calculated amount here
+            'updated_at' => now(),
+        ];
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
+        // Log the inventory update into your logging table
+        DB::table('update_inventory_item')->insert($data); // Make sure this table exists
 
+        Log::info('Inventory update logged successfully.', ['data' => $data]);
+
+        return redirect()->back()->withSuccess('Inventory item updated and logged successfully.');
+
+    } catch (\Exception $e) {
+        $unique_id = floor(time() - 999999999);
+        Log::channel('error_log')->error('InventoryController | UpdateInventoryItem() Error ' . $unique_id, [
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+        ]);
+
+        // Redirect back with the error message
+        return redirect()->back()
+            ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
     }
+}
+
 
     public function bookUpdate(Request $request)
     {
