@@ -38,12 +38,17 @@
                     <button type="button" class="btn btn-secondary" id="deselect-all">Deselect All</button>
                 </div>
 
-                <!-- User multi-select -->
-                <select id="users" name="users[]" class="form-control" multiple required>
+                <!-- User checkboxes -->
+                <div id="user-checkboxes">
                     @foreach($users as $user)
-                        <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="users[]" value="{{ $user->id }}" id="user-{{ $user->id }}">
+                            <label class="form-check-label" for="user-{{ $user->id }}">
+                                {{ $user->name }} ({{ $user->email }})
+                            </label>
+                        </div>
                     @endforeach
-                </select>
+                </div>
             </div>
 
             <button type="submit" class="btn btn-primary">Send Emails</button>
@@ -55,17 +60,13 @@
     <!-- Script to handle select all / deselect all functionality -->
     <script>
         document.getElementById('select-all').addEventListener('click', function() {
-            let users = document.getElementById('users');
-            for (let i = 0; i < users.options.length; i++) {
-                users.options[i].selected = true;
-            }
+            let checkboxes = document.querySelectorAll('#user-checkboxes input[type="checkbox"]');
+            checkboxes.forEach(checkbox => checkbox.checked = true);
         });
 
         document.getElementById('deselect-all').addEventListener('click', function() {
-            let users = document.getElementById('users');
-            for (let i = 0; i < users.options.length; i++) {
-                users.options[i].selected = false;
-            }
+            let checkboxes = document.querySelectorAll('#user-checkboxes input[type="checkbox"]');
+            checkboxes.forEach(checkbox => checkbox.checked = false);
         });
     </script>
 </body>
