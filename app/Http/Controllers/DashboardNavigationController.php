@@ -714,13 +714,18 @@ return redirect()->back()
       // ->join('inventories','inventories.id','=','inventory_items.inventory_id')
       // ->where('inventory_items.site_id','=',$site_id)
       // ->where('inventory_items.quantity', '>', '0')->get();
-      $items = Item::join('inventory_items', 'inventory_items.item_id', '=', 'items.id')
-         ->leftjoin('inventories', 'inventories.id', '=', 'inventory_items.inventory_id')
-         ->where('inventory_items.site_id', '=', $site_id)
-         ->where('items.stock_quantity', '>', 0)
-         ->select('items.*', 'inventory_items.*', 'inventories.trans_type')
-         ->get();
-
+      // $items = Item::join('inventory_items', 'inventory_items.item_id', '=', 'items.id')
+      //    ->leftjoin('inventories', 'inventories.id', '=', 'inventory_items.inventory_id')
+      //    ->where('inventory_items.site_id', '=', $site_id)
+      //    ->where('items.stock_quantity', '>', 0)
+      //    ->select('items.*', 'inventory_items.*', 'inventories.trans_type')
+      //    ->get();
+      $items = Item::leftjoin('inventory_items', 'inventory_items.item_id', '=', 'items.id')
+      ->leftjoin('inventories', 'inventories.id', '=', 'inventory_items.inventory_id')
+      ->where('inventory_items.site_id', '=', $site_id)
+      ->where('items.stock_quantity', '>', 0)
+      ->select('items.*', 'inventory_items.*', 'inventories.trans_type')
+      ->get();
       return view('homepages.items_list_site', compact('items'));
    }
 }

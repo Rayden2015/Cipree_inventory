@@ -24,7 +24,7 @@ class ItemsListSiteExport implements FromCollection, WithHeadings
         ->leftJoin('inventories', 'inventories.id', '=', 'inventory_items.inventory_id')
         ->leftJoin('suppliers', 'suppliers.id', '=', 'inventories.supplier_id') // Join suppliers table
         ->where('inventory_items.site_id', '=', $site_id)
-        ->where('items.stock_quantity', '>', 0)
+        ->where('inventory_items.quantity', '>', '0')
         ->select(
             'items.item_description', 
             'items.item_part_number', 
