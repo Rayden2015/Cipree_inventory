@@ -63,6 +63,7 @@
                             <th data-priority="1">Part Number</th>
                             <th>Stock Code</th>
                             <th>Qty in Stock</th>
+                            <th>Unit Cost </th>
                             <th>Amount</th>
                             <th>Age</th>
                             <th>Location</th>
@@ -79,7 +80,8 @@
                                 <td>{{ $rq->item->item_part_number ?? '' }}</td>
                                 <td>{{ $rq->item->item_stock_code ?? '' }}</td>
                                 <td>{{ $rq->item->stock_quantity ?? '' }}</td>
-                                <td>{{ $rq->amount ?? '' }}</td>
+                               <td>{{$rq->unit_cost_exc_vat_gh ?? ''}}
+                                <td>{{ $rq->item->amount ?? '' }}</td>
                                 <td>
                                     @if ($rq->created_at)
                                         {{ \Carbon\Carbon::parse($rq->created_at)->diffInDays(now()) }} days

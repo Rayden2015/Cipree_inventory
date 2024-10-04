@@ -31,7 +31,7 @@ class ItemsListSiteExport implements FromCollection, WithHeadings
             'items.item_stock_code', 
             'items.stock_quantity',
             'inventory_items.quantity', 
-            'inventory_items.amount', 
+            'items.amount', 
             'inventory_items.unit_cost_exc_vat_gh', 
             'inventory_items.created_at',  // Select created_at field to calculate age
             'locations.name', 
