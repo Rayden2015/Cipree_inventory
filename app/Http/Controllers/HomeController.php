@@ -42,7 +42,8 @@ class HomeController extends Controller
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function index()
-    {
+{
+    try {
         $site_id = Auth::user()->site->id;
         $authid = Auth::id();
 
@@ -91,10 +92,8 @@ class HomeController extends Controller
             ->where('sorders.status', '=', 'Supplied')
             ->sum('sorder_parts.sub_total');
 
-        // $sub_total_cost_of_parts =  $total_cost_of_partss - $total_cost_of_parts_issued;
         $sub_total_cost_of_parts = $total_cost_of_partss;
         $total_cost_of_parts = number_format($sub_total_cost_of_parts, 2);
-
 
         $stockValueByType = Inventory::selectRaw('inventories.trans_type, sum(inventory_items.amount) as total_value')
             ->join('inventory_items', 'inventories.id', '=', 'inventory_items.inventory_id')
@@ -102,15 +101,15 @@ class HomeController extends Controller
             ->groupBy('inventories.trans_type')
             ->get();
 
-
-
         $total_cost_of_parts_within_the_weeks = Sorder::join('sorder_parts', 'sorders.id', '=', 'sorder_parts.sorder_id')
             ->where('sorders.site_id', '=', $site_id)
             ->where('sorder_parts.site_id', '=', $site_id)
-            ->where('sorders.status', '=', 'Supplied')->whereBetween('sorders.delivered_on', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])->sum('sorder_parts.sub_total');
+            ->where('sorders.status', '=', 'Supplied')
+            ->whereBetween('sorders.delivered_on', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
+            ->sum('sorder_parts.sub_total');
+            
         $total_cost_of_parts_within_the_month = number_format($total_cost_of_parts_within_the_weeks, 2);
 
-        // last worked
         $stockDistribution = InventoryItem::select(
             'categories.name as category_name',
             DB::raw('SUM(inventory_items.amount) as total_amount')
@@ -122,7 +121,7 @@ class HomeController extends Controller
             ->groupBy('categories.name')
             ->get();
 
-        $total_value_items_received_mtd1 =  InventoryItem::whereBetween('created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
+        $total_value_items_received_mtd1 = InventoryItem::whereBetween('created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
             ->where('inventory_items.site_id', '=', $site_id)
             ->sum('amount');
         $total_value_items_received_mtd = number_format($total_value_items_received_mtd1, 2);
@@ -144,9 +143,9 @@ class HomeController extends Controller
         $delivered = Order::where('user_id', '=', $authid)->where('status', '=', 'Supplied')->count();
         $rfi_pending_approval = Sorder::whereNull('approval_status')->where('requested_by', '=', $authid)->count();
         $rfi_approved_requests = Sorder::where('approval_status', '=', 'Approved')->where('requested_by', '=', $authid)->count();
-        $rfi_processed_requests = Sorder::where('status', '=', 'Supplied')->where('requested_by', '=', $authid)->orWhere('status', '=', 'Partially Supplied')->where('requested_by', '=', $authid)->count();
+        $rfi_processed_requests = Sorder::where('status', '=', 'Supplied')->where('requested_by', '=', $authid)
+            ->orWhere('status', '=', 'Partially Supplied')->where('requested_by', '=', $authid)->count();
         $rfi_denied = Sorder::where('approval_status', '=', 'Denied')->where('requested_by', '=', $authid)->count();
-
 
         $dpr_pending_approval = Order::where('site_id', '=', $site_id)->whereNull('approval_status')->where('user_id', '=', $authid)->count();
         $dpr_approved = Order::where('site_id', '=', $site_id)->where('approval_status', '=', 'Approved')->where('user_id', '=', $authid)->count();
@@ -157,54 +156,29 @@ class HomeController extends Controller
         $pending_po_approvals = Porder::where('site_id', '=', $site_id)->whereNull('approval_status')->count();
         $pending_request_approvals = Order::where('site_id', '=', $site_id)->whereNull('approval_status')->count();
         $pending_stock_approvals = Sorder::where('site_id', '=', $site_id)->whereNull('approval_status')->count();
-        $approved_pos =  Porder::where('site_id', '=', $site_id)->where('approval_status', '=', 'Approved')->count();
-        $approved_request =  Order::where('site_id', '=', $site_id)->where('approval_status', '=', 'Approved')->count();
+        $approved_pos = Porder::where('site_id', '=', $site_id)->where('approval_status', '=', 'Approved')->count();
+        $approved_request = Order::where('site_id', '=', $site_id)->where('approval_status', '=', 'Approved')->count();
         $processed_pos = Porder::where('site_id', '=', $site_id)->where('status', '=', 'Ordered')->count();
         $processed_request = Sorder::where('site_id', '=', $site_id)->where('status', '=', 'Supplied')->count();
 
         $po_total_number_of_requests_mtd = Order::where('site_id', '=', $site_id)->whereBetween('created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])->count();
         $po_total_value_of_approved_pos_mtd = PorderPart::where('site_id', '=', $site_id)->whereBetween('created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])->where('site_id', '=', $site_id)->sum('sub_total');
 
-        $po_total_value_of_supplied_pos_mtd = Porder::join('porder_parts', 'porders.order_id', '=', 'porder_parts.order_id')->whereBetween('porders.created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])->where('porders.status', '=', 'Supplied')->where('porder_parts.site_id', '=', $site_id)->where('porders.site_id', '=', $site_id)->sum('porder_parts.sub_total');
-        $po_total_value_of_pending_pos_mtd = Porder::join('porder_parts', 'porders.order_id', '=', 'porder_parts.order_id')->whereBetween('porders.created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])->whereNull('porders.approval_status')->sum('porder_parts.sub_total');
-        $po_approved_stock_requests = Sorder::where('site_id', '=', $site_id)->where('approval_status', '=', 'Approved')->count();
-        $po_approved_direct_requests = Order::where('site_id', '=', $site_id)->where('approval_status', '=', 'Approved')->count();
-        $po_approved_pos = Porder::where('site_id', '=', $site_id)->where('approval_status', '=', 'Approved')->count();
-        $po_denied_requests = Order::where('site_id', '=', $site_id)->where('approval_status', '=', 'Denied')->count();
+        $po_total_value_of_supplied_pos_mtd = Porder::join('porder_parts', 'porders.order_id', '=', 'porder_parts.order_id')
+            ->whereBetween('porders.created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
+            ->where('porders.status', '=', 'Supplied')
+            ->where('porder_parts.site_id', '=', $site_id)
+            ->where('porders.site_id', '=', $site_id)
+            ->sum('porder_parts.sub_total');
+            
+        $po_total_value_of_pending_pos_mtd = Porder::join('porder_parts', 'porders.order_id', '=', 'porder_parts.order_id')
+            ->whereBetween('porders.created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
+            ->whereNull('porders.approval_status')
+            ->where('porder_parts.site_id', '=', $site_id)
+            ->where('porders.site_id', '=', $site_id)
+            ->sum('porder_parts.sub_total');
 
-        $user_complaints_open = Feedback::where('site_id', '=', $site_id)->where('reviewed', '=', '0')->count();
-
-        $stock_request_pending = Sorder::whereNUll('approval_status')->count();
-
-        $sofficer_stock_request_pending = Sorder::where('status', '!=', 'Supplied')->where('status', '!=', 'Partially Supplied')->where('approval_status', '=', 'Approved')
-            ->where('site_id', '=', $site_id)
-            ->count();
-        $out_of_stock_items = InventoryItem::leftjoin('inventories', 'inventory_items.inventory_id', '=', 'inventories.id')
-            ->leftjoin('items', 'inventory_items.item_id', '=', 'items.id')
-            ->where('inventory_items.site_id', '=', $site_id)
-            ->where('stock_quantity', '=', '0')
-            ->groupBy('inventory_items.item_id', 'inventories.trans_type')  // Group by both item_id and trans_type
-            ->select('inventory_items.item_id', 'inventories.trans_type')  // Select only grouped fields
-            ->get();  // Retrieve the result as a collection
-        // Filter results based on 'trans_type'
-        $out_of_stock_filtered = $out_of_stock_items->where('trans_type', 'Stock Purchase');
-
-        // Count the filtered results
-        $out_of_stock = $out_of_stock_filtered->count();
-
-        $reorder_level = InventoryItem::select('inventory_items.id', 'inventory_items.item_id')
-        ->leftJoin('items', 'items.id', '=', 'inventory_items.item_id')
-        ->leftJoin('inventories', function($join) {
-            $join->on('inventory_items.inventory_id', '=', 'inventories.id')
-                 ->where('inventories.trans_type', '=', 'Stock Purchase');
-        })
-        ->whereRaw('items.stock_quantity <= items.reorder_level')
-        ->where('inventory_items.quantity', '>', 0)
-        ->where('inventory_items.site_id', '=', $site_id)
-        ->count();
-    
-
-
+        $po_total_value_of_pending_request_mtd = Order::where('site_id', '=', $site_id)->whereBetween('created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])->whereNull('approval_status')->sum('user_id');
 
         return view('home', compact(
             'all_requests',
@@ -216,9 +190,6 @@ class HomeController extends Controller
             'total_no_of_parts',
             'total_cost_of_partss',
             'total_cost_of_parts_issued',
-            'sub_total_cost_of_parts',
-            'total_cost_of_parts',
-            'stockValueByType',
             'total_cost_of_parts_within_the_month',
             'stockDistribution',
             'total_value_items_received_mtd',
@@ -254,16 +225,18 @@ class HomeController extends Controller
             'po_total_value_of_approved_pos_mtd',
             'po_total_value_of_supplied_pos_mtd',
             'po_total_value_of_pending_pos_mtd',
-            'po_approved_stock_requests',
-            'po_approved_direct_requests',
-            'po_approved_pos',
-            'po_denied_requests',
-            'user_complaints_open',
-            'stock_request_pending',
-            'sofficer_stock_request_pending',
-            'out_of_stock','reorder_level'
+            'po_total_value_of_pending_request_mtd'
         ));
+    } catch (\Exception $e) {
+        // Log the error message
+        $unique_id = floor(time() - 999999999);
+        Log::channel('error_log')->error('HomeController | Index() Error ' . $unique_id . ': ' . $e->getMessage());
+
+        // Optionally, you can redirect to an error page or return a response
+        return redirect()->back()->with('error', 'An error occurred while fetching the dashboard data. Please try again later.');
     }
+}
+
     // catch (\Exception $e) {
     //     $unique_id = floor(time() - 999999999);
     //     Log::channel('error_log')->error('HomeController | Index() Error ' . $unique_id . ': ' . $e->getMessage());
