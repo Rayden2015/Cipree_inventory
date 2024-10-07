@@ -37,7 +37,7 @@
                 <h3 class="card-title">Items List at {{ Auth::user()->site->name }}</h3> <br>
                 <div class="d-flex justify-content-end mb-3">
                     <a href="{{ route('exportItemsListSite') }}" class="btn btn-success mr-2">Export Excel</a>
-                    <a href="{{ route('downloadItemsListPdf') }}" class="btn btn-danger">Export PDF</a>
+                    {{-- <a href="{{ route('downloadItemsListPdf') }}" class="btn btn-danger">Export PDF</a> --}}
                 </div>
             </div>
             <!-- /.card-header -->
@@ -54,7 +54,7 @@
         @endif
 
 
-            <div class="card-body">
+            {{-- <div class="card-body">
                 <table id="example1" class="table table-bordered table-striped">
                     <thead>
                         <tr>
@@ -99,9 +99,9 @@
 
                     </tbody>
                 </table>
-            </div>
+            </div> --}}
             {{-- {{ $items->links('pagination::bootstrap-4') }} --}}
-            {{ $items->count() }}
+            {{-- {{ $items->count() }} --}}
             <!-- /.card-body -->
         </div>
 
