@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use Sentry\Laravel\ServiceProvider as SentryServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,6 +15,12 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         //
+        if ($this->app->isProduction()) {
+            $this->app->bind('sentry', function () {
+                return app('sentry')->captureMessage('Test Sentry Setup');
+            });
+            $this->app->register(SentryServiceProvider::class);
+        }
     }
 
     /**
