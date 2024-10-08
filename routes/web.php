@@ -64,6 +64,7 @@ Route::get('item_search', [App\Http\Controllers\ItemController::class, 'item_sea
 Route::get('product_history', [App\Http\Controllers\ItemController::class, 'product_history'])->name('product_history');
 Route::get('product_history_show/{id}', [App\Http\Controllers\ItemController::class, 'product_history_show'])->name('product_history_show');
 Route::get('itemspersite', [App\Http\Controllers\ItemController::class, 'itemspersite'])->name('itemspersite');
+Route::get('/export-items-per-site', [ItemController::class, 'exportItemsPerSite'])->name('export.items_per_site');
 
 
 // parts routes

@@ -10,10 +10,12 @@ use Illuminate\Http\Request;
 use App\Models\InventoryItem;
 use App\Models\ItemCountPerSite;
 use Illuminate\Support\Facades\DB;
+use App\Exports\ItemsPerSiteExport;
 use App\Models\InventoryItemDetail;
 use Illuminate\Support\Facades\Log;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ItemController extends Controller
 {
@@ -325,5 +327,11 @@ class ItemController extends Controller
             // Pass the data to the Blade file
             return view('items.item_count', compact('items'));
         }
+
     }
+     // Function to export the data to Excel
+     public function exportItemsPerSite()
+     {
+         return Excel::download(new ItemsPerSiteExport, 'items_per_site.xlsx');
+     }
 }

@@ -33,6 +33,8 @@
 
 
         <div class="card">
+            <a href="{{ route('export.items_per_site') }}" class="btn btn-success">Export to Excel</a>
+
             {{-- <div class="card-header">
                     <h3 class="card-title">Items </h3>
                     <form action="{{ route('item_search') }}" method="GET">
