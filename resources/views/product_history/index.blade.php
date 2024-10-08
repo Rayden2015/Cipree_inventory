@@ -7,7 +7,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>Product History</title>
+        <title>Item History</title>
         <link rel="stylesheet" href="http://cdn.bootcss.com/toastr.js/latest/css/toastr.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
             integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA=="
@@ -57,7 +57,7 @@
                 <table id="example1" class="table table-bordered table-striped">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            {{-- <th>ID</th> --}}
                             <th>Description</th>
                             <th>Part Number</th>
                             <th>Stock Code</th>
@@ -71,7 +71,7 @@
                     @forelse ($product_history   as $ct)
                         <tbody>
                             <tr>
-                                <td>{{ $ct->id }}</td>
+                                {{-- <td>{{ $ct->id }}</td> --}}
                                 <td>{{ $ct->item_description }}</td>
                                 <td>{{ $ct->item_part_number }}</td>
                                 <td>{{ $ct->item_stock_code }}</td>

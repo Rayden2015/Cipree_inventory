@@ -245,9 +245,9 @@
                 {{-- @if (Auth::user()->role->name == 'store_officer' || Auth::user()->role->name == 'store_assistant' || Auth::user()->role->name == 'site_admin') --}}
                 @can('inventory-management-module')
                     <li
-                        class="nav-item {{ request()->is('items*', 'locations*', 'stores*', 'inventories*', 'categories*', 'spr_lists*', 'auth_spr_lists*','itemspersite') ? 'menu-open' : '' }}">
+                        class="nav-item {{ request()->is('items*', 'locations*', 'stores*', 'inventories*', 'categories*', 'spr_lists*', 'auth_spr_lists*','itemspersite','product_history','product_history_show*') ? 'menu-open' : '' }}">
                         <a href="#"
-                            class="nav-link {{ request()->is('items*', 'locations*', 'stores*', 'inventories*', 'categories*', 'spr_lists*', 'auth_spr_lists*','itemspersite') ? 'active' : '' }}">
+                            class="nav-link {{ request()->is('items*', 'locations*', 'stores*', 'inventories*', 'categories*', 'spr_lists*', 'auth_spr_lists*','itemspersite','product_history','product_history_show*') ? 'active' : '' }}">
                             <i>
                                 <img src="{{ asset('assets/images/icons/invmanagement.png') }}" width="26"
                                     height="26" alt="" />
@@ -278,6 +278,18 @@
                                     </a>
                                 </li>
                             @endcan
+
+
+                            @can('item-history')
+                            <li class="nav-item">
+                                <a href="{{ route('product_history') }}"
+                                    class="nav-link {{ request()->routeIs('product_history') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Item History</p>
+                                </a>
+                            </li>
+                        @endcan
+
 
                             {{-- @if (Auth::user()->role->name == 'store_officer' || Auth::user()->role->name == 'store_assistant') --}}
                             @can('view-location')
@@ -352,9 +364,9 @@
                 {{-- navigate --}}
                 @can('navigate-module')
                     <li
-                        class="nav-item {{ request()->routeIs('purchases.purchase_list','product_history','product_history_show*', 'sorders.store_lists', 'auth_spr_lists', 'purchases.all_requests', 'purchases.req_all', 'inventories.inventory_item_history', 'stores.supply_history', 'authorise.all_requests', 'inventories.inventory_item_history', 'stores.supply_history', 'stores.requester_store_lists', 'stores.store_officer_lists', 'purchases.drafts', 'inventories.index', 'po_spr_lists', 'spr_pos') ? 'menu-open' : '' }}">
+                        class="nav-item {{ request()->routeIs('purchases.purchase_list', 'sorders.store_lists', 'auth_spr_lists', 'purchases.all_requests', 'purchases.req_all', 'inventories.inventory_item_history', 'stores.supply_history', 'authorise.all_requests', 'inventories.inventory_item_history', 'stores.supply_history', 'stores.requester_store_lists', 'stores.store_officer_lists', 'purchases.drafts', 'inventories.index', 'po_spr_lists', 'spr_pos') ? 'menu-open' : '' }}">
                         <a href="#"
-                            class="nav-link {{ request()->routeIs('sorders.store_lists', 'product_history','product_history_show*','auth_spr_lists', 'purchases.all_requests', 'purchases.purchase_list', 'purchases.req_all', 'inventories.inventory_item_history', 'stores.supply_history', 'authorise.all_requests', 'inventories.inventory_item_history', 'stores.supply_history', 'stores.requester_store_lists', 'stores.store_officer_lists', 'purchases.drafts', 'inventories.index', 'po_spr_lists', 'spr_pos') ? 'active' : '' }}">
+                            class="nav-link {{ request()->routeIs('sorders.store_lists', 'auth_spr_lists', 'purchases.all_requests', 'purchases.purchase_list', 'purchases.req_all', 'inventories.inventory_item_history', 'stores.supply_history', 'authorise.all_requests', 'inventories.inventory_item_history', 'stores.supply_history', 'stores.requester_store_lists', 'stores.store_officer_lists', 'purchases.drafts', 'inventories.index', 'po_spr_lists', 'spr_pos') ? 'active' : '' }}">
                             <i>
                                 <img src="{{ asset('assets/images/icons/purchasing.png') }}" width="26"
                                     height="26" alt="" />
@@ -459,15 +471,7 @@
                                 </li>
                             @endcan
 
-                            @can('product-history')
-                            <li class="nav-item">
-                                <a href="{{ route('product_history') }}"
-                                    class="nav-link {{ request()->routeIs('product_history') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Product History</p>
-                                </a>
-                            </li>
-                        @endcan
+                          
                             @can('requester-stock-requests')
                                 <li class="nav-item">
                                     <a href="{{ route('stores.requester_store_lists') }}"

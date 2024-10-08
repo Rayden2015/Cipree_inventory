@@ -8,7 +8,7 @@
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <meta http-equiv="X-UA-Compatible" content="ie=edge">
-            <title>Product History Show</title>
+            <title>Item History Show</title>
             <link rel="stylesheet" href="http://cdn.bootcss.com/toastr.js/latest/css/toastr.min.css">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
                 integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA=="
@@ -26,7 +26,7 @@
 
             <div class="card">  
                 <div class="card-header">
-                    <h3 class="card-title">Product History</h3>
+                    <h3 class="card-title">Item History -- {{ $product_history->item_description }}   -- Current Quantity -- {{ $currentQuantity }}  </h3>
                 </div>
                 <!-- /.card-header -->
             
@@ -35,7 +35,7 @@
                     <table id="example1" class="table table-bordered table-striped">
                         <thead>
                             <tr>
-                                <th>ID</th>
+                                <th>GRN Number</th>
                                 <th>Description</th>
                                 <th>Part Number</th>
                                 <th>Stock Code</th>
@@ -46,7 +46,7 @@
                         <tbody>
                             @forelse ($received as $ct)
                                 <tr>
-                                    <td>{{ $ct->id }}</td>
+                                    <td>{{ $ct->inventory->grn_number ?? '' }}</td>
                                     <td>{{ $ct->item->item_description ?? ''}}</td>
                                     <td>{{ $ct->item->item_part_number ?? ''}}</td>
                                     <td>{{ $ct->item->item_stock_code ?? ''}}</td>
@@ -78,7 +78,7 @@
                     <table id="example1" class="table table-bordered table-striped">
                         <thead>
                             <tr>
-                                <th>ID</th>
+                                <th>SR Number</th>
                                 <th>Description</th>
                                 <th>Part Number</th>
                                 <th>Stock Code</th>
@@ -89,7 +89,7 @@
                         <tbody>
                             @forelse ($supplied as $rc)
                                 <tr>
-                                    <td>{{ $rc->id }}</td>
+                                    <td>{{ $rc->request_number ?? '' }}</td>
                                     <td>{{ $rc->item->item_description ?? ''}}</td>
                                     <td>{{ $rc->item->item_part_number ?? ''}}</td>
                                     <td>{{ $rc->item->item_stock_code ?? ''}}</td>

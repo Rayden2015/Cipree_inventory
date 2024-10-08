@@ -315,7 +315,10 @@ class ItemController extends Controller
         leftjoin('sorders','sorders.id','=','sorder_parts.sorder_id')->
         where('sorder_parts.item_id','=',$id)->
         where('sorders.status','=','Supplied')->get();
-        return view('product_history.show', compact('product_history','received','supplied'));
+       
+        // Calculate the current stock based on received - supplied
+        $currentQuantity = $received->sum('quantity') - $supplied->sum('qty_supplied');
+        return view('product_history.show', compact('product_history','received','supplied','currentQuantity'));
     }
 
 
