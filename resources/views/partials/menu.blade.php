@@ -245,9 +245,9 @@
                 {{-- @if (Auth::user()->role->name == 'store_officer' || Auth::user()->role->name == 'store_assistant' || Auth::user()->role->name == 'site_admin') --}}
                 @can('inventory-management-module')
                     <li
-                        class="nav-item {{ request()->is('items*', 'locations*', 'stores*', 'inventories*', 'categories*', 'spr_lists*', 'auth_spr_lists*') ? 'menu-open' : '' }}">
+                        class="nav-item {{ request()->is('items*', 'locations*', 'stores*', 'inventories*', 'categories*', 'spr_lists*', 'auth_spr_lists*','itemspersite') ? 'menu-open' : '' }}">
                         <a href="#"
-                            class="nav-link {{ request()->is('items*', 'locations*', 'stores*', 'inventories*', 'categories*', 'spr_lists*', 'auth_spr_lists*') ? 'active' : '' }}">
+                            class="nav-link {{ request()->is('items*', 'locations*', 'stores*', 'inventories*', 'categories*', 'spr_lists*', 'auth_spr_lists*','itemspersite') ? 'active' : '' }}">
                             <i>
                                 <img src="{{ asset('assets/images/icons/invmanagement.png') }}" width="26"
                                     height="26" alt="" />
@@ -269,7 +269,15 @@
                                 </li>
                             @endcan
 
-                           
+                            @can('view-item')
+                                <li class="nav-item">
+                                    <a href="{{ route('itemspersite') }}"
+                                        class="nav-link {{ request()->routeIs('itemspersite') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Items Per Site</p>
+                                    </a>
+                                </li>
+                            @endcan
 
                             {{-- @if (Auth::user()->role->name == 'store_officer' || Auth::user()->role->name == 'store_assistant') --}}
                             @can('view-location')

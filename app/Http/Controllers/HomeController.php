@@ -43,6 +43,7 @@ public function __construct()
  */
 public function index()
 {
+    try{
     $site_id = Auth::user()->site->id;
     $authid = Auth::id();
 
@@ -264,10 +265,11 @@ public function index()
         'out_of_stock','reorder_level'
     ));
 }
-// catch (\Exception $e) {
-//     $unique_id = floor(time() - 999999999);
-//     Log::channel('error_log')->error('HomeController | Index() Error ' . $unique_id . ': ' . $e->getMessage());
-//     Toastr::error('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the Feedback Button', 'Error');
-// }
+catch (\Exception $e) {
+    $unique_id = floor(time() - 999999999);
+    Log::channel('error_log')->error('HomeController | Index() Error ' . $unique_id . ': ' . $e->getMessage());
+   
+}
 
+}
 }

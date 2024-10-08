@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\SorderPart;
 use Illuminate\Http\Request;
 use App\Models\InventoryItem;
+use App\Models\ItemCountPerSite;
 use Illuminate\Support\Facades\DB;
 use App\Models\InventoryItemDetail;
 use Illuminate\Support\Facades\Log;
@@ -313,5 +314,16 @@ class ItemController extends Controller
         where('sorder_parts.item_id','=',$id)->
         where('sorders.status','=','Supplied')->get();
         return view('product_history.show', compact('product_history','received','supplied'));
+    }
+
+
+    public function itemspersite(){
+        {
+            // Fetch all records from the MySQL view
+            $items = ItemCountPerSite::all();
+    
+            // Pass the data to the Blade file
+            return view('items.item_count', compact('items'));
+        }
     }
 }
