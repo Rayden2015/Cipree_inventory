@@ -309,12 +309,16 @@ class ItemController extends Controller
 
     public function product_history_show($id)
     {
+        $site_id = Auth::user()->site->id;
         $product_history = Item::find($id);
-        $received = InventoryItemDetail::where('item_id','=',$id)->get();
+        $received = InventoryItemDetail::where('item_id','=',$id)->
+        where('site_id','=',$site_id)->
+        get();
         $supplied = SorderPart::
         leftjoin('sorders','sorders.id','=','sorder_parts.sorder_id')->
         where('sorder_parts.item_id','=',$id)->
-        where('sorders.status','=','Supplied')->get();
+        where('sorders.status','=','Supplied')->
+        where('sorders.site_id','=',$site_id)->get();
        
         // Calculate the current stock based on received - supplied
         $currentQuantity = $received->sum('quantity') - $supplied->sum('qty_supplied');

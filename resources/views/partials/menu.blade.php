@@ -269,7 +269,7 @@
                                 </li>
                             @endcan
 
-                            @can('view-item')
+                            {{-- @can('view-item')
                                 <li class="nav-item">
                                     <a href="{{ route('itemspersite') }}"
                                         class="nav-link {{ request()->routeIs('itemspersite') ? 'active' : '' }}">
@@ -277,7 +277,7 @@
                                         <p>Items Per Site</p>
                                     </a>
                                 </li>
-                            @endcan
+                            @endcan --}}
 
 
                             @can('item-history')
