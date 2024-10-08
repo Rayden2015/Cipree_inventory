@@ -1,3 +1,15 @@
+@if (session('success'))
+<div class="alert alert-success">
+    {{ session('success') }}
+</div>
+@endif
+
+@if (session('error'))
+<div class="alert alert-danger">
+    {{ session('error') }}
+</div>
+@endif
+
 <h5 style="color:white;">Check Item Availability <p style="float:right;"><i class="fa fa-shopping-cart" aria-hidden="true"></i> <span
             class="badge badge-pill badge-danger">
             @if (count((array) session('cart')) == '0')
