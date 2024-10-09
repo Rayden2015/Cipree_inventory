@@ -1,0 +1,34 @@
+UPDATE items i
+JOIN (
+    SELECT 
+        i.id AS item_id,
+        (COALESCE(rh.total_received, 0) - COALESCE(sh.total_supplied, 0)) AS updated_stock_quantity
+    FROM 
+        items i
+    LEFT JOIN 
+        (
+            -- Get total received quantity per item and site
+            SELECT 
+                d.item_id,
+                SUM(d.quantity) AS total_received
+            FROM 
+                inventory_item_details d
+                group by d.item_id
+        ) rh ON i.id = rh.item_id
+    LEFT JOIN 
+        (
+            -- Get total supplied quantity per item (remarks not null or not 'Not Supplied')
+            SELECT 
+                p.item_id,
+                SUM(p.quantity) AS total_supplied
+            FROM 
+                sorder_parts p
+            WHERE 
+                p.remarks IS NOT NULL 
+                AND p.remarks != 'Not Supplied'
+            GROUP BY 
+                p.item_id
+        ) sh ON i.id = sh.item_id
+) derived_table ON i.id = derived_table.item_id
+SET 
+    i.stock_quantity = derived_table.updated_stock_quantity;

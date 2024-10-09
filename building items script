@@ -1,0 +1,41 @@
+//Item
+Select i.id, i.item_description, i.stock_quantity, i.site_id, site_name, i.stock_quantity from items i ; 
+
+
+
+
+//Received history 
+SELECT d.site_id, d.item_id, d.quantity FROM `inventory_item_details` d where d.item_id
+
+
+//Suppply history 
+SELECT  p.quantity, p.item_id
+FROM sorder_parts p, sorders s
+WHERE s.id = p.sorder_id
+ and p.remarks IS NOT NULL 
+AND s.status in ('Supplied', 'Partially Supplied');
+
+
+Sites
+SELECT s.id, s.name FROM `sites` s
+
+id	name
+1	Chirano Mine
+2	Iduapriem Mine
+4	Head Office
+
+NB: In cases where the site is null case it as Undefined.
+NB : The items table is generic and therefore does not have a site_id defined as it is not be available in any site. 
+
+
+
+Prompt : 
+Total of sum of quanitty supplied for each item, total/sum of quantity received for each item,
+
+
+
+ update items stock quanity = (received-supplied) per each item per each site. Provide item description, item_id, stock_code
+
+
+
+Please provide the update query

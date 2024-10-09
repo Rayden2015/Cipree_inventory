@@ -1,0 +1,60 @@
+-- 1. Get total quantity received for each item per site
+WITH received_history AS (
+    SELECT 
+        d.item_id,
+        d.site_id,
+        SUM(d.quantity) AS total_received
+    FROM 
+        inventory_item_details d
+    WHERE 
+        d.item_id IS NOT NULL
+    GROUP BY 
+        d.item_id, d.site_id
+),
+
+-- 2. Get total quantity supplied for each item (ignoring null or 'Not Supplied')
+supplied_history AS (
+    SELECT 
+        p.item_id,
+        SUM(p.quantity) AS total_supplied
+    FROM 
+        sorder_parts p
+    WHERE 
+        p.remarks IS NOT NULL 
+        AND p.remarks != 'Not Supplied'
+    GROUP BY 
+        p.item_id
+),
+
+-- 3. Combine received and supplied quantities per item per site and calculate the stock quantity difference
+item_stock AS (
+    SELECT
+        i.id AS item_id,
+        i.item_description,
+        COALESCE(rh.site_id, 'Undefined') AS site_id, -- Handle the case where the site_id is null
+        s.name AS site_name,
+        COALESCE(SUM(rh.total_received), 0) AS total_received,
+        COALESCE(sh.total_supplied, 0) AS total_supplied,
+        (COALESCE(SUM(rh.total_received), 0) - COALESCE(sh.total_supplied, 0)) AS updated_stock_quantity
+    FROM 
+        items i
+    LEFT JOIN 
+        received_history rh ON i.id = rh.item_id
+    LEFT JOIN 
+        supplied_history sh ON i.id = sh.item_id
+    LEFT JOIN 
+        sites s ON rh.site_id = s.id
+    GROUP BY 
+        i.id, i.item_description, rh.site_id, sh.total_supplied, s.name
+)
+
+-- 4. Select the required columns to display
+SELECT
+    item_id,
+    item_description,
+    site_name,
+    total_received,
+    total_supplied,
+    updated_stock_quantity
+FROM 
+    item_stock;
