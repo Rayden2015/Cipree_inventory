@@ -318,6 +318,7 @@ class ItemController extends Controller
         leftjoin('sorders','sorders.id','=','sorder_parts.sorder_id')->
         where('sorder_parts.item_id','=',$id)->
         where('sorders.status','=','Supplied')->
+        orwhere('sorders.status','=','Partially Supplied')->
         where('sorders.site_id','=',$site_id)->get();
        
         // Calculate the current stock based on received - supplied
