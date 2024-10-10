@@ -86,7 +86,7 @@ class ReportController extends Controller
         
         // Query to sum the data for each month for the last 12 months where sorder.status is 'Supplied'
         $supplied = SorderPart::join('sorders', 'sorder_parts.sorder_id', '=', 'sorders.id')
-            ->where('sorders.status', '=', 'Supplied')
+            ->whereIn('sorders.status', ['Supplied', 'Partially Supplied']);
             ->whereBetween('sorders.created_at', [$date12MonthsAgo, $currentDate])
             ->where('sorder_parts.site_id','=',$site_id)
             ->where('sorders.site_id','=',$site_id)
