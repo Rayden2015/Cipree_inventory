@@ -880,7 +880,7 @@ class StoreRequestController extends Controller
                 ->leftJoin('inventories', 'inventory_items.inventory_id', '=', 'inventories.id')
                 ->where('sorders.site_id', '=', $site_id)
                 ->where('sorder_parts.site_id', '=', $site_id)
-                ->where('sorders.status', '=', 'Supplied')
+                ->whereIn('sorders.status', ['Supplied', 'Partially Supplied']);
                 ->latest('sorders.delivered_on')
                 ->select(
                     'sorder_parts.id',
@@ -932,7 +932,7 @@ class StoreRequestController extends Controller
                     ->leftjoin('endusers', 'sorders.enduser_id', '=', 'endusers.id')
                     ->leftjoin('inventory_items', 'sorder_parts.inventory_id', '=', 'inventory_items.id')
                     ->leftJoin('inventories', 'inventory_items.inventory_id', '=', 'inventories.id')
-                    ->where('sorders.status', '=', 'Supplied')
+                    ->whereIn('sorders.status', ['Supplied', 'Partially Supplied']);
                     ->where('sorders.site_id', '=', $site_id)
                     ->where('sorder_parts.site_id', '=', $site_id)
                     ->whereDate('sorders.delivered_on', '>=', $start_date)
@@ -996,7 +996,7 @@ class StoreRequestController extends Controller
                 ->leftJoin('inventories', 'inventory_items.inventory_id', '=', 'inventories.id')
                 ->where('sorders.site_id', '=', $site_id)
                 ->where('sorder_parts.site_id', '=', $site_id)
-                ->where('sorders.status', '=', 'Supplied');
+                ->whereIn('sorders.status', ['Supplied', 'Partially Supplied']);;
 
             // Check if a search query is provided
             $searchTerm = null;
@@ -1430,6 +1430,7 @@ class StoreRequestController extends Controller
                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
+    
     public function requester_store_list_view($id)
     {
         $sorder = Sorder::find($id);

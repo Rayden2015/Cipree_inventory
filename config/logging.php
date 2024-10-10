@@ -54,7 +54,7 @@ return [
    'channels' => [
     'stack' => [
         'driver' => 'stack',
-        'channels' => ['single', 'error_log'],
+        'channels' => ['daily', 'error_log'],
         'ignore_exceptions' => false,
     ],
 
@@ -70,6 +70,7 @@ return [
             'driver' => 'single',
             'path' => storage_path('logs/errors/error.log'),
             'level' => 'error',
+            'days' => 1
         ],
         'single' => [
             'driver' => 'single',
