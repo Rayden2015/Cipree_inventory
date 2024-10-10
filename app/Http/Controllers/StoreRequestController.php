@@ -1430,6 +1430,7 @@ class StoreRequestController extends Controller
                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
+    
     public function requester_store_list_view($id)
     {
         $sorder = Sorder::find($id);
