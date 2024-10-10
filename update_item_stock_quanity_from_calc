@@ -32,3 +32,43 @@ JOIN (
 ) derived_table ON i.id = derived_table.item_id
 SET 
     i.stock_quantity = derived_table.updated_stock_quantity;
+
+
+
+
+
+
+/*UPDATE ITEMS BASED ON  PRODUCT HISTORY LOGIC */
+
+-- 1. Get the total received quantity for the item per site
+CREATE TEMPORARY TABLE temp_received AS
+SELECT 
+    d.item_id,
+    SUM(d.quantity) AS total_received
+FROM 
+    inventory_item_details d
+GROUP BY 
+    d.item_id;
+
+-- 2. Get the total supplied quantity for the item per site
+CREATE TEMPORARY TABLE temp_supplied AS
+SELECT 
+    sp.item_id,
+    SUM(sp.qty_supplied) AS total_supplied
+FROM 
+    sorder_parts sp, sorders s
+WHERE  s.id = sp.sorder_id and 
+    s.status IN ('Supplied', 'Partially Supplied')
+GROUP BY 
+    sp.item_id;
+
+-- 3. Update the stock_quantity in the items table
+UPDATE items i
+JOIN temp_received r ON i.id = r.item_id
+LEFT JOIN temp_supplied s ON r.item_id = s.item_id
+SET 
+    i.stock_quantity = COALESCE(r.total_received, 0) - COALESCE(s.total_supplied, 0);
+
+-- 4. Drop the temporary tables after update (optional)
+DROP TEMPORARY TABLE IF EXISTS temp_received;
+DROP TEMPORARY TABLE IF EXISTS temp_supplied;
