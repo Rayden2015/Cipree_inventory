@@ -316,6 +316,7 @@ class ItemController extends Controller
         get();
         $supplied = SorderPart::
         leftjoin('sorders','sorders.id','=','sorder_parts.sorder_id')->
+        leftjoin('inventories','inventories.id','=','sorder_parts.inventory_id')->
         where('sorder_parts.item_id','=',$id)->
         where('sorders.status','=','Supplied')->
         orwhere('sorders.status','=','Partially Supplied')->

@@ -46,19 +46,22 @@
                         <tbody>
                             @forelse ($received as $ct)
                                 <tr>
-                                    <td>{{ $ct->inventory->grn_number ?? '' }}</td>
-                                    <td>{{ $ct->item->item_description ?? ''}}</td>
-                                    <td>{{ $ct->item->item_part_number ?? ''}}</td>
-                                    <td>{{ $ct->item->item_stock_code ?? ''}}</td>
-                                    <td>{{ $ct->quantity ?? ''}}</td>
-                                    <td>{{ $ct->created_at ?? ''}}</td>
+                                    <td>
+                                        <a href="{{ route('inventories.show', $ct->inventory->id) }}">
+                                            {{ $ct->inventory->grn_number ?? '' }}
+                                        </a>
+                                    </td>
+                                    <td>{{ $ct->item->item_description ?? '' }}</td>
+                                    <td>{{ $ct->item->item_part_number ?? '' }}</td>
+                                    <td>{{ $ct->item->item_stock_code ?? '' }}</td>
+                                    <td>{{ $ct->quantity ?? '' }}</td>
+                                    <td>{{ $ct->created_at ?? '' }}</td>
                                 </tr>
                             @empty
                                 <tr>
                                     <td class="text-center" colspan="12">Data Not Found!</td>
                                 </tr>
                             @endforelse
-                    
                             <!-- Total Row -->
                             @if($received->count() > 0)
                                 <tr>
@@ -68,11 +71,9 @@
                                 </tr>
                             @endif
                         </tbody>
-                    </table>
-                    
+                    </table>      
                 </div>
               
-
                 <div class="card-body">
                     Supplied
                     <table id="example1" class="table table-bordered table-striped">
@@ -84,6 +85,7 @@
                                 <th>Stock Code</th>
                                 <th>Quantity Supplied</th>
                                 <th>Date Supplied</th>
+                                <th>Grn Number</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -95,6 +97,12 @@
                                     <td>{{ $rc->item->item_stock_code ?? ''}}</td>
                                     <td>{{ $rc->qty_supplied ?? ''}}</td>
                                     <td>{{ $rc->delivered_on ?? ''}}</td>
+                                    <td>{{ $rc->inventory ? $rc->inventory->id : 'N/A' }}</td> 
+                                    <td>
+                {{-- <a href="{{ route('inventories.show', $rc->inventory->grn_number ) }}">
+                    {{ $rc->inventory->grn_number ?? '' }}
+                </a> --}}
+            </td>
                                 </tr>
                             @empty
                                 <tr>
