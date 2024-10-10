@@ -238,7 +238,7 @@ class ItemController extends Controller
      */
     public function destroy(string $id)
     {
-        try {
+        try { 
             $item = Item::find($id);
             $item->delete();
 

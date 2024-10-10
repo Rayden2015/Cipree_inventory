@@ -194,13 +194,13 @@
                     </div>
                 </div>
 
+         
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label for="contract_end_date">Contract End Date:</label>
-                        <input type="date" name="contract_end_date" class="form-control" value="{{ old('contract_end_date') }}" min="{{ date('Y-m-d') }}">
+                        <label for="contract_duration">Contract Duration (Months):</label>
+                        <input type="number" name="duration" class="form-control" min="1" value="{{ old('duration') }}" placeholder="Enter duration in months">
                     </div>
                 </div>
-                
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="probation_period">Probation Period (months):</label>

@@ -178,10 +178,8 @@
 
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label for="contract_end_date">Contract End Date:</label>
-                        <input type="date" name="contract_end_date" class="form-control" 
-                               value="{{ old('contract_end_date') }}" 
-                               min="{{ $employee->contract_start_date }}">
+                        <label for="contract_start_date">Contract Start Date:</label>
+                        <input type="date" name="contract_start_date" class="form-control" value="{{ $employee->contract_start_date }}">
                     </div>
                 </div>
 
@@ -194,6 +192,14 @@
 
                 <div class="col-md-6">
                     <div class="form-group">
+                        <label for="duration">Duration:</label>
+                        <input type="number" name="duration" class="form-control" value="{{ $employee->duration }}">
+                    </div>
+                </div>
+
+
+                <div class="col-md-6">
+                    <div class="form-group">
                         <label for="probation_period">Probation Period (months):</label>
                         <input type="number" name="probation_period" class="form-control" value="{{ $employee->probation_period }}">
                     </div>
@@ -202,7 +208,7 @@
 
             <!-- Submit Button -->
             <div class="form-group">
-                <button type="submit" class="btn btn-primary">Update Employee</button>
+                <button type="submit" class="btn btn-primary">Update Employee</button> <br>
             </div>
         </form>
     </div>
