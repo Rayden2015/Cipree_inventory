@@ -314,13 +314,24 @@ class ItemController extends Controller
         $received = InventoryItemDetail::where('item_id','=',$id)->
         where('site_id','=',$site_id)->
         get();
-        $supplied = SorderPart::
-        leftjoin('sorders','sorders.id','=','sorder_parts.sorder_id')->
-        leftjoin('inventories','inventories.id','=','sorder_parts.inventory_id')->
-        where('sorder_parts.item_id','=',$id)->
-        where('sorders.status','=','Supplied')->
-        orwhere('sorders.status','=','Partially Supplied')->
-        where('sorders.site_id','=',$site_id)->get();
+        // $supplied = SorderPart::
+        // leftjoin('sorders','sorders.id','=','sorder_parts.sorder_id')->
+        // leftjoin('inventories','inventories.id','=','sorder_parts.inventory_id')->
+        // where('sorder_parts.item_id','=',$id)->
+        // where('sorders.status','=','Supplied')->
+        // orwhere('sorders.status','=','Partially Supplied')->
+        // where('sorders.site_id','=',$site_id)->get();
+
+        //Ensuring query results applies to only the item under consideration
+        $supplied = SorderPart::leftJoin('sorders', 'sorders.id', '=', 'sorder_parts.sorder_id')
+            ->leftJoin('inventories', 'inventories.id', '=', 'sorder_parts.inventory_id')
+            ->where('sorder_parts.item_id', '=', $id)
+            ->where(function($query) {
+                $query->where('sorders.status', '=', 'Supplied')
+                    ->orWhere('sorders.status', '=', 'Partially Supplied');
+            })
+            ->where('sorders.site_id', '=', $site_id)
+            ->get();
        
         // Calculate the current stock based on received - supplied
         $currentQuantity = $received->sum('quantity') - $supplied->sum('qty_supplied');
