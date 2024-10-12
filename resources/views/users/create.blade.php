@@ -121,6 +121,25 @@
                                 </div>
                             </div>
 
+
+                            <div class="mb-3 row">
+                                <label for="department id" class="col-md-4 col-form-label text-md-end text-start">
+                                    Department</label>
+                                <div class="col-md-6">
+                                    <label>Department: </label>
+                                    <select id="department_id" type="text"
+                                        class="form-control @error('department_id') is-invalid @enderror" name="department_id"
+                                        autocomplete="department_id" autofocus required>
+                                        <option value="" selected hidden>Please Select</option>
+
+                                        @foreach ($departments as $dp)
+                                            <option {{ old('dp') == $dp->id ? 'selected' : '' }}
+                                                value="{{ $dp->id }}">
+                                                {{ $dp->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
                             <div class="mb-3 row">
                                 <label for="status" class="col-md-4 col-form-label text-md-end text-start">Status</label>
                                 <div class="col-md-6">
@@ -136,25 +155,7 @@
                                 </div>
                             </div>
 
-                            {{-- <div class="mb-3 row">
-                            <label for="password" class="col-md-4 col-form-label text-md-end text-start">Password</label>
-                            <div class="col-md-6">
-                                <input type="password" class="form-control @error('password') is-invalid @enderror"
-                                    id="password" name="password">
-                                @if ($errors->has('password'))
-                                    <span class="text-danger">{{ $errors->first('password') }}</span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="mb-3 row">
-                            <label for="password_confirmation"
-                                class="col-md-4 col-form-label text-md-end text-start">Confirm Password</label>
-                            <div class="col-md-6">
-                                <input type="password" class="form-control" id="password_confirmation"
-                                    name="password_confirmation">
-                            </div>
-                        </div> --}}
+                            
 
                         <div class="mb-3 row">
                             <label for="roles" class="col-md-4 col-form-label text-md-end text-start">Roles</label>

@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Login;
 use App\Models\Company;
 use App\Mail\WelcomeMail;
+use App\Models\Department;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Helpers\UploadHelper;
@@ -59,7 +60,8 @@ class UserController extends Controller
     {
         $roles = Role::orderBy('id')->get();
         $sites = Site::all();
-        return view('users.create', compact('roles', 'sites'));
+        $departments = Department::all();
+        return view('users.create', compact('roles', 'sites','departments'));
     }
 
     public function store(Request $request)
@@ -93,6 +95,7 @@ class UserController extends Controller
             $user->staff_id = $request->staff_id;
             $user->site_id = $request->site_id;
             $user->role_id = $request->role_id;
+            $user->department_id = $request->department_id;
             $user->save();
     
              // Assign roles to the user
@@ -188,6 +191,7 @@ class UserController extends Controller
     
             $roles = Role::all();
             $sites = Site::all();
+            $departments = Department::all();
             $userRoles = $user->roles->pluck('name')->toArray(); // Fetch the names of the user's roles
     
             Log::info('UserController | edit() ', [
@@ -195,7 +199,7 @@ class UserController extends Controller
                 'message' => 'Edit User Page Displayed Successfully'
             ]);
     
-            return view('users.edit', compact('user', 'roles', 'sites', 'userRoles'));
+            return view('users.edit', compact('user', 'roles', 'sites', 'userRoles','departments'));
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
             Log::channel('error_log')->error('UserController | Edit() Error ' . $unique_id, [
@@ -238,6 +242,7 @@ class UserController extends Controller
         $user->role_id = $request->role_id;
         $user->staff_id = $request->staff_id;
         $user->site_id = $request->site_id;
+        $user->department_id = $request->department_id;
         $user->add_admin = $request->add_admin;
         $user->add_site_admin = $request->add_site_admin;
         $user->add_requester = $request->add_requester;

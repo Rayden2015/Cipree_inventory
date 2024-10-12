@@ -156,6 +156,23 @@
 
                         </div>
 
+                        <div class="mb-3 row">
+
+                            <label for="department_id"
+                                class="col-md-4 col-form-label text-md-end text-start">Department</label>
+                            <div class="col-md-6">
+                                <select data-placeholder="Choose..." name="department_id" id="department_id"
+                                    class="select-search form-control">
+                                    <option value=""></option>
+                                    @foreach ($departments as $dp)
+                                        <option {{ $user->department_id == $dp->id ? 'selected' : '' }}
+                                            value="{{ $dp->id }}">{{ $dp->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                        </div>
+
 
                         <div class="mb-3 row">
                             <label for="staff_id" class="col-md-4 col-form-label text-md-end text-start">Staff ID</label>
