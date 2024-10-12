@@ -140,6 +140,26 @@
                                     </select>
                                 </div>
                             </div>
+
+                            
+                            <div class="mb-3 row">
+                                <label for="section id" class="col-md-4 col-form-label text-md-end text-start">
+                                    Section</label>
+                                <div class="col-md-6">
+                                    <label>Section: </label>
+                                    <select id="section_id" type="text"
+                                        class="form-control @error('section_id') is-invalid @enderror" name="section_id"
+                                        autocomplete="section_id" autofocus required>
+                                        <option value="" selected hidden>Please Select</option>
+
+                                        @foreach ($sections as $sct)
+                                            <option {{ old('sct') == $sct->id ? 'selected' : '' }}
+                                                value="{{ $sct->id }}">
+                                                {{ $sct->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
                             <div class="mb-3 row">
                                 <label for="status" class="col-md-4 col-form-label text-md-end text-start">Status</label>
                                 <div class="col-md-6">
