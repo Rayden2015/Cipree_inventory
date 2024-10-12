@@ -32,7 +32,7 @@ class ExcelController extends Controller
 
         $total_cost_of_parts_within_the_month = SorderPart::select('sorders.delivered_on', 'sorders.request_number', 'items.item_description', 'items.item_part_number', 'items.item_stock_code', 'sorder_parts.quantity', 'sorder_parts.sub_total')
             ->where('sorder_parts.site_id', '=', $site_id)
-            ->leftjoin('sorders', 'sorders.id', '=', 'sorder_parts.sorder_id')->whereIn('sorders.status', ['Supplied', 'Partially Supplied']);->where('sorders.site_id', '=', $site_id)
+            ->leftjoin('sorders', 'sorders.id', '=', 'sorder_parts.sorder_id')->whereIn('sorders.status', ['Supplied', 'Partially Supplied'])->where('sorders.site_id', '=', $site_id)
             ->leftjoin('items', 'sorder_parts.item_id', '=', 'items.id')
             ->whereDate('sorders.delivered_on', '>=', $start_date)->whereDate('sorders.delivered_on', '<=', $end_date)
             ->latest('sorders.created_at')->get();

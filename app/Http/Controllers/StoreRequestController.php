@@ -932,7 +932,7 @@ class StoreRequestController extends Controller
                     ->leftjoin('endusers', 'sorders.enduser_id', '=', 'endusers.id')
                     ->leftjoin('inventory_items', 'sorder_parts.inventory_id', '=', 'inventory_items.id')
                     ->leftJoin('inventories', 'inventory_items.inventory_id', '=', 'inventories.id')
-                    ->whereIn('sorders.status', ['Supplied', 'Partially Supplied']);
+                    ->whereIn('sorders.status', ['Supplied', 'Partially Supplied'])
                     ->where('sorders.site_id', '=', $site_id)
                     ->where('sorder_parts.site_id', '=', $site_id)
                     ->whereDate('sorders.delivered_on', '>=', $start_date)
@@ -996,7 +996,7 @@ class StoreRequestController extends Controller
                 ->leftJoin('inventories', 'inventory_items.inventory_id', '=', 'inventories.id')
                 ->where('sorders.site_id', '=', $site_id)
                 ->where('sorder_parts.site_id', '=', $site_id)
-                ->whereIn('sorders.status', ['Supplied', 'Partially Supplied']);;
+                ->whereIn('sorders.status', ['Supplied', 'Partially Supplied']);
 
             // Check if a search query is provided
             $searchTerm = null;
