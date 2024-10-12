@@ -309,15 +309,25 @@ class ItemController extends Controller
     {
         $site_id = Auth::user()->site->id;
         $product_history = Item::find($id);
+<<<<<<< HEAD
         $received = InventoryItemDetail::where('item_id', '=', $id)->where('site_id', '=', $site_id)->get();
         // $supplied = SorderPart::
         // leftjoin('sorders','sorders.id','=','sorder_parts.sorder_id')->
         // leftJoin('inventory_items','inventory_items.id','=','sorder_parts.inventory_id')->
         // leftjoin('inventories','inventories.id','=','inventory_items.inventory_id')->
+=======
+        $received = InventoryItemDetail::where('item_id','=',$id)->
+        where('site_id','=',$site_id)->
+        get();
+        // $supplied = SorderPart::
+        // leftjoin('sorders','sorders.id','=','sorder_parts.sorder_id')->
+        // leftjoin('inventories','inventories.id','=','sorder_parts.inventory_id')->
+>>>>>>> b677db03795aadd72672d5763c194da07fb3c4af
         // where('sorder_parts.item_id','=',$id)->
         // where('sorders.status','=','Supplied')->
         // orwhere('sorders.status','=','Partially Supplied')->
         // where('sorders.site_id','=',$site_id)->get();
+<<<<<<< HEAD
     //     $supplied = DB::select("
     //     SELECT sp.*, s.*, ii.*, inv.*, i.*
     //     FROM sorder_parts sp
@@ -344,6 +354,8 @@ class ItemController extends Controller
         // dd($supplied);
         $supplied = collect($supplied);
 
+       
+>>>>>>> b677db03795aadd72672d5763c194da07fb3c4af
         // Calculate the current stock based on received - supplied
         $currentQuantity = $received->sum('quantity') - $supplied->sum('qty_supplied');
         return view('product_history.show', compact('product_history', 'received', 'supplied', 'currentQuantity'));
