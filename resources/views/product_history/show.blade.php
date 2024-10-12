@@ -85,31 +85,37 @@
                                 <th>Stock Code</th>
                                 <th>Quantity Supplied</th>
                                 <th>Date Supplied</th>
-                                <th>Grn Number</th>
+                                {{-- <th>Grn Number</th> --}}
                             </tr>
                         </thead>
                         <tbody>
                             @forelse ($supplied as $rc)
                                 <tr>
+                                    <!-- Since you fetched everything as columns, access them directly from the object -->
                                     <td>{{ $rc->request_number ?? '' }}</td>
-                                    <td>{{ $rc->item->item_description ?? ''}}</td>
-                                    <td>{{ $rc->item->item_part_number ?? ''}}</td>
-                                    <td>{{ $rc->item->item_stock_code ?? ''}}</td>
-                                    <td>{{ $rc->qty_supplied ?? ''}}</td>
-                                    <td>{{ $rc->delivered_on ?? ''}}</td>
-                                    <td>{{ $rc->inventory ? $rc->inventory->id : 'N/A' }}</td> 
+                                    <td>{{ $rc->item_description ?? '' }}</td>
+                                    <td>{{ $rc->item_part_number ?? '' }}</td>
+                                    <td>{{ $rc->item_stock_code ?? '' }}</td>
+                                    <td>{{ $rc->qty_supplied ?? '' }}</td>
+                                    <td>{{ $rc->delivered_on ?? '' }}</td>
+                                    
+                                    <!-- Display the inventory_id if available, otherwise 'N/A' -->
                                     <td>
-                {{-- <a href="{{ route('inventories.show', $rc->inventory->grn_number ) }}">
-                    {{ $rc->inventory->grn_number ?? '' }}
-                </a> --}}
-            </td>
+                                        @if($rc->inventory_id)
+                                            <a href="{{ route('inventories.show', ['inventory' => $rc->inventory_id]) }}">
+                                                {{ $rc->grn_number ?? 'View Inventory' }}
+                                            </a>
+                                        @else
+                                            N/A
+                                        @endif
+                                    </td> 
                                 </tr>
                             @empty
                                 <tr>
-                                    <td class="text-center" colspan="6">Data Not Found!</td>
+                                    <td class="text-center" colspan="7">Data Not Found!</td>
                                 </tr>
                             @endforelse
-                
+                        
                             <!-- Total Row -->
                             @if($supplied->count() > 0)
                                 <tr>
@@ -119,6 +125,7 @@
                                 </tr>
                             @endif
                         </tbody>
+                        
                     </table>
                 </div>
                 

@@ -34,7 +34,7 @@ class ItemController extends Controller
     public function index()
     {
         try {
-           
+
             // $items = Item::all();
             $items = Item::orderBy('item_description')->paginate(20);
             // $items = Item::join('inventory_items','items.id', '=','inventory_items.item_id')->latest('items.created_at')->paginate(20);
@@ -46,8 +46,6 @@ class ItemController extends Controller
                 //'itmes' => $items
             ]);
             return view('items.index', compact('items'));
-          
-
         } catch (\Exception $e) {
             // Log errors
             $unique_id = floor(time() - 999999999);
@@ -238,7 +236,7 @@ class ItemController extends Controller
      */
     public function destroy(string $id)
     {
-        try { 
+        try {
             $item = Item::find($id);
             $item->delete();
 
@@ -289,58 +287,81 @@ class ItemController extends Controller
     public function product_history(Request $request)
     {
         $query = Item::query();
-    
+
         // Check if there's a search query and apply filters
         if ($request->has('search')) {
             $search = $request->input('search');
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('item_description', 'like', "%{$search}%")
-                  ->orWhere('item_part_number', 'like', "%{$search}%")
-                  ->orWhere('item_stock_code', 'like', "%{$search}%");
+                    ->orWhere('item_part_number', 'like', "%{$search}%")
+                    ->orWhere('item_stock_code', 'like', "%{$search}%");
             });
         }
-    
+
         // Paginate results
         $product_history = $query->latest()->paginate(20);
-        
+
         return view('product_history.index', compact('product_history'));
     }
-    
+
 
     public function product_history_show($id)
     {
         $site_id = Auth::user()->site->id;
         $product_history = Item::find($id);
-        $received = InventoryItemDetail::where('item_id','=',$id)->
-        where('site_id','=',$site_id)->
-        get();
-        $supplied = SorderPart::
-        leftjoin('sorders','sorders.id','=','sorder_parts.sorder_id')->
-        leftjoin('inventories','inventories.id','=','sorder_parts.inventory_id')->
-        where('sorder_parts.item_id','=',$id)->
-        where('sorders.status','=','Supplied')->
-        orwhere('sorders.status','=','Partially Supplied')->
-        where('sorders.site_id','=',$site_id)->get();
-       
+        $received = InventoryItemDetail::where('item_id', '=', $id)->where('site_id', '=', $site_id)->get();
+        // $supplied = SorderPart::
+        // leftjoin('sorders','sorders.id','=','sorder_parts.sorder_id')->
+        // leftJoin('inventory_items','inventory_items.id','=','sorder_parts.inventory_id')->
+        // leftjoin('inventories','inventories.id','=','inventory_items.inventory_id')->
+        // where('sorder_parts.item_id','=',$id)->
+        // where('sorders.status','=','Supplied')->
+        // orwhere('sorders.status','=','Partially Supplied')->
+        // where('sorders.site_id','=',$site_id)->get();
+    //     $supplied = DB::select("
+    //     SELECT sp.*, s.*, ii.*, inv.*, i.*
+    //     FROM sorder_parts sp
+    //     LEFT JOIN sorders s ON s.id = sp.sorder_id
+    //     LEFT JOIN inventory_items ii ON ii.id = sp.inventory_id
+    //     LEFT JOIN inventories inv ON inv.id = ii.inventory_id
+    //     LEFT JOIN items i ON i.id = sp.item_id
+    //     WHERE sp.item_id = ?    
+    //     AND (s.status = 'Supplied' OR s.status = 'Partially Supplied')
+    //     AND s.site_id = ?
+    // ", [$id, $site_id]);
+    $supplied = DB::select("
+    SELECT sp.*, s.*, ii.*, inv.*, i.*, inv.grn_number
+    FROM sorder_parts sp
+    LEFT JOIN sorders s ON s.id = sp.sorder_id
+    LEFT JOIN inventory_items ii ON ii.id = sp.inventory_id
+    LEFT JOIN inventories inv ON inv.id = ii.inventory_id
+    LEFT JOIN items i ON i.id = sp.item_id
+    WHERE sp.item_id = ?
+    AND (s.status = 'Supplied' OR s.status = 'Partially Supplied')
+    AND s.site_id = ?
+", [$id, $site_id]);
+
+        // dd($supplied);
+        $supplied = collect($supplied);
+
         // Calculate the current stock based on received - supplied
         $currentQuantity = $received->sum('quantity') - $supplied->sum('qty_supplied');
-        return view('product_history.show', compact('product_history','received','supplied','currentQuantity'));
+        return view('product_history.show', compact('product_history', 'received', 'supplied', 'currentQuantity'));
     }
 
 
-    public function itemspersite(){
-        {
+    public function itemspersite()
+    { {
             // Fetch all records from the MySQL view
             $items = ItemCountPerSite::all();
-    
+
             // Pass the data to the Blade file
             return view('items.item_count', compact('items'));
         }
-
     }
-     // Function to export the data to Excel
-     public function exportItemsPerSite()
-     {
-         return Excel::download(new ItemsPerSiteExport, 'items_per_site.xlsx');
-     }
+    // Function to export the data to Excel
+    public function exportItemsPerSite()
+    {
+        return Excel::download(new ItemsPerSiteExport, 'items_per_site.xlsx');
+    }
 }

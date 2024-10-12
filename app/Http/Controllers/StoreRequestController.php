@@ -880,7 +880,7 @@ class StoreRequestController extends Controller
                 ->leftJoin('inventories', 'inventory_items.inventory_id', '=', 'inventories.id')
                 ->where('sorders.site_id', '=', $site_id)
                 ->where('sorder_parts.site_id', '=', $site_id)
-                ->whereIn('sorders.status', ['Supplied', 'Partially Supplied']);
+                ->whereIn('sorders.status', ['Supplied', 'Partially Supplied'])
                 ->latest('sorders.delivered_on')
                 ->select(
                     'sorder_parts.id',

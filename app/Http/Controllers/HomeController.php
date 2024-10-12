@@ -89,7 +89,7 @@ public function index()
     $total_cost_of_parts_issued = Sorder::join('sorder_parts', 'sorders.id', '=', 'sorder_parts.sorder_id')
         ->where('sorders.site_id', '=', $site_id)
         ->where('sorder_parts.site_id', '=', $site_id)
-        ->whereIn('sorders.status', ['Supplied', 'Partially Supplied']);
+        ->whereIn('sorders.status', ['Supplied', 'Partially Supplied'])
         ->sum('sorder_parts.sub_total');
 
     // $sub_total_cost_of_parts =  $total_cost_of_partss - $total_cost_of_parts_issued;
@@ -108,7 +108,8 @@ public function index()
     $total_cost_of_parts_within_the_weeks = Sorder::join('sorder_parts', 'sorders.id', '=', 'sorder_parts.sorder_id')
         ->where('sorders.site_id', '=', $site_id)
         ->where('sorder_parts.site_id', '=', $site_id)
-        ->whereIn('sorders.status', ['Supplied', 'Partially Supplied']);->whereBetween('sorders.delivered_on', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])->sum('sorder_parts.sub_total');
+        ->whereIn('sorders.status', ['Supplied', 'Partially Supplied'])
+        ->whereBetween('sorders.delivered_on', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])->sum('sorder_parts.sub_total');
     $total_cost_of_parts_within_the_month = number_format($total_cost_of_parts_within_the_weeks, 2);
 
     // last worked
