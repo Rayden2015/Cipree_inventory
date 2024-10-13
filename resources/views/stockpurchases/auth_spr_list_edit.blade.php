@@ -114,7 +114,7 @@
                         </div> --}}
                 </form>
             </div>
-            @if (Auth::user()->hasRole('purchasing_officer') || Auth::user()->hasRole('authoriser'))
+            @if (Auth::user()->hasRole('purchasing_officer') || Auth::user()->hasRole('Super Authoriser'))
                 <div class="card-body" id="myDiv">
                     <div class="table-responsive">
                         @csrf
@@ -151,7 +151,7 @@
                             <button class="btn btn-primary" style="float: right;"
                                 onclick="location.reload()";>Update</button>
                         </table>
-                        @if (Auth::user()->hasRole('authoriser'))
+                        @if (Auth::user()->hasRole('Super Authoriser'))
                             <div class="card-footer">
                                 <form action="{{ route('authoriser_remarks_update', $sorder->id) }}" method="post">
                                     @method('PUT')

@@ -401,8 +401,8 @@
                         @endif
 
 
-                        {{-- @if (Auth::user()->role->name == 'authoriser') --}}
-                        @if (Auth::user()->hasRole('authoriser'))
+                        {{-- @if (Auth::user()->role->name == 'Super Authoriser') --}}
+                        @if (Auth::user()->hasRole('Super Authoriser'))
                             @if ($purchase->approval_status == '')
                                 {{-- {{ 'not yet ' }} --}}
                                 {{-- <button    class="btn btn-secondary">Approved</button> --}}

@@ -115,7 +115,7 @@
                 </form>
             </div>
           
-            @if (Auth::user()->hasRole('purchasing_officer') || Auth::user()->hasRole('authoriser'))
+            @if (Auth::user()->hasRole('purchasing_officer') || Auth::user()->hasRole('Super Authoriser'))
                 <div class="card-body" id="myDiv">
                     <div class="table-responsive">
                         @csrf
@@ -186,7 +186,7 @@
             }
         </style>
     @endif
-    @if (auth()->user()->roles->contains('name', 'authoriser'))
+    @if (auth()->user()->roles->contains('name', 'Super Authoriser'))
         <style>
             #price{
                 pointer-events: none;

@@ -212,7 +212,7 @@
             {{-- back button --}}
          
            
-            @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('authoriser'))
+            @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Super Authoriser'))
             <a href="{{ route('sorders.store_lists') }}" id="printbtn" class="btn btn-primary float-right">Back</a>
         @elseif (Auth::user()->hasRole('store_officer') || Auth::user()->hasRole('store_assistant'))
             <a href="{{ URL::previous() }}" id="printbtn" class="btn btn-primary float-right">Back</a>
@@ -427,7 +427,7 @@
 
                     </table>
                     {{-- <a href="#" id="printbtn" onclick="window.print()" class="btn btn-primary float-right">Print</a> --}}
-                    @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('authoriser'))
+                    @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Super Authoriser'))
                         {{-- <a href="{{ URL::previous() }}" class="btn btn-primary float-left">Approve</a> --}}
                         @if ($sorder->approval_status == '')
                             {{-- {{ 'not yet ' }} --}}

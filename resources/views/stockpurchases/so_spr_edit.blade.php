@@ -101,7 +101,7 @@
                                     <div class="form-group">
                                         <label>Enduser: </label>
                                         <select data-placeholder="Choose..." name="enduser_id" id="enduser_id"
-                                            @unlessrole('purchasing_officer|authoriser') readonly @endunlessrole
+                                            @unlessrole('purchasing_officer|Super Authoriser') readonly @endunlessrole
                                             class="select-search form-control">
                                             <option value=""></option>
                                             @foreach ($endusers as $ed)
@@ -255,7 +255,7 @@
                         @endforeach
                     </tbody>
                 </table>
-                @if(Auth::user()->hasROle('authoriser'))
+                @if(Auth::user()->hasROle('Super Authoriser'))
                 <div class="card-footer">
                     <form action="{{ route('authoriser_remarks_update',$sorder->id) }}" method="post">
                         @method('PUT')

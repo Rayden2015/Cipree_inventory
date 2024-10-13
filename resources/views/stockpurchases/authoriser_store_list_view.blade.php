@@ -202,7 +202,7 @@
             <a href="#" id="printbtn" onclick="window.print()" class="btn btn-primary float-lef">Print</a>
             <a href="{{ route('dashboard.pending_stock_approvals') }}" id="backbtn"
                 class="btn btn-primary float-right">Back</a>
-            {{-- @if (Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'authoriser')
+            {{-- @if (Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'Super Authoriser')
                 <a href="{{ route('sorders.store_lists') }}" id="backbtn" class="btn btn-primary float-right">Back</a>
             @elseif (Auth::user()->role->name == 'store_officer' || Auth::user()->role->name == 'store_assistant')
                 <a href="{{ URL::previous() }}" id="backbtn" class="btn btn-primary float-right">Back</a>
@@ -415,7 +415,7 @@
 
                     </table>
                     {{-- <a href="#" id="printbtn" onclick="window.print()" class="btn btn-primary float-right">Print</a> --}}
-                    @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('authoriser'))
+                    @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Super Authoriser'))
                         {{-- <a href="{{ URL::previous() }}" class="btn btn-primary float-left">Approve</a> --}}
                         @if ($sorder->approval_status == '')
                             {{-- {{ 'not yet ' }} --}}

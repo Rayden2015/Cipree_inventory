@@ -63,7 +63,7 @@
 
                             {{-- <th>Taken At</th> --}}
                             <th>View Details</th>
-                           {{-- @if(Auth::user()->role->name == 'authoriser') --}}
+                           {{-- @if(Auth::user()->role->name == 'Super Authoriser') --}}
                            @if(Auth::user()->hasRole('store_officer'))
                                 <th>Edit</th>
                             @endif
