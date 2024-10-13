@@ -81,6 +81,11 @@ public function index()
         ->where('inventory_items.site_id', '=', $site_id)
         ->where('items.stock_quantity', '>', '0')
         ->count();
+    // $total_no_of_parts = InventoryItem::where('site_id', '=', $site_id)
+    // ->where('quantity', '>', 0)
+    // ->groupBy('item_id')
+    // ->count();
+
 
     $total_cost_of_partss = InventoryItem::where('site_id', '=', $site_id)
         ->where('quantity', '>', '0')
