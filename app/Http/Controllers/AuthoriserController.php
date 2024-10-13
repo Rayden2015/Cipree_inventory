@@ -38,8 +38,8 @@ class AuthoriserController extends Controller
      
            
     
-        // If the user is a 'department authoriser', load the second query
-        if (Auth::user()->hasRole('department authoriser')) {
+        // If the user is a 'Department Authoriser', load the second query
+        if (Auth::user()->hasRole('Department Authoriser')) {
             $department_id = Auth::user()->department->id;
             $all_requests = Order::leftJoin('users', 'users.id', '=', 'orders.user_id')
                 ->where('orders.status', '=', 'Requested')
