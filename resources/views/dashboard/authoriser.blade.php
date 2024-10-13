@@ -1,4 +1,4 @@
-@can('authoriser-dashboard')
+@can('super-authoriser-dashboard')
 <div class="container-fluid">
     <!-- Small boxes (Stat box) -->
     <div class="row">
@@ -157,4 +157,4 @@
     <!-- /.row (main row) -->
 </div>
 @endcan
-{{-- end of authoriser dashboard --}}
+{{-- end of super authoriser dashboard --}}

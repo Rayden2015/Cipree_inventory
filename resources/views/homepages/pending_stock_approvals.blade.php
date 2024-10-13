@@ -64,7 +64,7 @@
                             <th>View</th>
                             
                             @if (Auth::user()->hasRole('purchasing_officer') ||
-                            Auth::user()->hasRole('authoriser') ||
+                            Auth::user()->hasRole('Super Authoriser') ||
                             Auth::user()->hasRole('store_officer'))
                         <th>Edit</th>
                     @endif
@@ -96,7 +96,7 @@
                              
                                
                                 @if (Auth::user()->hasRole('purchasing_officer') ||
-                            Auth::user()->hasRole('authoriser') ||
+                            Auth::user()->hasRole('Super Authoriser') ||
                             Auth::user()->hasRole('store_officer'))
                             <td>
                                 <a href="{{ route('sorders.store_list_edit', $rq->id) }}"

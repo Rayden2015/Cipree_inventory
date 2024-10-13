@@ -208,11 +208,11 @@
                                     <td>{{ $ph->id }}</td>
                                     <td><input type="text" class="form-control" name="description"
                                             value="{{ $ph->description }}"
-                                              @if(Auth::user()->hasRole('authoriser')) readonly @endif>
+                                              @if(Auth::user()->hasRole('Super Authoriser')) readonly @endif>
                                     </td>
                                     <td><input type="text" class="form-control" name="part_number"
                                             value="{{ $ph->part_number }}"
-                                              @if(Auth::user()->hasRole('authoriser')) readonly @endif>
+                                              @if(Auth::user()->hasRole('Super Authoriser')) readonly @endif>
                                     </td>
                                     <td>
 
@@ -272,7 +272,7 @@
                                         </select>
                                     </td>
                                     <td><input type="text" class="form-control" name="remarks"
-                                            value="{{ $ph->remarks }}"   @if(Auth::user()->hasRole('authoriser')) readonly @endif>
+                                            value="{{ $ph->remarks }}"   @if(Auth::user()->hasRole('Super Authoriser')) readonly @endif>
                                     </td>
                                     @if($purchase->status == 'Supplied')
                                     <td> <label for="">Items Already Supplied</label></td>

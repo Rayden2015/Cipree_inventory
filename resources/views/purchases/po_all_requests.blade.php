@@ -54,8 +54,8 @@
                             @hasanyrole('purchasing_officer|Admin')
                                 <th>Generate Order</th>
                             @endhasanyrole 
-                            {{-- @if(Auth::user()->role->name == 'authoriser' || Auth::user()->role->name == 'purchasing_officer') --}}
-                            @hasanyrole('purchasing_officer|authoriser')
+                            {{-- @if(Auth::user()->role->name == 'Super Authoriser' || Auth::user()->role->name == 'purchasing_officer') --}}
+                            @hasanyrole('purchasing_officer|Super Authoriser')
                                 <th>Edit</th>
                             @endhasanyrole
                             <th>Export</th>
@@ -85,8 +85,8 @@
 
                                 </td>
                                 @endhasrole
-                                {{-- @if(Auth::user()->role->name == 'authoriser' || Auth::user()->role->name == 'purchasing_officer') --}}
-                                @hasanyrole('purchasing_officer|authoriser')
+                                {{-- @if(Auth::user()->role->name == 'Super Authoriser' || Auth::user()->role->name == 'purchasing_officer') --}}
+                                @hasanyrole('purchasing_officer|Super Authoriser')
                                 <td>
                                     <a href="{{ route('purchases.edit', $rq->id) }}" class="btn btn-success">Edit</a>
 

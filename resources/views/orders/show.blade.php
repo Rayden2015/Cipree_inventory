@@ -398,7 +398,7 @@
                     @endif --}}
 
 
-                    @if (Auth::user()->hasRole('authoriser'))
+                    @if (Auth::user()->hasRole('Super Authoriser'))
                         @if ($order->approval_status == '')
                             {{-- {{ 'not yet ' }} --}}
                             {{-- <button    class="btn btn-secondary">Approved</button> --}}

@@ -106,7 +106,7 @@
                             <i class="fas fa-expand-arrows-alt"></i>
                         </a>
                     </li>
-                    {{-- @if(Auth::user()->role->name == 'authoriser'|| Auth::user()->role->name == 'admin') --}}
+                    {{-- @if(Auth::user()->role->name == 'Super Authoriser'|| Auth::user()->role->name == 'admin') --}}
                         <li class="nav-item">
                             <div class="dropdown">
                                 <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">

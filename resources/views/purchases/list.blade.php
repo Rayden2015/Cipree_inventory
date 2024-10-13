@@ -50,8 +50,8 @@
                            <th>Status</th>
                             <th>View</th>
                            
-                            {{-- @if(Auth::user()->role->name == 'purchasing_officer'|| Auth::user()->role->name == 'authoriser' || Auth::user()->role->name == 'store_officer') --}}
-                            @hasanyrole('purchasing_officer|authoriser|store_officer')
+                            {{-- @if(Auth::user()->role->name == 'purchasing_officer'|| Auth::user()->role->name == 'Super Authoriser' || Auth::user()->role->name == 'store_officer') --}}
+                            @hasanyrole('purchasing_officer|Super Authoriser|store_officer')
                                 <th>Edit</th>
                             @endhasanyrole
                             {{-- @if(Auth::user()->role->name == 'purchasing_officer') --}}
@@ -78,8 +78,8 @@
                                 </td>
                              
                                 
-                                {{-- @if(Auth::user()->role->name == 'purchasing_officer'|| Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'store_officer' || Auth::user()->role->name == 'authoriser') --}}
-                                @hasanyrole('purchasing_officer|authoriser|store_officer|admin')
+                                {{-- @if(Auth::user()->role->name == 'purchasing_officer'|| Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'store_officer' || Auth::user()->role->name == 'Super Authoriser') --}}
+                                @hasanyrole('purchasing_officer|Super Authoriser|store_officer|admin')
                                 <td>
                                     <a href="{{ route('purchases.editlist', $rq->id) }}" class="btn btn-success">Edit</a>
 

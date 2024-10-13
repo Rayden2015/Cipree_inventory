@@ -46,61 +46,61 @@
                             <th>Request Date</th>
                             <th>Request ID</th>
                             <th>Requested By</th>
-                           <th>End User</th>                                               
-                           <th>Approval Status</th>
-                           <th>Site</th>
+                            <th>End User</th>
+                            <th>Approval Status</th>
+                            <th>Site</th>
                             <th>View</th>
-                          
-                            {{-- @if(Auth::user()->role->name == 'authoriser' || Auth::user()->role->name == 'purchasing_officer') --}}
-                            @hasanyrole('authoriser|purchasing_officer')
+
+                            {{-- @if (Auth::user()->role->name == 'Super Authoriser' || Auth::user()->role->name == 'purchasing_officer') --}}
+                            @hasanyrole('Super Authoriser|purchasing_officer')
                                 <th>Edit</th>
                             @endhasanyrole
                             {{-- <th>Export</th> --}}
-                            @if(Auth::user()->hasRole('admin')) 
-                            <th>Delete</th>
-                            @endif 
+                            @if (Auth::user()->hasRole('admin'))
+                                <th>Delete</th>
+                            @endif
                         </tr>
                     </thead>
                     @forelse ($all_requests as $rq)
                         <tbody>
                             <tr>
                                 <td>{{ $rq->id }}</td>
-                                <td>{{ date('d-m-Y (H:i)', strtotime($rq->request_date))}}</td>
+                                <td>{{ date('d-m-Y (H:i)', strtotime($rq->request_date)) }}</td>
                                 <td>{{ $rq->request_number ?? '' }}</td>
-                                <td>{{ $rq->requested->name ?? '' }}</td>                               
-                                
-                                <td>{{ $rq->enduser->asset_staff_id  ?? ''}}</td>
+                                <td>{{ $rq->requested->name ?? '' }}</td>
+
+                                <td>{{ $rq->enduser->asset_staff_id ?? '' }}</td>
                                 <td>
-                                  {{ $rq->approval_status ?? 'Pending' }}
+                                    {{ $rq->approval_status ?? 'Pending' }}
                                 </td>
-                                <td>{{ $rq->requested->site->name ?? ''  }}</td>
+                                <td>{{ $rq->requested->site->name ?? '' }}</td>
                                 <td>
                                     <a href="{{ route('orders.show', $rq->id) }}" class="btn btn-secondary">View</a>
 
                                 </td>
-                              
-                                @hasanyrole('authoriser|purchasing_officer')
-                                <td>
-                                    <a href="{{ route('orders.edit', $rq->id) }}" class="btn btn-success">Edit</a>
 
-                                </td>
+                                @hasanyrole('Super Authoriser|purchasing_officer')
+                                    <td>
+                                        <a href="{{ route('orders.edit', $rq->id) }}" class="btn btn-success">Edit</a>
+
+                                    </td>
                                 @endhasanyrole
                                 {{-- <td>
                                     <a href="{{ route('purchases.generatePDF', $rq->id) }}"
                                         class="btn btn-primary">Export</a>
 
                                 </td> --}}
-                                @if(Auth::user()->hasRole('admin'))
-                                <td>
+                                @if (Auth::user()->hasRole('admin'))
+                                    <td>
 
-                                    <form action="{{ route('purchases.destroy', $rq->id) }}" method="post">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" onclick="return confirm('Are you sure?')"
-                                            class="btn btn-danger">Delete</button>
-                                    </form>
-                                </td>
-@endif
+                                        <form action="{{ route('purchases.destroy', $rq->id) }}" method="post">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" onclick="return confirm('Are you sure?')"
+                                                class="btn btn-danger">Delete</button>
+                                        </form>
+                                    </td>
+                                @endif
 
                             @empty
                             <tr>

@@ -62,7 +62,7 @@
                            <th>Status</th>
                             <th>View</th>
                           
-                                 @if (Auth::user()->hasRole('store_officer') || Auth::user()->hasRole('authoriser') || Auth::user()->hasRole('purchasing_officer'))
+                                 @if (Auth::user()->hasRole('store_officer') || Auth::user()->hasRole('Super Authoriser') || Auth::user()->hasRole('purchasing_officer'))
                             
                                 <th>Edit</th>
                             @endif
@@ -86,7 +86,7 @@
                                 <td>
                                     <a href="{{ route('purchases.showlist', $rq->id) }}" class="btn btn-secondary">View</a>
                                 </td>
-                                @if (Auth::user()->hasRole('store_officer') || Auth::user()->hasRole('authoriser') || Auth::user()->hasRole('purchasing_officer'))
+                                @if (Auth::user()->hasRole('store_officer') || Auth::user()->hasRole('Super Authoriser') || Auth::user()->hasRole('purchasing_officer'))
                                 <td>
                                     <a href="{{ route('purchases.editlist', $rq->id) }}" class="btn btn-success">Edit</a>
 

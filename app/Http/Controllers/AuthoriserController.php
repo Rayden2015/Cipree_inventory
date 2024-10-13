@@ -35,14 +35,11 @@ class AuthoriserController extends Controller
     public function index()
     {
         $site_id = Auth::user()->site->id;  // Fetch the logged-in user's site ID
-    
-        // If the user is an 'authoriser', load the first query
-        if (Auth::user()->hasRole('authoriser')) {
-            $purchases = Order::where('site_id', '=', $site_id)->latest()->paginate(10);
-            return view('authoriser.index', compact('purchases'));
+     
+           
     
         // If the user is a 'department authoriser', load the second query
-        } elseif (Auth::user()->hasRole('department authoriser')) {
+        if (Auth::user()->hasRole('department authoriser')) {
             $department_id = Auth::user()->department->id;
             $all_requests = Order::leftJoin('users', 'users.id', '=', 'orders.user_id')
                 ->where('orders.status', '=', 'Requested')
@@ -52,9 +49,9 @@ class AuthoriserController extends Controller
                 
             return view('authoriser.index', compact('all_requests'));
         }
+        $purchases = Order::where('site_id', '=', $site_id)->latest()->paginate(10);
+        return view('authoriser.index', compact('purchases'));
     
-        // Optionally, handle the case where the user has neither role
-        return redirect()->back()->with('error', 'Unauthorized access');
     }
     
 

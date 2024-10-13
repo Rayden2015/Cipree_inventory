@@ -62,7 +62,7 @@
                             <th>Status</th>
                             <th>View</th>
 
-                            @if (Auth::user()->hasRole('authoriser') ||
+                            @if (Auth::user()->hasRole('Super Authoriser') ||
                                     Auth::user()->hasRole('purchasing_officer') ||
                                     Auth::user()->hasRole('store_officer'))
                                 <th>Edit</th>
@@ -92,7 +92,7 @@
 
 
                              
-                            @if (Auth::user()->hasRole('authoriser') ||
+                            @if (Auth::user()->hasRole('Super Authoriser') ||
                             Auth::user()->hasRole('purchasing_officer') ||
                             Auth::user()->hasRole('store_officer'))
                                     <td>

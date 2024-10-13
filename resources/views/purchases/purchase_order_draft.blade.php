@@ -71,7 +71,7 @@
                                     <div class="form-group">
                                         <label>Supplier: </label>
                                         <select data-placeholder="Choose..." name="supplier_id" id="supplier_id"
-                                            @unlessrole('purchasing_officer|authoriser') readonly @endunlessrole
+                                            @unlessrole('purchasing_officer|Super Authoriser') readonly @endunlessrole
                                             class="select-search form-control">
                                             <option value=""></option>
                                             @foreach ($suppliers as $ed)
@@ -110,7 +110,7 @@
                                     <div class="form-group">
                                         <label>Type of Purchase: </label>
                                         <select class="select form-control" id="type_of_purchase" name="type_of_purchase"
-                                            @unlessrole('purchasing_officer|authoriser') readonly @endunlessrole required
+                                            @unlessrole('purchasing_officer|Super Authoriser') readonly @endunlessrole required
                                             data-fouc data-placeholder="Choose..">
 
                                             <option value=""></option>
@@ -126,7 +126,7 @@
                                     <div class="form-group">
                                         <label>Enduser: </label>
                                         <select data-placeholder="Choose..." name="enduser_id" id="enduser_id"
-                                            @unlessrole('purchasing_officer|authoriser') readonly @endunlessrole
+                                            @unlessrole('purchasing_officer|Super Authoriser') readonly @endunlessrole
                                             class="select-search form-control">
                                             <option value=""></option>
                                             @foreach ($endusers as $ed)
@@ -179,8 +179,8 @@
 
                         {{-- </form> --}}
                     </div>
-                    {{-- @if (Auth::user()->role->name == 'purchasing_officer' || Auth::user()->role->name == 'authoriser') --}}
-                    @hasanyrole('purchasing_officer|authoriser')
+                    {{-- @if (Auth::user()->role->name == 'purchasing_officer' || Auth::user()->role->name == 'Super Authoriser') --}}
+                    @hasanyrole('purchasing_officer|Super Authoriser')
                         <div class="card-body" id="myDiv">
                             <div class="table-responsive">
                                 @csrf
@@ -318,7 +318,7 @@
                                                         <td>
                                                             <select data-placeholder="Choose..." name="tax_id"
                                                                 id="tax_id"
-                                                                @unlessrole('purchasing_officer|authoriser') readonly @endunlessrole
+                                                                @unlessrole('purchasing_officer|Super Authoriser') readonly @endunlessrole
                                                                 class="select-search form-control">
                                                                 <option value=""></option>
                                                                 @foreach ($taxes as $sp)
@@ -366,7 +366,7 @@
                                                     <td>
                                                         <select data-placeholder="Choose..." name="levy_id"
                                                             id="levy_id"
-                                                            @unlessrole('purchasing_officer|authoriser') readonly @endunlessrole
+                                                            @unlessrole('purchasing_officer|Super Authoriser') readonly @endunlessrole
                                                             class="select-search livesearchtax form-control">
                                                             <option value=""></option>
                                                             @foreach ($levies as $lv)
@@ -493,7 +493,7 @@
                     var newRow = `
                     <tr>
                         <td><select data-placeholder="Choose..." name="tax_id" id="tax_id"
-    @unlessrole('purchasing_officer|authoriser') readonly @endunlessrole
+    @unlessrole('purchasing_officer|Super Authoriser') readonly @endunlessrole
     class="select-search form-control">
     <option value=""></option>
     @foreach ($taxes as $sp)

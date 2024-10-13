@@ -51,8 +51,8 @@
                            <th>Site</th>
                             <th>View</th>
                           
-                            {{-- @if(Auth::user()->role->name == 'authoriser' || Auth::user()->role->name == 'purchasing_officer') --}}
-                            @hasanyrole('authoriser|purchasing_officer')
+                            {{-- @if(Auth::user()->role->name == 'Super Authoriser' || Auth::user()->role->name == 'purchasing_officer') --}}
+                            @hasanyrole('Super Authoriser|purchasing_officer')
                                 <th>Edit</th>
                             @endhasanyrole
                             {{-- <th>Export</th> --}}
@@ -79,7 +79,7 @@
 
                                 </td>
                               
-                                @hasanyrole('authoriser|purchasing_officer')
+                                @hasanyrole('Super Authoriser|purchasing_officer')
                                 <td>
                                     <a href="{{ route('orders.edit', $rq->id) }}" class="btn btn-success">Edit</a>
 
