@@ -609,6 +609,18 @@ public function authoriser_remarks_update(Request $request, $id)
         try {
             $auth = Auth::id();
             $site_id = Auth::user()->site->id;
+            $department_id = Auth::user()->department->id;
+
+            if(Auth::user()->hasRole('Department Authoriser')) {
+                $spr_lists = StockPurchaseRequest::join('users','users.id','=','stock_purchase_requests.user_id')->
+               where('stock_purchase_requests.site_id', '=', $site_id)->latest()->paginate(15);
+                Log::info("StockPurchaseReqquestController | spr_lists() ", [
+                    'user_details' => Auth::user(),
+                    'response_payload' => $spr_lists
+                ]);
+                return view('stockpurchases.auth_spr_lists', compact('spr_lists'));
+            }
+
             $spr_lists = StockPurchaseRequest::where('site_id', '=', $site_id)->latest()->paginate(15);
             Log::info("StockPurchaseReqquestController | spr_lists() ", [
                 'user_details' => Auth::user(),

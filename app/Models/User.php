@@ -17,7 +17,7 @@ use Illuminate\Foundation\Auth\ThrottlesLogins as ThrottlesLoginsTrait;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable,CanResetPassword, ThrottlesLoginsTrait, Authorizable;
+    use HasApiTokens, HasFactory, Notifiable, CanResetPassword, ThrottlesLoginsTrait, Authorizable;
     use HasRoles;
 
     /**
@@ -27,8 +27,31 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'email','department_id','section_id',
-        'password','phone','address','location','image','role_id','status','staff_id','site_id', 'add_admin','add_site_admin','add_requester','add_finance_officer','add_store_officer','add_purchasing_officer','add_authoriser','add_store_assistant','add_procurement_assistant','last_successful_login','last_failed_login','failed_login_attempts','updated_at'
+        'email',
+        'department_id',
+        'section_id',
+        'password',
+        'phone',
+        'address',
+        'location',
+        'image',
+        'role_id',
+        'status',
+        'staff_id',
+        'site_id',
+        'add_admin',
+        'add_site_admin',
+        'add_requester',
+        'add_finance_officer',
+        'add_store_officer',
+        'add_purchasing_officer',
+        'add_authoriser',
+        'add_store_assistant',
+        'add_procurement_assistant',
+        'last_successful_login',
+        'last_failed_login',
+        'failed_login_attempts',
+        'updated_at'
     ];
 
     /**
@@ -50,16 +73,24 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function role(){
+    public function role()
+    {
         return $this->belongsTo(Role::class);
     }
-    public function enduser(){
-       return $this->belongsTo(Enduser::class,'enduser_id');
+    public function enduser()
+    {
+        return $this->belongsTo(Enduser::class, 'enduser_id');
     }
-    public function request_by(){
-        return $this->belongsTo(User::class,'requested_by');
+    public function request_by()
+    {
+        return $this->belongsTo(User::class, 'requested_by');
     }
-    public function site(){
-        return $this->belongsTo(Site::class,'site_id');
+    public function site()
+    {
+        return $this->belongsTo(Site::class, 'site_id');
+    }
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id');
     }
 }

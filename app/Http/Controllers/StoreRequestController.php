@@ -350,6 +350,19 @@ class StoreRequestController extends Controller
     public function store_lists()
     {
         $site_id = Auth::user()->site->id;
+        $department_id = Auth::user()->department->id;
+
+        if (Auth::user()->hasRole('Department Authoriser')) {
+            $store_requests = Sorder::leftjoin('users', 'users.id', '=', 'sorders.user_id')
+                ->where('sorders.site_id', '=', $site_id)
+                ->where('users.department_id', '=', $department_id)
+                ->latest()
+                ->paginate(15);
+                return view('stores.index', compact('store_requests'));
+        }
+
+
+
         $store_requests = Sorder::where('site_id', '=', $site_id)->latest()->paginate(15);
         return view('stores.index', compact('store_requests'));
     }
@@ -765,43 +778,43 @@ class StoreRequestController extends Controller
             $quantity = SorderPart::where('sorder_id', $id)->pluck('qty_supplied')->toArray();
 
             $data['items'] = DB::table('inventory_items')
-            ->select('inventory_items.*')
-            ->join('sorder_parts', 'inventory_items.id', '=', 'sorder_parts.inventory_id')
-            ->where('sorder_parts.sorder_id', '=', $id)
-            ->selectRaw('inventory_items.id, inventory_items.quantity - sorder_parts.qty_supplied AS new_quantity')
-            ->get();
-        Log::info("Data Items Before Edit", [
-            'DataItems' => $data['items'],
-        ]);
+                ->select('inventory_items.*')
+                ->join('sorder_parts', 'inventory_items.id', '=', 'sorder_parts.inventory_id')
+                ->where('sorder_parts.sorder_id', '=', $id)
+                ->selectRaw('inventory_items.id, inventory_items.quantity - sorder_parts.qty_supplied AS new_quantity')
+                ->get();
+            Log::info("Data Items Before Edit", [
+                'DataItems' => $data['items'],
+            ]);
 
-        foreach ($data['items'] as $product_item) {
-            $r1 =  InventoryItem::updateOrCreate(
-                ['id' => $product_item->id], // Use $product_item->id instead of $product_item['items']['id']
-                ['quantity' => $product_item->new_quantity] // Use $product_item->new_quantity instead of $product_item['quantity']['new_quantity']
-            );
-            if ($r1->wasRecentlyCreated) {
-                Log::info("Itemsa which was newly created", [
-                    'Details' => $r1
-                ]);
-                $r1->delete();
+            foreach ($data['items'] as $product_item) {
+                $r1 =  InventoryItem::updateOrCreate(
+                    ['id' => $product_item->id], // Use $product_item->id instead of $product_item['items']['id']
+                    ['quantity' => $product_item->new_quantity] // Use $product_item->new_quantity instead of $product_item['quantity']['new_quantity']
+                );
+                if ($r1->wasRecentlyCreated) {
+                    Log::info("Itemsa which was newly created", [
+                        'Details' => $r1
+                    ]);
+                    $r1->delete();
+                }
             }
-        }
-        $data2['items'] = DB::table('inventory_items')
-            ->select('inventory_items.*')
-            ->join('sorder_parts', 'inventory_items.id', '=', 'sorder_parts.inventory_id')
-            ->where('sorder_parts.sorder_id', '=', $id)
-            ->selectRaw('inventory_items.id, inventory_items.quantity * inventory_items.unit_cost_exc_vat_gh AS new_amount')
-            ->get();
-        foreach ($data2['items'] as $product_itemb) {
-            $r2 =    InventoryItem::updateOrCreate(
-                ['id' => $product_itemb->id], // Use $product_item->id instead of $product_item['items']['id']
-                ['amount' => $product_itemb->new_amount] // Use $product_item->new_quantity instead of $product_item['quantity']['new_quantity']
-            );
-            if ($r2->wasRecentlyCreated) {
-                Log::info("Itemsa which was newly created", [
-                    'Details' => $r2
-                ]);
-                $r2->delete();
+            $data2['items'] = DB::table('inventory_items')
+                ->select('inventory_items.*')
+                ->join('sorder_parts', 'inventory_items.id', '=', 'sorder_parts.inventory_id')
+                ->where('sorder_parts.sorder_id', '=', $id)
+                ->selectRaw('inventory_items.id, inventory_items.quantity * inventory_items.unit_cost_exc_vat_gh AS new_amount')
+                ->get();
+            foreach ($data2['items'] as $product_itemb) {
+                $r2 =    InventoryItem::updateOrCreate(
+                    ['id' => $product_itemb->id], // Use $product_item->id instead of $product_item['items']['id']
+                    ['amount' => $product_itemb->new_amount] // Use $product_item->new_quantity instead of $product_item['quantity']['new_quantity']
+                );
+                if ($r2->wasRecentlyCreated) {
+                    Log::info("Itemsa which was newly created", [
+                        'Details' => $r2
+                    ]);
+                    $r2->delete();
                 }
             }
             // Update stock quantities
@@ -1430,7 +1443,7 @@ class StoreRequestController extends Controller
                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
-    
+
     public function requester_store_list_view($id)
     {
         $sorder = Sorder::find($id);
@@ -1444,7 +1457,5 @@ class StoreRequestController extends Controller
 
         $sorder->save();
         return view('stores.requester_store_list_view', compact('sorder', 'sorder_parts', 'company'));
-
-      
     }
 }

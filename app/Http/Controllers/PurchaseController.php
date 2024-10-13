@@ -419,10 +419,33 @@ class PurchaseController extends Controller
 
     public function purchase_list()
     {
-          $site_id = Auth::user()->site->id;
-        $purchase_lists = Porder::where('is_draft', '=', false)->where('site_id','=', $site_id)->latest()->paginate(15);
+        // Get the site ID from the authenticated user
+        $site_id = Auth::user()->site->id;
+    
+        // Check if the user is a 'Department Authoriser'
+        if (Auth::user()->hasRole('Department Authoriser')) {
+            $department_id = Auth::user()->department->id;
+    
+            // Query for department authoriser role
+            $purchase_lists = Porder::leftJoin('users', 'users.id', '=', 'porders.user_id')
+                ->where('users.department_id', '=', $department_id)
+                ->where('porders.site_id', '=', $site_id) // Compare site_id to the logged-in user's site
+                ->latest()
+                ->paginate(15);
+    
+            return view('purchases.list', compact('purchase_lists'));
+        } 
+    
+        // Default query for authoriser role
+        $purchase_lists = Porder::where('is_draft', '=', false) // Assuming you want to check for draft orders
+            ->where('site_id', '=', $site_id)
+            ->latest()
+            ->paginate(15);
+    
         return view('purchases.list', compact('purchase_lists'));
     }
+    
+    
 
     public function drafts()
     {
