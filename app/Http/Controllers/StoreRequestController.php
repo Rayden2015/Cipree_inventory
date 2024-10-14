@@ -27,6 +27,9 @@ use Illuminate\Support\Facades\Response;
 
 class StoreRequestController extends Controller
 {
+    public function __construct(){
+        $this->middleware('auth');
+    }
     public function request_search(Request $request)
     {
         try {
