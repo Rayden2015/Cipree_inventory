@@ -90,6 +90,10 @@
                             <th>Cost</th>
                             <th>End User</th>
                             <th>Location</th>
+                            @if (Auth::user()->hasRole('Super Admin'))
+                            
+                            <th>Delete</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -105,8 +109,16 @@
                                 <td>{{ $in->qty_supplied ?? '' }}</td>
                                 <td>{{ $in->sub_total ?? '' }}</td>
                                 <td>{{ $in->asset_staff_id ?? 'Not Set' }}</td>
-
                                 <td>{{ $in->location->name ?? 'Not Set' }}</td>
+                                @if (Auth::user()->hasRole('Super Admin'))
+                                <td>
+                                    <form action="{{ route('sorderpart_delete', $in->id) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this item?')">Delete</button>
+                                    </form>
+                                </td>
+                                @endif
                             </tr>
                         @empty
                             <tr>
