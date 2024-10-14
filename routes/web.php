@@ -196,6 +196,7 @@ Route::get('requester_store_lists', [\App\Http\Controllers\StoreRequestControlle
 Route::get('fetch_single_enduser/{id}', [\App\Http\Controllers\StoreRequestController::class, 'fetch_single_enduser'])->name('fetch_single_enduser');
 Route::get('fetch_single_enduser1/{id}', [\App\Http\Controllers\StoreRequestController::class, 'fetch_single_enduser1'])->name('fetch_single_enduser1');
 Route::delete('sorderpart_delete/{id}', [\App\Http\Controllers\StoreRequestController::class, 'sorderpart_delete'])->name('sorderpart_delete');
+Route::delete('/sorderpart/delete/{id}', [\App\Http\Controllers\StoreRequestController::class, 'deleteSorderPart'])->name('sorderpart_delete');
 
 
 // authoriser module

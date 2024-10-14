@@ -1461,4 +1461,66 @@ class StoreRequestController extends Controller
         $sorder->save();
         return view('stores.requester_store_list_view', compact('sorder', 'sorder_parts', 'company'));
     }
+    public function deleteSorderPart($id)
+    {
+        try {
+            // Find the sorder part by id
+            $sorderPart = SorderPart::find($id);
+    
+            // Check if the part exists
+            if (!$sorderPart) {
+                return redirect()->back()->withError('Sorder part not found.');
+            }
+    
+            // Capture the item_id before deleting the part
+            $itemId = $sorderPart->item_id;
+    
+            // Delete the part
+            $sorderPart->delete();
+    
+            // Log the deletion
+            Log::info("StoreReqquestController | deleteSorderPart() | Sorder part deleted", [
+                'user_details' => Auth::user(),
+                'sorder_part_id' => $id,
+                'response_message' => 'Sorder part deleted successfully'
+            ]);
+    
+            // Update the items table based on product history logic
+            DB::statement("
+                UPDATE items i
+                LEFT JOIN (
+                    SELECT d.item_id, SUM(d.quantity) AS total_received
+                    FROM inventory_item_details d
+                    WHERE d.item_id = :itemId1
+                    GROUP BY d.item_id
+                ) r ON i.id = r.item_id
+                LEFT JOIN (
+                    SELECT sp.item_id, SUM(sp.qty_supplied) AS total_supplied
+                    FROM sorder_parts sp
+                    JOIN sorders s ON s.id = sp.sorder_id
+                    WHERE sp.item_id = :itemId2
+                    AND s.status IN ('Supplied', 'Partially Supplied')
+                    GROUP BY sp.item_id
+                ) s ON i.id = s.item_id
+                SET i.stock_quantity = COALESCE(r.total_received, 0) - COALESCE(s.total_supplied, 0)
+                WHERE i.id = :itemId3;
+            ", ['itemId1' => $itemId, 'itemId2' => $itemId, 'itemId3' => $itemId]);
+    
+            // Redirect back with success message
+            return redirect()->back()->withSuccess('Sorder part deleted and stock quantity updated successfully.');
+    
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::channel('error_log')->error('An error occurred while deleting with id ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+    
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id);
+        }
+    }
+    
+
 }

@@ -40,7 +40,9 @@
                 <br>
                 <form action="{{ route('stores.supply_history_search_item') }}" method="GET">
                     <div class="input-group mb-3">
-                        <input type="text" class="form-control" placeholder="Search Description or Part Number, Enduser or Stock Code" aria-describedby="basic-addon2" name="search">
+                        <input type="text" class="form-control"
+                            placeholder="Search Description or Part Number, Enduser or Stock Code"
+                            aria-describedby="basic-addon2" name="search">
                     </div>
                     <div class="input-group mb-3">
                         <input type="date" class="form-control" name="start_date">
@@ -63,16 +65,16 @@
             </div>
             <!-- /.card-header -->
             @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
+            @endif
 
-        @if (session('error'))
-            <div class="alert alert-danger">
-                {{ session('error') }}
-            </div>
-        @endif
+            @if (session('error'))
+                <div class="alert alert-danger">
+                    {{ session('error') }}
+                </div>
+            @endif
 
             <div class="card-body">
                 <table id="example1" class="table table-bordered table-striped">
@@ -90,9 +92,10 @@
                             <th>Cost</th>
                             <th>End User</th>
                             <th>Location</th>
-                            {{-- @if (Auth::user()->role->name == 'store_officer')
+                            @if (Auth::user()->hasRole('Super Admin'))
+                            
                             <th>Delete</th>
-                            @endif --}}
+                            @endif
                             {{-- <th>Date</th> --}}
 
                             {{-- <th>View</th> --}}
@@ -121,16 +124,15 @@
                                 <td>{{ $in->enduser->asset_staff_id ?? 'Not Set' }}</td>
                                 <td>{{ $in->location->name ?? 'Not Set' }}</td>
 
-                                {{-- @if (Auth::user()->role->name == 'store_officer')
-                                    <td>
-                                        <form action="{{ route('sorderpart_delete', $in->id) }}" method="post">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" onclick="return confirm('Are you sure?')"
-                                                class="btn btn-danger">Delete</button>
-                                        </form>
-                                    </td>
-                                @endif --}}
+                                @if (Auth::user()->hasRole('Super Admin'))
+                                <td>
+                                    <form action="{{ route('sorderpart_delete', $in->id) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this item?')">Delete</button>
+                                    </form>
+                                </td>
+                                @endif
                             @empty
                             <tr>
 

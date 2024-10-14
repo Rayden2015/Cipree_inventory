@@ -24,15 +24,17 @@ class LogSuccessfulLogin
      */
     public function handle(object $event)
     {
-        $event = Auth::id();
+        // Get the ID of the authenticated user
+        $userId = Auth::id();
+    
+        // Create a new Login record with the user ID and attempt
         Login::create([
-            'user_id'=>$event,
-            'attempt'=>1,
+            'user_id' => $userId,
+            'attempt' => 1,  // Provide a value for 'attempt'
         ]);
-        $user = User::find($event);
-        // User::where('id','=',$event)->update(['last_login_at'=>Carbon::now()]);
-        
-
-
+    
+        // Find the user by ID if needed for further logic
+        $user = User::find($userId);
     }
+    
 }
