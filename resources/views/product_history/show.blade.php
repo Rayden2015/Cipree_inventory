@@ -26,7 +26,7 @@
 
             <div class="card">  
                 <div class="card-header">
-                    <h3 class="card-title">Item History -- {{ $product_history->item_description }}   -- Current Quantity -- {{ $currentQuantity }}  </h3>
+                    <h3 class="card-title">Item History | {{ $product_history->item_description }}  |  Current Quantity | {{ $currentQuantity }}  </h3>
                 </div>
                 <!-- /.card-header -->
             

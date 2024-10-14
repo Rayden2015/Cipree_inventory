@@ -65,12 +65,12 @@ return [
         'name' => 'update_inventory_item', // Name it as you like
     ],
 
-
         'error_log' => [
             'driver' => 'single',
             'path' => storage_path('logs/errors/error.log'),
             'level' => 'error',
-            'days' => 1
+            'days' => 1,
+            'replace_placeholders' => true
         ],
         'single' => [
             'driver' => 'single',
