@@ -1022,7 +1022,7 @@ class StoreRequestController extends Controller
                     'sorders.delivery_reference_number', 
                     'inventories.grn_number', 
                     'inventories.enduser_id',
-                    'sorders.created_at',
+                    'sorders.delivered_on',
                     'inventory_items.location_id'
                 );
     
