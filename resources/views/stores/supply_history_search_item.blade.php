@@ -90,6 +90,10 @@
                             <th>Cost</th>
                             <th>End User</th>
                             <th>Location</th>
+                            @if (Auth::user()->hasRole('Super Admin'))
+                            
+                            <th>Delete</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -99,14 +103,23 @@
                                 <td>{{ date('d-m-Y (H:i)', strtotime($in->delivered_on)) }}</td>
                                 <td>{{ $in->delivery_reference_number ?? '' }}</td>
                                 <td>{{ $in->grn_number ?? 'Not Found or Deleted' }}</td>
-                                <td>{{ $in->item_details->item_description ?? ' ' }}</td>
-                                <td>{{ $in->item_details->item_part_number ?? ' ' }}</td>
-                                <td>{{ $in->item_details->item_stock_code ?? ' ' }}</td>
+                                <td>{{ $in->item_description ?? ' ' }}</td>
+                                <td>{{ $in->item_part_number ?? ' ' }}</td>
+                                <td>{{ $in->item_stock_code ?? ' ' }}</td>
                                 <td>{{ $in->qty_supplied ?? '' }}</td>
                                 <td>{{ $in->sub_total ?? '' }}</td>
-                                <td>{{ $in->asset_staff_id ?? 'Not Set' }}</td>
+                                <td>{{ $in->enduser->asset_staff_id ?? 'Not Set' }}</td>
 
                                 <td>{{ $in->location->name ?? 'Not Set' }}</td>
+                                @if (Auth::user()->hasRole('Super Admin'))
+                                <td>
+                                    <form action="{{ route('sorderpart_delete', $in->id) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this item?')">Delete</button>
+                                    </form>
+                                </td>
+                                @endif
                             </tr>
                         @empty
                             <tr>

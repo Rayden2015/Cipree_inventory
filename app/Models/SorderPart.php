@@ -34,6 +34,10 @@ class SorderPart extends Model
 
         return $this->belongsTo(Item::class,'item_id');
     }
+     public function sorder()
+    {
+        return $this->belongsTo(Sorder::class, 'sorder_id');
+    }
 
    
 }

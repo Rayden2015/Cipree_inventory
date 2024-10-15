@@ -991,31 +991,42 @@ class StoreRequestController extends Controller
 
 
 
-
     public function supply_history_search_item(Request $request)
     {
         try {
+            // Log user details and request payload
             Log::info("StoreReqquestController | supply_history_search_item() ", [
                 'user_details' => Auth::user(),
-                //'request_message' => $message,
-                'request_payload' => $request
+                'request_payload' => $request->all()
             ]);
-
+    
             $site_id = Auth::user()->site->id;
-
-            // Initialize the query builder with your base join and where conditions
-            $query = SorderPart::leftjoin('sorders', 'sorders.id', '=', 'sorder_parts.sorder_id')
+    
+            // Initialize the query with joins and base conditions
+            $query = SorderPart::with(['item_details', 'location', 'sorder', 'sorder.inventory'])
+                ->leftjoin('sorders', 'sorders.id', '=', 'sorder_parts.sorder_id')
                 ->leftjoin('items', 'items.id', '=', 'sorder_parts.item_id')
                 ->leftjoin('endusers', 'sorders.enduser_id', '=', 'endusers.id')
                 ->leftjoin('inventory_items', 'sorder_parts.inventory_id', '=', 'inventory_items.id')
-
                 ->leftJoin('inventories', 'inventory_items.inventory_id', '=', 'inventories.id')
                 ->where('sorders.site_id', '=', $site_id)
                 ->where('sorder_parts.site_id', '=', $site_id)
-                ->whereIn('sorders.status', ['Supplied', 'Partially Supplied']);
-
-            // Check if a search query is provided
-            $searchTerm = null;
+                ->whereIn('sorders.status', ['Supplied', 'Partially Supplied'])
+                ->select(
+                    'sorder_parts.id', 
+                    'items.item_description', 
+                    'items.item_part_number', 
+                    'items.item_stock_code', 
+                    'sorder_parts.qty_supplied', 
+                    'sorder_parts.sub_total', 
+                    'sorders.delivery_reference_number', 
+                    'inventories.grn_number', 
+                    'inventories.enduser_id',
+                    'sorders.created_at',
+                    'inventory_items.location_id'
+                );
+    
+            // Apply search filter if present
             if ($request->search) {
                 $searchTerm = '%' . $request->search . '%';
                 $query->where(function ($subQuery) use ($searchTerm) {
@@ -1025,17 +1036,13 @@ class StoreRequestController extends Controller
                         ->orWhere('items.item_stock_code', 'like', $searchTerm);
                 });
             }
-
-            // Check if date range is provided
-            $startDate = null;
-            $endDate = null;
+    
+            // Apply date range filter if present
             if ($request->start_date && $request->end_date) {
-                $startDate = $request->start_date;
-                $endDate = $request->end_date;
-                $query->whereBetween('sorders.created_at', [$startDate, $endDate]);
+                $query->whereBetween('sorders.created_at', [$request->start_date, $request->end_date]);
             }
-
-            // Finalize the query with ordering and pagination
+    
+            // Paginate the result
             $total_cost_of_parts_within_the_month = $query->latest('sorders.created_at')
                 ->paginate(100)
                 ->appends([
@@ -1043,27 +1050,31 @@ class StoreRequestController extends Controller
                     'start_date' => $request->start_date,
                     'end_date' => $request->end_date
                 ]);
-
+    
+            // Log success
             Log::info("StoreReqquestController | supply_history_search_item() ", [
                 'user_details' => Auth::user(),
                 'request_message' => 'Supply History Search Item Successful',
                 'response_payload' => $total_cost_of_parts_within_the_month
             ]);
-
+    
+            // Return the view with the data
             return view('stores.supply_history_search_item', compact('total_cost_of_parts_within_the_month'));
         } catch (\Exception $e) {
+            // Log the error with a unique ID
             $unique_id = floor(time() - 999999999);
             Log::channel('error_log')->error('An error occurred with id ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
-
+    
             // Redirect back with the error message
             return redirect()->back()
                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
-
+    
+    
 
     public function sorderpart_delete($sorderPartId)
     {
@@ -1461,66 +1472,63 @@ class StoreRequestController extends Controller
         $sorder->save();
         return view('stores.requester_store_list_view', compact('sorder', 'sorder_parts', 'company'));
     }
-    public function deleteSorderPart($id)
-    {
-        try {
-            // Find the sorder part by id
-            $sorderPart = SorderPart::find($id);
-    
-            // Check if the part exists
-            if (!$sorderPart) {
-                return redirect()->back()->withError('Sorder part not found.');
-            }
-    
-            // Capture the item_id before deleting the part
-            $itemId = $sorderPart->item_id;
-    
-            // Delete the part
-            $sorderPart->delete();
-    
-            // Log the deletion
-            Log::info("StoreReqquestController | deleteSorderPart() | Sorder part deleted", [
-                'user_details' => Auth::user(),
-                'sorder_part_id' => $id,
-                'response_message' => 'Sorder part deleted successfully'
-            ]);
-    
-            // Update the items table based on product history logic
-            DB::statement("
-                UPDATE items i
-                LEFT JOIN (
-                    SELECT d.item_id, SUM(d.quantity) AS total_received
-                    FROM inventory_item_details d
-                    WHERE d.item_id = :itemId1
-                    GROUP BY d.item_id
-                ) r ON i.id = r.item_id
-                LEFT JOIN (
-                    SELECT sp.item_id, SUM(sp.qty_supplied) AS total_supplied
-                    FROM sorder_parts sp
-                    JOIN sorders s ON s.id = sp.sorder_id
-                    WHERE sp.item_id = :itemId2
-                    AND s.status IN ('Supplied', 'Partially Supplied')
-                    GROUP BY sp.item_id
-                ) s ON i.id = s.item_id
-                SET i.stock_quantity = COALESCE(r.total_received, 0) - COALESCE(s.total_supplied, 0)
-                WHERE i.id = :itemId3;
-            ", ['itemId1' => $itemId, 'itemId2' => $itemId, 'itemId3' => $itemId]);
-    
-            // Redirect back with success message
-            return redirect()->back()->withSuccess('Sorder part deleted and stock quantity updated successfully.');
-    
-        } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('An error occurred while deleting with id ' . $unique_id, [
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-    
-            // Redirect back with the error message
-            return redirect()->back()
-                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id);
+   public function deleteSorderPart($id)
+{
+    try {
+        // Find the sorder part by id
+        $sorderPart = SorderPart::find($id);
+
+        // Check if the part exists
+        if (!$sorderPart) {
+            Log::error('Sorder part not found for id: ' . $id);
+            return redirect()->back()->withError('Sorder part not found.');
         }
+
+        Log::info('Sorder part found for id: ' . $id);
+
+        // Capture the item_id before deleting the part
+        $itemId = $sorderPart->item_id;
+
+        // Try to delete the part
+        $sorderPart->delete();
+        Log::info('Sorder part deleted for id: ' . $id);
+
+        // Update the items table based on product history logic
+        DB::statement("
+            UPDATE items i
+            LEFT JOIN (
+                SELECT d.item_id, SUM(d.quantity) AS total_received
+                FROM inventory_item_details d
+                WHERE d.item_id = :itemId1
+                GROUP BY d.item_id
+            ) r ON i.id = r.item_id
+            LEFT JOIN (
+                SELECT sp.item_id, SUM(sp.qty_supplied) AS total_supplied
+                FROM sorder_parts sp
+                JOIN sorders s ON s.id = sp.sorder_id
+                WHERE sp.item_id = :itemId2
+                AND s.status IN ('Supplied', 'Partially Supplied')
+                GROUP BY sp.item_id
+            ) s ON i.id = s.item_id
+            SET i.stock_quantity = COALESCE(r.total_received, 0) - COALESCE(s.total_supplied, 0)
+            WHERE i.id = :itemId3;
+        ", ['itemId1' => $itemId, 'itemId2' => $itemId, 'itemId3' => $itemId]);
+
+        // Redirect back with success message
+        return redirect()->back()->withSuccess('Sorder part deleted and stock quantity updated successfully.');
+
+    } catch (\Exception $e) {
+        $unique_id = floor(time() - 999999999);
+        Log::channel('error_log')->error('An error occurred while deleting with id ' . $unique_id, [
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+        ]);
+
+        // Redirect back with the error message
+        return redirect()->back()
+            ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id);
     }
-    
+}
+
 
 }
