@@ -40,8 +40,10 @@ class DashboardNavigationController extends Controller
          if (Auth::user()->hasRole('Department Authoriser')) {
             $department_id = Auth::user()->department->id;
 
-         $pending_po_approvals = Porder::leftJoin('users', 'users.id', '=', 'porders.user_id')->
-         where('porders.site_id', '=', $site_id)->whereNull('porders.approval_status')->latest('porders.created_at')->paginate(15);
+         $pending_po_approvals = Porder::leftJoin('users', 'users.id', '=', 'porders.user_id')
+         ->where('porders.site_id', '=', $site_id)
+         ->where('users.department_id', '=', $department_id)
+         ->whereNull('porders.approval_status')->latest('porders.created_at')->paginate(15);
          return view('homepages.pending_po_approvals', compact('pending_po_approvals'));
          }
          $pending_po_approvals = Porder::where('site_id', '=', $site_id)->whereNull('approval_status')->latest()->paginate(15);
@@ -70,7 +72,9 @@ class DashboardNavigationController extends Controller
          if (Auth::user()->hasRole('Department Authoriser')) {
             $department_id = Auth::user()->department->id;
          $approved_request = Order::leftJoin('users', 'users.id', '=', 'orders.user_id')->
-         where('orders.site_id', '=', $site_id)->where('orders.approval_status', '=', 'Approved')->latest('orders.created_at')->paginate(15);
+         where('orders.site_id', '=', $site_id)
+         ->where('users.department_id', '=', $department_id)
+         ->where('orders.approval_status', '=', 'Approved')->latest('orders.created_at')->paginate(15);
          return view('homepages.approved_request', compact('approved_request'));
          }
          $approved_request = Order::where('site_id', '=', $site_id)->where('approval_status', '=', 'Approved')->latest()->paginate(15);
@@ -99,7 +103,9 @@ class DashboardNavigationController extends Controller
          if (Auth::user()->hasRole('Department Authoriser')) {
             $department_id = Auth::user()->department->id;
          $approved_pos = Porder::leftJoin('users', 'users.id', '=', 'porders.user_id')->
-         where('porders.site_id', '=', $site_id)->where('porders.approval_status', '=', 'Approved')->latest('porders.created_at')->paginate(15);
+         where('porders.site_id', '=', $site_id)
+         ->where('users.department_id', '=', $department_id)
+         ->where('porders.approval_status', '=', 'Approved')->latest('porders.created_at')->paginate(15);
          return view('homepages.approved_pos', compact('approved_pos'));
          }
          $approved_pos = Porder::where('site_id', '=', $site_id)->where('approval_status', '=', 'Approved')->latest()->paginate(15);
@@ -128,7 +134,9 @@ class DashboardNavigationController extends Controller
          if (Auth::user()->hasRole('Department Authoriser')) {
             $department_id = Auth::user()->department->id;
          $processed_request = Sorder::leftJoin('users', 'users.id', '=', 'sorders.user_id')->
-         where('sorders.site_id', '=', $site_id)->where('sorders.status', '=', 'Supplied')->latest('sorders.created_at')->paginate(15);
+         where('sorders.site_id', '=', $site_id)
+         ->where('users.department_id', '=', $department_id)
+         ->where('sorders.status', '=', 'Supplied')->latest('sorders.created_at')->paginate(15);
          return view('homepages.processed_request', compact('processed_request'));
          }
          $processed_request = Sorder::where('site_id', '=', $site_id)->where('status', '=', 'Supplied')->latest()->paginate(15);
@@ -158,8 +166,9 @@ class DashboardNavigationController extends Controller
             $department_id = Auth::user()->department->id;
          $pending_request_approvals = Order::leftJoin('users', 'users.id', '=', 'orders.user_id')
          ->where('orders.site_id', '=', $site_id)
-         ->whereNull('orders.approval_status')->
-         latest('orders.created_at')->paginate(15);
+         ->where('users.department_id', '=', $department_id)
+         ->whereNull('orders.approval_status')
+         ->latest('orders.created_at')->paginate(15);
          return view('homepages.pending_request_approvals', compact('pending_request_approvals'));
          }
 
@@ -190,8 +199,10 @@ class DashboardNavigationController extends Controller
          $site_id = Auth::user()->site->id;
          if (Auth::user()->hasRole('Department Authoriser')) {
             $department_id = Auth::user()->department->id;
-         $pending_stock_approvals = Sorder::leftJoin('users', 'users.id', '=', 'sorders.user_id')->
-         where('sorders.site_id', '=', $site_id)->whereNull('sorders.approval_status')->latest('sorders.created_at')->paginate(15);
+         $pending_stock_approvals = Sorder::leftJoin('users', 'users.id', '=', 'sorders.user_id')
+         ->where('sorders.site_id', '=', $site_id)
+         ->where('users.department_id', '=', $department_id)
+         ->whereNull('sorders.approval_status')->latest('sorders.created_at')->paginate(15);
          return view('homepages.pending_stock_approvals', compact('pending_stock_approvals'));
          }
          $pending_stock_approvals = Sorder::where('site_id', '=', $site_id)->whereNull('approval_status')->latest()->paginate(15);
@@ -221,7 +232,9 @@ class DashboardNavigationController extends Controller
          if (Auth::user()->hasRole('Department Authoriser')) {
             $department_id = Auth::user()->department->id;
          $processed_pos = Porder::leftJoin('users', 'users.id', '=', 'porders.user_id')->
-         where('porders.site_id', '=', $site_id)->where('porders.status', '=', 'Ordered')->latest('porders.created_at')->paginate(15);
+         where('porders.site_id', '=', $site_id)
+         ->where('users.department_id', '=', $department_id)
+         ->where('porders.status', '=', 'Ordered')->latest('porders.created_at')->paginate(15);
          return view('homepages.processed_pos', compact('processed_pos'));
          }
          $processed_pos = Porder::where('site_id', '=', $site_id)->where('status', '=', 'Ordered')->latest()->paginate(15);
