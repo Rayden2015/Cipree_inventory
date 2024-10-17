@@ -1,124 +1,75 @@
-@extends('layouts.app2')
-@section('content')
+<!doctype html>
+<html lang="en">
 
-    <head>
-        <link rel="stylesheet" href="https://unpkg.com/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-        <link rel="stylesheet" href="https://unpkg.com/bs-brain@2.0.2/components/logins/login-5/assets/css/login-5.css">
-    </head>
-    <style>
-        #webname div {
-            /* width: 560px; */
+<head>
+    <title>Infinixel</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-        }
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700&display=swap" rel="stylesheet">
 
-        @media (min-width:900px) {
-            .myimage {
-                padding-left: 140px;
-                padding-right: 120px;
-                width: 600px;
-                height: 300px;
-            }
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
+    <link rel="stylesheet" href="{{ asset('assets/css/loginstyle.css') }}">
 
-        }
-    </style>
+</head>
 
-    <body style="background-color:white; font-family: 'Segoe UI Light';">
-        <!-- Login 5 - Bootstrap Brain Component -->
-
+<body class="img js-fullheight" style="background-image: url('{{ asset('assets/images/bg2.jpeg') }}');">
+    <section class="ftco-section">
         <div class="container">
-            <div class="card border-light-subtle shadow-sm">
-                <div class="row g-0">
-
-                    
-                    <div class="col-12 col-md-6">
-                        <div class="d-flex align-items-center justify-content-center h-100"
-                            style="background-color:#0e6258">
-                            <div class=" gy-md-4 overflow-hidden">
-
-                                <h2 class="h1 mb-4" style="color:#A9D18E; width:100%; text-align:center;">WELCOME <span
-                                        style="font-family: 'Brush Script MT', cursive;"> to</span>
-                                    CIPREE</h2>
-                                <img class="img-fluid rounded mb-4 myimage" loading="lazy"
-                                    src="{{ asset('assets/images/icons/test_green.png') }}" width="390" height="80"
-                                    alt="BootstrapBrain Logo">
-                                {{-- <hr class="border-primary-subtle mb-4"> --}}
-                                <p style="font-size: 16px; color:#C5E0B4; text-align:center;">Website: www.cipree.com
-                                    Email:info@cipree.com / service@cipree.com</p>
-                                </p>
+            <div class="row justify-content-center">
+                <div class="col-md-6 text-center mb-5">
+                    <h2 class="heading-section">Login</h2>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-4">
+                    <div class="login-wrap p-0">
+                        <h3 class="mb-4 text-center">Have an account?</h3>
+                        <form action="{{ route('login') }}" method="post" class="signin-form">
+                            @csrf
+                            <div class="form-group">
+                                <input type="text" class="form-control" name="email" placeholder="Email" required>
                             </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6" style="background-color: #F0F8FB">
-                        <div class="card-body p-3 p-md-4 p-xl-5">
-                            <div class="row">
-                                @if (Session::has('errors'))
-                                    <div class="alert alert-danger"style="color:red;">
-                                        @foreach ($errors->all() as $error)
-                                            {{ $error }}<br />
-                                        @endforeach
-                                    </div>
-                                @endif
-                                <div class="col-12">
-                                    <div class="mb-5">
-                                        <h3 style="font-weight:none; text-align:center;">Sign in</h3>
-                                    </div>
-                                </div>
+                            <div class="form-group">
+                                <input id="password-field" type="password" class="form-control" name="password"
+                                    placeholder="Password" required>
+                                <span toggle="#password-field"
+                                    class="fa fa-fw fa-eye field-icon toggle-password"></span>
                             </div>
-                            <form method="POST" action="{{ route('login') }}">
-                                @csrf
-                                <div class="row gy-3 gy-md-4 overflow-hidden">
-                                    <div class="col-12">
-                                        <label for="email" class="form-label" style="font-weight: bold;">Email <span
-                                                class="text-danger">*</span></label>
-                                        <input type="email" class="form-control" name="email" id="email"
-                                            placeholder="name@example.com" required>
-                                    </div>
-                                    <div class="col-12">
-                                        <label for="password" class="form-label" style="font-weight: bold;">Password
-                                            <span class="text-danger">*</span></label>
-                                        <input type="password" class="form-control" name="password" id="password"
-                                            value="" required>
-                                    </div>
-                                    <div class="col-12">
-                                        {{-- <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value=""
-                                                    name="remember_me" id="remember_me">
-                                                <label class="form-check-label text-secondary" for="remember_me">
-                                                    Keep me logged in
-                                                </label>
-                                            </div> --}}
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="d-grid">
-                                            <button style="background-color:#0e6258" class="btn bsb-btn-xl btn-primary"
-                                                type="submit">Sign In</button>
-                                        </div>
-                                        <br>
-                                        <p id="p1"><a href="{{ route('password.request') }}" class="ml-auto">Forgot
-                                                password?</a> </p>
-                                    </div>
-                                </div>
-                            </form>
-                            <div class="row">
-                                <div class="col-12">
-                                    <hr class="mt-5 mb-4 border-secondary-subtle">
-                                    <div class="d-flex gap-2 gap-md-4 flex-column flex-md-row justify-content-md-end">
-
-                                    </div>
-                                </div>
+                            <div class="form-group">
+                                <button type="submit" class="form-control btn btn-primary submit px-3">Sign In</button>
                             </div>
-                            <div class="row">
-
+                            <div class="form-group d-md-flex">
+                                {{-- <div class="w-50">
+                                    <label class="checkbox-wrap checkbox-primary">Remember Me
+                                        <input type="checkbox" checked>
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </div> --}}
+                                {{-- <div class="w-50 text-md-right">
+                                    <a href="#" style="color: #fff">Forgot Password</a>
+                                </div> --}}
                             </div>
-                        </div>
+                        </form>
+                        {{-- <p class="w-100 text-center">&mdash; Or Sign In With &mdash;</p>
+                        <div class="social d-flex text-center">
+                            <a href="#" class="px-2 py-2 mr-md-1 rounded"><span
+                                    class="ion-logo-facebook mr-2"></span> Facebook</a>
+                            <a href="#" class="px-2 py-2 ml-md-1 rounded"><span
+                                    class="ion-logo-twitter mr-2"></span> Twitter</a>
+                        </div> --}}
                     </div>
                 </div>
             </div>
         </div>
+    </section>
 
-    </body>
+    <script src="{{ asset('assets/js/jquery.min.js') }}"></script>
+    <script src="{{ asset('assets/js/popper.js') }}"></script>
+    <script src="{{ asset('assets/js/bootstrap.min.js') }}"></script>
+    <script src="{{ asset('assets/js/loginmain.js') }}"></script>
 
+</body>
 
-    </html>
-@endsection
+</html>

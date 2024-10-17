@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class RoleSeeder extends Seeder
 {
@@ -13,23 +13,7 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        Role::create(['name' => 'Super Admin']);
-        $admin = Role::create(['name' => 'Admin']);
-        $productManager = Role::create(['name' => 'Product Manager']);
-
-        $admin->givePermissionTo([
-            'create-user',
-            'edit-user',
-            'delete-user',
-            'create-product',
-            'edit-product',
-            'delete-product'
-        ]);
-
-        $productManager->givePermissionTo([
-            'create-product',
-            'edit-product',
-            'delete-product'
-        ]);
+        $role = Role::create(['name' => 'Admin', 'guard_name' => 'web']); //1
+        $role = Role::create(['name' => 'Agent', 'guard_name' => 'web']); //2
     }
 }
