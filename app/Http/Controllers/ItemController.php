@@ -316,7 +316,7 @@ class ItemController extends Controller
         get();
 
         $supplied = DB::select("
-        SELECT sp.*, s.*, ii.*, inv.*, i.*, inv.grn_number
+        SELECT sp.*, s.id as sorder_id, s.request_number, s.delivered_on, ii.*, inv.*, i.*, inv.grn_number
         FROM sorder_parts sp
         LEFT JOIN sorders s ON s.id = sp.sorder_id
         LEFT JOIN inventory_items ii ON ii.id = sp.inventory_id
@@ -325,10 +325,10 @@ class ItemController extends Controller
         WHERE sp.item_id = ?
         AND (s.status = 'Supplied' OR s.status = 'Partially Supplied')
         AND s.site_id = ?
-        ", [$id, $site_id]);
-
-        // dd($supplied);
-        $supplied = collect($supplied);
+    ", [$id, $site_id]);
+    
+    $supplied = collect($supplied);
+    
         
         // Calculate the current stock based on received - supplied
         $currentQuantity = $received->sum('quantity') - $supplied->sum('qty_supplied');

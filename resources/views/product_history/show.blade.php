@@ -90,31 +90,40 @@
                         </thead>
                         <tbody>
                             @forelse ($supplied as $rc)
-                                <tr>
-                                    <!-- Since you fetched everything as columns, access them directly from the object -->
-                                    <td>{{ $rc->request_number ?? '' }}</td>
-                                    <td>{{ $rc->item_description ?? '' }}</td>
-                                    <td>{{ $rc->item_part_number ?? '' }}</td>
-                                    <td>{{ $rc->item_stock_code ?? '' }}</td>
-                                    <td>{{ $rc->qty_supplied ?? '' }}</td>
-                                    <td>{{ $rc->delivered_on ?? '' }}</td>
-                                    
-                                    <!-- Display the inventory_id if available, otherwise 'N/A' -->
-                                    <td>
-                                        @if($rc->inventory_id)
-                                            <a href="{{ route('inventories.show', ['inventory' => $rc->inventory_id]) }}">
-                                                {{ $rc->grn_number ?? 'View Inventory' }}
-                                            </a>
-                                        @else
-                                            N/A
-                                        @endif
-                                    </td> 
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td class="text-center" colspan="7">Data Not Found!</td>
-                                </tr>
-                            @endforelse
+                            <tr>
+                                <td>
+                                    @if($rc->request_number && $rc->sorder_id)
+                                        <a href="{{ route('sorders.store_list_view', ['id' => $rc->sorder_id]) }}">
+                                            {{ $rc->request_number }}
+                                        </a>
+                                    @else
+                                        N/A
+                                    @endif
+                                </td>
+                                <td>{{ $rc->item_description ?? '' }}</td>
+                                <td>{{ $rc->item_part_number ?? '' }}</td>
+                                <td>{{ $rc->item_stock_code ?? '' }}</td>
+                                <td>{{ $rc->qty_supplied ?? '' }}</td>
+                                <td>{{ $rc->delivered_on ?? '' }}</td>
+                                
+                                <!-- Display the inventory_id if available, otherwise 'N/A' -->
+                                <td>
+                                    @if($rc->inventory_id)
+                                        <a href="{{ route('inventories.show', ['inventory' => $rc->inventory_id]) }}">
+                                            {{ $rc->grn_number ?? 'View Inventory' }}
+                                        </a>
+                                    @else
+                                        N/A
+                                    @endif
+                                </td> 
+                            </tr>
+                        @empty
+                            <tr>
+                                <td class="text-center" colspan="7">Data Not Found!</td>
+                            </tr>
+                        @endforelse
+                        
+                        
                         
                             <!-- Total Row -->
                             @if($supplied->count() > 0)
