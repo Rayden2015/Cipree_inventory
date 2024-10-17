@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
-use Illuminate\Pagination\Paginator;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+<<<<<<< HEAD
 use Sentry\Laravel\ServiceProvider as SentryServiceProvider;
+=======
+use Illuminate\Support\ServiceProvider;
+>>>>>>> d29d2b411f82256fddca149984e6cef765ac5ec9
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Paginator::useBootstrapFive();
-		 Schema::defaultStringLength(191);
+        //
+        Schema::defaultStringLength(191);
     }
 }

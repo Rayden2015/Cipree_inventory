@@ -1,32 +1,16 @@
-@php
-    $first_name = App\Http\Controllers\UserController::username();
-    $logo = App\Http\Controllers\UserController::logo();
-    $lastlogin = App\Http\Controllers\UserController::lastlogin();
-    $user = auth()->user();
-@endphp
 <aside class="main-sidebar sidebar-light-primary elevation-4">
     <!-- Brand Logo -->
     <a href="{{ route('home') }}" class="brand-link">
-        <img src="{{ asset('images/company/' . $logo) }}" alt="AdminLTE Logo" class="brand-image"
-            style="opacity: .8; width:210px; heigh:100px;"><br>
-        <span style="text-align:center; font-weight:bold; padding-left:80px;">CIPREE</span> <br>
-        <h6 style="text-align:center; font-weight:bold; padding-top:3px;">{{ $first_name . ', ' }}
-            {{-- {{ Auth::user()->role->name }} --}}
-            @if ($user)
-
-                @foreach ($user->getRoleNames() as $role)
-                    <span>{{ $role }}</span>
-                @endforeach
-            @endif
-        </h6>
-        <h6 style="text-align:center;">Last Login: {{ $lastlogin ? ' ' . $lastlogin->created_at : '' }}</h6>
-
-        {{-- <h6 style="text-align:center; font-weight:bold;">{{ Auth::user()->role->name }}</h6> --}}
+        <img src="{{ asset('assets/images/icons/infinixel.png') }}" alt="AdminLTE Logo"
+            class="brand-image img-circle elevation-3" style="opacity: .8">
+        <span class="brand-text font-weight-bold">Mur De Pierre</span>
     </a>
 
     <!-- Sidebar -->
     <div class="sidebar">
         <!-- Sidebar user panel (optional) -->
+
+
         <!-- SidebarSearch Form -->
 
         <!-- Sidebar Menu -->
@@ -36,7 +20,7 @@
                 <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
                 <li class="nav-item menu-open">
-                    <a style="background-color: #0e6258" href="{{ route('home') }}" class="nav-link active">
+                    <a href="{{ route('home') }}" class="nav-link active">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>
                             Dashboard
@@ -45,134 +29,41 @@
                 </li>
                 <li class="nav-item">
 
-                    {{-- company tab --}}
-                    {{-- @if (Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'site_admin') --}}
-                    @can('company-module')
-                    <li
-                        class="nav-item {{ request()->routeIs('company.index', 'users.index', 'reviews.index', 'sites*', 'roles*', 'permissions*', 'uom*','send.bulk.email') ? 'menu-open' : '' }}">
-                        <a href="#"
-                            class="nav-link {{ request()->routeIs('company.index', 'users.index', 'reviews.index', 'sites*', 'roles*', 'permissions*', 'uom*','send.bulk.email') ? 'active' : '' }}">
-                            <i>
-                                <img src="{{ asset('assets/images/icons/comp.png') }}"width="26" height="26"
-                                    alt="" />
-                            </i>
-                            <p>
-                                Company
-                                <i class="fas fa-angle-left right"></i>
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview">
-                            @can('info')
-                                <li class="nav-item">
-                                    <a href="{{ route('company.index') }}"
-                                        class="nav-link {{ request()->routeIs('company.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Info</p>
-                                    </a>
-                                </li>
-                            @endcan
+                    {{-- @role('admin')
 
-                            @can('account')
-                                <li class="nav-item">
-                                    <a href="{{ route('users.index') }}"
-                                        class="nav-link {{ request()->routeIs('users.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Account</p>
-                                    </a>
-                                </li>
-                            @endcan
-                            @can('reviews')
-                                <li class="nav-item">
-                                    <a href="{{ route('reviews.index') }}"
-                                        class="nav-link {{ request()->routeIs('reviews.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Reviews</p>
-                                    </a>
-                                </li>
-                            @endcan
-                            {{-- @if (Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'site_admin') --}}
-                            @can('view-site')
-                                <li class="nav-item">
-                                    <a href="{{ route('sites.index') }}"
-                                        class="nav-link {{ request()->routeIs('sites.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Sites</p>
-                                    </a>
-                                </li>
-                            @endcan
-
-                            @can('bulk-mails')
-                            <li class="nav-item">
-                                <a href="{{ route('send.bulk.email') }}"
-                                    class="nav-link {{ request()->routeIs('send.bulk.email') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Bulk Emails</p>
-                                </a>
-                            </li>
-                            @endcan
-
-                            @can('view-uom')
-                                <li class="nav-item">
-                                    <a href="{{ route('uom.index') }}"
-                                        class="nav-link {{ request()->routeIs('uom.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>UoM</p>
-                                    </a>
-                                </li>
-                            @endcan
-
-                            @can('view-role')
-                                <li class="nav-item">
-                                    <a href="{{ route('roles.index') }}"
-                                        class="nav-link {{ request()->routeIs('roles.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Roles</p>
-                                    </a>
-                                </li>
-                            @endcan
-
-                            @can('view-permission')
-                                <li class="nav-item">
-                                    <a href="{{ route('permissions.index') }}"
-                                        class="nav-link {{ request()->routeIs('permissions.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Permissions</p>
-                                    </a>
-                                </li>
-                            @endcan
-                            {{-- @endif --}}
-
-                        </ul>
-                    </li>
-                @endcan
-                {{-- @endif --}}
-                {{-- end of company tab --}}
+                @endrole --}}
+                <li class="nav-item">
+                    <a href="{{route('property.allproperties')}}" class="nav-link">
+                        <i>
+                            <img src="{{ asset('assets/images/icons/property.jpg') }}" width="26" height="26"
+                                alt="" />
+                        </i>
+                        <p>Properties</p>
+                    </a>
+                </li>
 
 
-                {{-- employee management tab --}}
-                {{-- @if (Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'site_admin') --}}
-                @can('employee-management-module')
-                    <li class="nav-item {{ request()->routeIs('employees*') ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ request()->routeIs('employees*') ? 'active' : '' }}">
-                            <i>
-                                <img src="{{ asset('assets/images/icons/emp.png') }}"width="26" height="26"
-                                    alt="" />
-                            </i>
-                            <p>
-                                Employee Management
-                                <i class="fas fa-angle-left right"></i>
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview">
+                <li class="nav-item">
+                    <a href="{{ route('blog.allblogs') }}" class="nav-link">
+                        <i>
+                            <img src="{{ asset('assets/images/icons/blog.png') }}" width="26" height="26"
+                                alt="" />
+                        </i>
+                        <p>Blogs</p>
+                    </a>
+                </li>
 
-                            <li class="nav-item">
-                                <a href="{{ route('employees.index') }}"
-                                    class="nav-link {{ request()->routeIs('employees.index') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Employees</p>
-                                </a>
-                            </li>
+                <li class="nav-item">
+                    <a href="{{ route('users.index') }}" class="nav-link">
+                        <i>
+                            <img src="{{ asset('assets/images/icons/users.png') }}" width="26" height="26"
+                                alt="" />
+                        </i>
+                        <p>Users</p>
+                    </a>
+                </li>
 
+<<<<<<< HEAD
 
 
                         </ul>
@@ -673,58 +564,36 @@
                     {{-- @endif --}}
                 @endcan
                 {{-- end purchase model  --}}
+=======
+>>>>>>> d29d2b411f82256fddca149984e6cef765ac5ec9
                 {{-- reports --}}
-                @can('reports-module')
-                    <li class="nav-item {{ request()->routeIs('monthlyreport') ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ request()->routeIs('monthlyreport') ? 'active' : '' }}">
-                            <i>
-                                <img src="{{ asset('assets/images/icons/reports.jpg') }}" width="26" height="26"
-                                    alt="" />
-                            </i>
-                            <p>
-                                Reports
-                                <i class="fas fa-angle-left right"></i>
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview">
 
-                            {{-- @if (Auth::user()->role->name == 'store_officer') --}}
-                            @can('monthly-reports')
-                                <li class="nav-item">
-                                    <a href="{{ route('monthlyreport') }}"
-                                        class="nav-link {{ request()->routeIs('monthlyreport') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Monthly Reports</p>
-                                    </a>
-                                </li>
-                            @endcan
-                            {{-- @endif --}}
 
-                        </ul>
-                    </li>
-                    {{-- end of reports module --}}
 
-                @endcan
+            </ul>
+            </li>
+
+            {{-- end of reports --}}
+
+
 
             </ul>
             {{--  --}}
 
-            <a href="{{ route('myaccounts.index') }}"
-                class="nav-link {{ request()->routeIs('myaccounts.index') ? 'active' : '' }}">
-                <i>
+            {{-- <a href="{{ route('myaccounts.index') }}" class="nav-link"> <i>
                     <img src="{{ asset('assets/images/icons/myaccount.png') }}" width="26" height="26"
                         alt="" />
                 </i>
-                <span>My Account</span>
-            </a>
+                <span>My Account</span></a> --}}
 
-            <a href="{{ route('logout') }}" class="nav-link {{ request()->routeIs('logout') ? 'active' : '' }}">
-                <i>
+
+
+            <a href="{{ route('logout') }}" class="nav-link"> <i>
                     <img src="{{ asset('assets/images/icons/logout.jpg') }}" width="26" height="26"
                         alt="" />
                 </i>
-                <span>Logout</span>
-            </a>
+                <span>Logout</span></a>
+
             {{--  --}}
         </nav>
         <!-- /.sidebar-menu -->

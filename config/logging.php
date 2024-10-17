@@ -51,6 +51,7 @@ return [
     |
     */
 
+<<<<<<< HEAD
    'channels' => [
     'stack' => [
         'driver' => 'stack',
@@ -71,7 +72,15 @@ return [
             'level' => 'error',
             'days' => 1,
             'replace_placeholders' => true
+=======
+    'channels' => [
+        'stack' => [
+            'driver' => 'stack',
+            'channels' => ['single'],
+            'ignore_exceptions' => false,
+>>>>>>> d29d2b411f82256fddca149984e6cef765ac5ec9
         ],
+
         'single' => [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
@@ -103,7 +112,7 @@ return [
             'handler_with' => [
                 'host' => env('PAPERTRAIL_URL'),
                 'port' => env('PAPERTRAIL_PORT'),
-                'connectionString' => 'tls://' . env('PAPERTRAIL_URL') . ':' . env('PAPERTRAIL_PORT'),
+                'connectionString' => 'tls://'.env('PAPERTRAIL_URL').':'.env('PAPERTRAIL_PORT'),
             ],
             'processors' => [PsrLogMessageProcessor::class],
         ],

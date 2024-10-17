@@ -8,17 +8,15 @@ use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Auth\Passwords\CanResetPassword;
-use Illuminate\Auth\ThrottlesLogins;
-use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
-use Illuminate\Foundation\Auth\Access\Authorizable;
-use Illuminate\Foundation\Auth\ThrottlesLogins as ThrottlesLoginsTrait;
-
 
 class User extends Authenticatable
 {
+<<<<<<< HEAD
     use HasApiTokens, HasFactory, Notifiable, CanResetPassword, ThrottlesLoginsTrait, Authorizable;
     use HasRoles;
+=======
+    use HasApiTokens, HasFactory, Notifiable,HasRoles;
+>>>>>>> d29d2b411f82256fddca149984e6cef765ac5ec9
 
     /**
      * The attributes that are mass assignable.
@@ -28,6 +26,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+<<<<<<< HEAD
         'department_id',
         'section_id',
         'password',
@@ -52,6 +51,11 @@ class User extends Authenticatable
         'last_failed_login',
         'failed_login_attempts',
         'updated_at'
+=======
+        'password', 'phone','mobile','skype','facebook_url',
+        'twitter_url','snapchat_url','instagram_url','linkedin_url',
+        'picture','address','role_id','description'
+>>>>>>> d29d2b411f82256fddca149984e6cef765ac5ec9
     ];
 
     /**
@@ -73,6 +77,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+<<<<<<< HEAD
     public function role()
     {
         return $this->belongsTo(Role::class);
@@ -92,5 +97,10 @@ class User extends Authenticatable
     public function department()
     {
         return $this->belongsTo(Department::class, 'department_id');
+=======
+
+    public function role(){
+        return $this->belongsTo(User::class,'role_id');
+>>>>>>> d29d2b411f82256fddca149984e6cef765ac5ec9
     }
 }

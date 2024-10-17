@@ -2,27 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
-use App\Models\Item;
-use App\Models\User;
-use App\Models\Order;
-use App\Models\Porder;
-use App\Models\Sorder;
-use App\Models\Enduser;
-use App\Models\Section;
-use App\Models\Feedback;
-use App\Models\Purchase;
-use App\Models\Inventory;
-use App\Models\Department;
-use App\Models\PorderPart;
-use App\Models\Notification;
+use App\Models\Property;
 use Illuminate\Http\Request;
-use App\Models\InventoryItem;
-use Illuminate\Support\Facades\DB;
-use App\Models\InventoryItemDetail;
-use Illuminate\Support\Facades\Log;
-use Brian2694\Toastr\Facades\Toastr;
-use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -36,6 +17,7 @@ public function __construct()
     $this->middleware('auth');
 }
 
+<<<<<<< HEAD
 /**
  * Show the application dashboard.
  *
@@ -277,5 +259,19 @@ catch (\Exception $e) {
    
 }
 
+=======
+    /**
+     * Show the application dashboard.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function index()
+    {
+        $total_properties = Property::count();
+        $sale_properties = Property::where('status', '=','Sale')->count();
+        $rent_properties = Property::where('status', '=','Rent')->count();
+        return view('home', compact('total_properties','sale_properties','rent_properties'));
+    }
+>>>>>>> d29d2b411f82256fddca149984e6cef765ac5ec9
 }
 }
