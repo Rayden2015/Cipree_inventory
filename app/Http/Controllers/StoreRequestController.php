@@ -886,33 +886,21 @@ class StoreRequestController extends Controller
     public function supply_history()
     {
         try {
-            $site_id = Auth::user()->site->id;
-
-            $total_cost_of_parts_within_the_month =
-                SorderPart::leftJoin('sorders', 'sorders.id', '=', 'sorder_parts.sorder_id')
-                ->leftJoin('items', 'items.id', '=', 'sorder_parts.item_id')
-                ->leftJoin('endusers', 'sorders.enduser_id', '=', 'endusers.id')
-                ->leftJoin('inventory_items', 'sorder_parts.inventory_id', '=', 'inventory_items.id')
-                ->leftJoin('inventories', 'inventory_items.inventory_id', '=', 'inventories.id')
-                ->where('sorders.site_id', '=', $site_id)
-                ->where('sorder_parts.site_id', '=', $site_id)
-                ->whereIn('sorders.status', ['Supplied', 'Partially Supplied'])
-                ->latest('sorders.delivered_on')
-                ->select(
-                    'sorder_parts.id',
-                    'sorder_parts.qty_supplied',
-                    'sorder_parts.sub_total',
-                    'sorders.delivery_reference_number',
-                    'sorders.delivered_on',
-                    'items.item_description',
-                    'items.item_part_number',
-                    'items.item_stock_code',
-                    'sorders.enduser_id',
-                    'inventory_items.location_id',
-                    'inventories.grn_number'
-
-                )
-                ->paginate(100);
+            $site_id = Auth::user()->site->id;            
+            $total_cost_of_parts_within_the_month = SorderPart::with([
+                'sorder' => function ($query) use ($site_id) {
+                    $query->where('site_id', $site_id)
+                          ->whereIn('status', ['Supplied', 'Partially Supplied']);
+                },
+                'item', // Ensure item relationship is defined
+                'inventoryItem.inventory' // Ensure inventory relationship is defined
+            ])
+            ->where('sorder_parts.site_id', $site_id) // Ensure filtering by site_id in sorder_parts
+            ->join('sorders', 'sorder_parts.sorder_id', '=', 'sorders.id') // Join with sorders
+            ->orderBy('sorders.delivered_on', 'desc') // Order by delivered_on in descending order
+            ->select('sorder_parts.*') // Select only columns from sorder_parts
+            ->paginate(100);
+            
 
             Log::info("StoreReqquestController | store_officer_update() | Sorder before edit", [
                 'user_details' => Auth::user(),
@@ -933,63 +921,7 @@ class StoreRequestController extends Controller
         }
     }
 
-    public function supply_history_search(Request $request)
-    {
-        try {
-            $site_id = Auth::user()->site->id;
-            $start_date = Carbon::parse(request()->start_date)->toDateString();
-            $end_date = Carbon::parse(request()->end_date)->toDateString();
-            $total_cost_of_parts_within_the_month = null;
-
-            if ($request->start_date && $request->end_date) {
-                $total_cost_of_parts_within_the_month =
-                    SorderPart::leftjoin('sorders', 'sorders.id', '=', 'sorder_parts.sorder_id')
-                    ->leftjoin('items', 'items.id', '=', 'sorder_parts.item_id')
-                    ->leftjoin('endusers', 'sorders.enduser_id', '=', 'endusers.id')
-                    ->leftjoin('inventory_items', 'sorder_parts.inventory_id', '=', 'inventory_items.id')
-                    ->leftJoin('inventories', 'inventory_items.inventory_id', '=', 'inventories.id')
-                    ->whereIn('sorders.status', ['Supplied', 'Partially Supplied'])
-                    ->where('sorders.site_id', '=', $site_id)
-                    ->where('sorder_parts.site_id', '=', $site_id)
-                    ->whereDate('sorders.delivered_on', '>=', $start_date)
-                    ->whereDate('sorders.delivered_on', '<=', $end_date)
-                    ->select(
-                        'sorder_parts.id',
-                        'sorder_parts.qty_supplied',
-                        'sorder_parts.sub_total',
-                        'sorders.delivery_reference_number',
-                        'sorders.delivered_on',
-                        'items.item_description',
-                        'items.item_part_number',
-                        'items.item_stock_code',
-                        'endusers.asset_staff_id', // Select the required enduser column
-                        'inventory_items.location_id'
-                    )
-                    ->latest('sorders.created_at')
-                    ->paginate(10000);
-            }
-
-            Log::info("StoreReqquestController | supply_history_search()", [
-                'user_details' => Auth::user(),
-                'request_payload' => $request,
-                'response_message' => 'Supply history search successful',
-                'response_payload' => $total_cost_of_parts_within_the_month
-            ]);
-
-            return view('stores.supply_history', compact('total_cost_of_parts_within_the_month', 'start_date', 'end_date'));
-        } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('An error occurred with id ' . $unique_id, [
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-            return redirect()->back()
-                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-        }
-    }
-
-
+  
 
     public function supply_history_search_item(Request $request)
     {

@@ -93,13 +93,8 @@
                             <th>End User</th>
                             <th>Location</th>
                             @if (Auth::user()->hasRole('Super Admin'))
-                            
-                            <th>Delete</th>
+                                <th>Delete</th>
                             @endif
-                            {{-- <th>Date</th> --}}
-
-                            {{-- <th>View</th> --}}
-
 
                         </tr>
                     </thead>
@@ -107,38 +102,41 @@
                         <tbody>
                             <tr>
                                 <td>{{ $in->id }}</td>
-
-                                <td>{{ date('d-m-Y (H:i)', strtotime($in->delivered_on ?? '')) }}</td>
-                                <td>{{ $in->delivery_reference_number ?? '' }}</td>
-                                <td>{{ $in->grn_number ?? 'Not Found or Deleted' }}</td>
-                                <td>{{ $in->item_description ?? ' ' }}</td>
-                                <td>{{ $in->item_part_number ?? ' ' }}</td>
-                                <td>{{ $in->item_stock_code ?? ' ' }}</td>
-
-
+                                <td>{{ date('d-m-Y (H:i)', strtotime($in->sorder->delivered_on ?? '')) }}</td>
+                                <!-- Accessing delivered_on from sorder -->
+                                <td>{{ $in->sorder->delivery_reference_number ?? '' }}</td>
+                                <!-- Accessing delivery_reference_number from sorder -->
+                                <td>{{ $in->inventoryItem->inventory->grn_number ?? 'Not Found or Deleted' }}</td>
+                                <!-- Accessing GRN Number -->
+                                <td>{{ $in->item->item_description ?? ' ' }}</td>
+                                <!-- Accessing item_description from item -->
+                                <td>{{ $in->item->item_part_number ?? ' ' }}</td>
+                                <!-- Accessing item_part_number from item -->
+                                <td>{{ $in->item->item_stock_code ?? ' ' }}</td>
+                                <!-- Accessing item_stock_code from item -->
                                 <td>{{ $in->qty_supplied ?? '' }}</td>
-
                                 <td>{{ $in->sub_total ?? '' }}</td>
-
-
-                                <td>{{ $in->enduser->asset_staff_id ?? 'Not Set' }}</td>
-                                <td>{{ $in->location->name ?? 'Not Set' }}</td>
+                                <td>{{ $in->sorder->enduser->asset_staff_id ?? 'Not Set' }}</td>
+                                <!-- Adjust as necessary -->
+                                <td>{{ $in->inventoryItem->location->name ?? 'Not Set' }}</td> <!-- Adjust as necessary -->
 
                                 @if (Auth::user()->hasRole('Super Admin'))
-                                <td>
-                                    <form action="{{ route('sorderpart_delete', $in->id) }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this item?')">Delete</button>
-                                    </form>
-                                </td>
+                                    <td>
+                                        <form action="{{ route('sorderpart_delete', $in->id) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger"
+                                                onclick="return confirm('Are you sure you want to delete this item?')">Delete</button>
+                                        </form>
+                                    </td>
                                 @endif
-                            @empty
+                            </tr>
+                        @empty
                             <tr>
-
                                 <td class="text-center" colspan="12">Item not available!</td>
                             </tr>
                     @endforelse
+
 
                     </tr>
 

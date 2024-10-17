@@ -38,6 +38,9 @@ class SorderPart extends Model
     {
         return $this->belongsTo(Sorder::class, 'sorder_id');
     }
-
+    public function inventoryItem()
+    {
+        return $this->belongsTo(InventoryItem::class, 'inventory_id'); // Adjust 'inventory_id' if necessary
+    }
    
 }

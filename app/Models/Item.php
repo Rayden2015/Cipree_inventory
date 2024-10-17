@@ -41,5 +41,8 @@ class Item extends Model
     public function supplier(){
         return $this->belongsTo(Supplier::class,'supplier_id');
     }
-
+    public function inventoryItems()
+    {
+        return $this->hasMany(InventoryItem::class); // Adjust if necessary
+    }
 }
