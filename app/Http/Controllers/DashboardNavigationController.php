@@ -199,13 +199,21 @@ class DashboardNavigationController extends Controller
          $site_id = Auth::user()->site->id;
          if (Auth::user()->hasRole('Department Authoriser')) {
             $department_id = Auth::user()->department->id;
-         $pending_stock_approvals = Sorder::leftJoin('users', 'users.id', '=', 'sorders.user_id')
-         ->where('sorders.site_id', '=', $site_id)
-         ->where('users.department_id', '=', $department_id)
-         ->whereNull('sorders.approval_status')->latest('sorders.created_at')->paginate(15);
+            $pending_stock_approvals = Sorder::with(['request_by', 'enduser'])
+            ->leftJoin('users', 'users.id', '=', 'sorders.user_id')
+            ->where('sorders.site_id', '=', $site_id)
+            ->where('users.department_id', '=', $department_id)
+            ->whereNull('sorders.approval_status')
+            ->latest('sorders.created_at')
+            ->select('sorders.*') // Select all columns from sorders
+            ->paginate(15);
+        
          return view('homepages.pending_stock_approvals', compact('pending_stock_approvals'));
+         // dd($pending_stock_approvals);
          }
+
          $pending_stock_approvals = Sorder::where('site_id', '=', $site_id)->whereNull('approval_status')->latest()->paginate(15);
+
          return view('homepages.pending_stock_approvals', compact('pending_stock_approvals'));
       } catch (\Exception $e) {
          $unique_id = floor(time() - 999999999);
