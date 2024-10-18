@@ -953,7 +953,7 @@ class StoreRequestController extends Controller
                     'sorder_parts.sub_total', 
                     'sorders.delivery_reference_number', 
                     'inventories.grn_number', 
-                    'inventories.enduser_id',
+                    'sorders.enduser_id',
                     'sorders.delivered_on',
                     'inventory_items.location_id'
                 );
