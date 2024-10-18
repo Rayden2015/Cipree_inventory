@@ -1,4 +1,4 @@
-@can('purchasing-officer-dashboard')
+
 <div class="container-fluid">
     <!-- Small boxes (Stat box) -->
     <div class="row">
@@ -168,5 +168,5 @@
         </div>
     </div>
 </div>
-@endcan
+
 {{-- end of purchasing officer dashboard --}}

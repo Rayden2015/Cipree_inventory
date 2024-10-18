@@ -1,4 +1,4 @@
-@can('requester-dashboard')
+
         <div class="container-fluid">
             <!-- Small boxes (Stat box) -->
             <div class="row">
@@ -169,5 +169,5 @@
             </div>
 
         </div>
-    @endcan
+   
     {{-- end of requester dashboard --}}

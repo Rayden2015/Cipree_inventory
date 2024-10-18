@@ -1,4 +1,4 @@
-@can('admin-dashboard')
+
     <div class="container-fluid">
         <!-- Small boxes (Stat box) -->
         <div class="row">
@@ -86,5 +86,5 @@
         {{--  --}}
         <!-- /.row (main row) -->
     </div>
-    @endcan
+  
      {{-- end of admin dashboard --}}

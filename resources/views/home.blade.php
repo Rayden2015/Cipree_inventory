@@ -4,40 +4,52 @@
     <style>
         #rcorners1 {
             border-radius: 25px;
-
         }
     </style>
+    
     @php
         $first_name = App\Http\Controllers\UserController::username();
         $logo = App\Http\Controllers\UserController::logo();
     @endphp
+    
     <br>
-    {{-- admin dashboard --}}
-    @include('dashboard.admin')
 
-    {{-- authoriser dashboard --}}
-    @include('dashboard.authoriser')
+    {{-- Dashboard Inclusions --}}
+    @can('view-admin-dashboard')
+        @include('dashboard.admin')
+    @endcan
 
-    {{-- finance officer dashboard --}}
-    @include('dashboard.finance_officer')
+    @can('view-authoriser-dashboard')
+        @include('dashboard.authoriser')
+    @endcan
 
-    {{-- purchasing officer dashboard --}}
-    @include('dashboard.purchasing_officer')
+    @can('view-finance-officer-dashboard')
+        @include('dashboard.finance_officer')
+    @endcan
 
-    {{-- requester dashboard --}}
-    @include('dashboard.requester')
+    @can('view-purchasing-officer-dashboard')
+        @include('dashboard.purchasing_officer')
+    @endcan
 
-    {{-- site admin dashboard --}}
-    @include('dashboard.site_admin')
+    @can('view-requester-dashboard')
+        @include('dashboard.requester')
+    @endcan
 
-    {{-- store officer dashboard --}}
-    @include('dashboard.store_officer')
+    @can('view-site-admin-dashboard')
+        @include('dashboard.site_admin')
+    @endcan
 
-    {{-- super admin dashboard --}}
-    @include('dashboard.super_admin')
+    @can('view-store-officer-dashboard')
+        @include('dashboard.store_officer')
+    @endcan
 
-    {{-- department authoriser --}}
-    @include('dashboard.department_authoriser')
+    @can('view-super-admin-dashboard')
+        @include('dashboard.super_admin')
+    @endcan
+
+    @can('department-authoriser-dashboard')
+        @include('dashboard.department_authoriser')
+    @endcan
 
     <script>
         setTimeout(function() {

@@ -1,4 +1,4 @@
-@can('store-officer-dashboard')
+
 <div class="container-fluid">
     <!-- Small boxes (Stat box) -->
     <div class="row">
@@ -173,7 +173,7 @@
         </div>
     </div>
 </div>
-@endcan
+
 {{-- end of store officer dashboard --}}
 
 
