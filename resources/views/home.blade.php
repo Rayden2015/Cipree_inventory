@@ -1,10 +1,44 @@
 @extends('layouts.admin')
+
 @section('content')
-    @if(Auth::user()->role_id == '1')
+    <style>
+        #rcorners1 {
+            border-radius: 25px;
+
+        }
+    </style>
+    @php
+        $first_name = App\Http\Controllers\UserController::username();
+        $logo = App\Http\Controllers\UserController::logo();
+    @endphp
+    <br>
+    {{-- admin dashboard --}}
     @include('dashboard.admin')
-    @endif
-    @if(Auth::user()->role_id == '2')
-    @include('dashboard.user')
-        
-    @endif
+
+    {{-- authoriser dashboard --}}
+    @include('dashboard.authoriser')
+
+    {{-- finance officer dashboard --}}
+    @include('dashboard.finance_officer')
+
+    {{-- purchasing officer dashboard --}}
+    @include('dashboard.purchasing_officer')
+
+    {{-- requester dashboard --}}
+    @include('dashboard.requester')
+
+    {{-- site admin dashboard --}}
+    @include('dashboard.site_admin')
+
+    {{-- store officer dashboard --}}
+    @include('dashboard.store_officer')
+
+    {{-- super admin dashboard --}}
+    @include('dashboard.super_admin')
+
+    <script>
+        setTimeout(function() {
+            window.location.reload();
+        }, 60000);
+    </script>
 @endsection

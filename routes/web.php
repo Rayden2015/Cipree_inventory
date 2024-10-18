@@ -1,13 +1,34 @@
 <?php
 
-use App\Models\Property;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SmsController;
+use App\Http\Controllers\UomController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ItemController;
+use App\Http\Controllers\LevyController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SiteController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\CountryController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PartsController;
+use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\EnduserController;
+use App\Http\Controllers\SectionController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\LocationController;
+use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\TotalTaxController;
+use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\TaxLeviesController;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Admin\CompanyController;
-
+use App\Http\Controllers\AuthoriserController;
+use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\PermissionsController;
+use App\Http\Controllers\StoreRequestController;
+use App\Http\Controllers\EmailController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -20,11 +41,9 @@ use App\Http\Controllers\Admin\CompanyController;
 */
 
 Route::get('/', function () {
-    $properties = Property::latest()->limit(6)->get();
-    return view('index', compact('properties'));
+    return redirect('login');
 });
 
-<<<<<<< HEAD
 
 Route::resource('users', UserController::class);
 Route::resource('uom', UomController::class);
@@ -305,40 +324,14 @@ Route::resource('permissions', PermissionsController::class);
 Route::resource('total_taxes', TotalTaxController::class);
 Route::get('ajax-autocomplete-tax', [TotalTaxController::class, 'getTax']);
 Route::post('fetch_single_tax', [\App\Http\Controllers\TotalTaxController::class, 'fetch_single_tax'])->name('fetch_single_tax');
-=======
->>>>>>> d29d2b411f82256fddca149984e6cef765ac5ec9
 Auth::routes();
 
-Route::get('home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::get('/index', [App\Http\Controllers\PagesController::class, 'index'])->name('pages.index');
-Route::get('/about', [App\Http\Controllers\PagesController::class, 'about'])->name('pages.about');
-Route::get('/property', [App\Http\Controllers\PagesController::class, 'property'])->name('pages.property');
-Route::get('/blogs', [App\Http\Controllers\PagesController::class, 'blogs'])->name('pages.blogs');
-Route::get('/contact', [App\Http\Controllers\PagesController::class, 'contact'])->name('pages.contact');
-Route::get('/services', [App\Http\Controllers\PagesController::class, 'services'])->name('pages.services');
-Route::get('/show/{id}', [App\Http\Controllers\PropertyController::class, 'show'])->name('property.show');
+Route::get('/home', [HomeController::class, 'index'])->name('home');
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::post('/store', [App\Http\Controllers\ContactController::class, 'store'])->name('contact.store');
-// Route::get('/index',[App\Http\Controllers\PropertyController::class, 'index'])->name('property.index');
+Route::resources([
+    'roles' => RoleController::class,
+    'users' => UserController::class,
+    'employees' => EmployeeController::class,
 
-Route::middleware('auth')->group(function () {
-    Route::resource('users',UserController::class);
-    Route::get('logout', [LoginController::class, 'logout'])->name('logout');
-    Route::get('blog', [App\Http\Controllers\BlogController::class, 'allblogs'])->name('blog.allblogs');
-    // Route::get('blog',[App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
-    Route::get('/blog/edit', [App\Http\Controllers\BlogController::class, 'edit'])->name('blog.edit');
-    Route::put('/blog/update/{id}', [App\Http\Controllers\BlogController::class, 'update'])->name('blog.update');
-    Route::post('/blog/store', [App\Http\Controllers\BlogController::class, 'store'])->name('blog.store');
-    Route::delete('/blog/destroy/{id}', [App\Http\Controllers\BlogController::class, 'destroy'])->name('blog.destroy');
-    Route::get('/blog/create', [App\Http\Controllers\BlogController::class, 'create'])->name('blog.create');
 
-    Route::get('/property/edit/{id}', [App\Http\Controllers\PropertyController::class, 'edit'])->name('property.edit');
-    Route::put('/update/{id}', [App\Http\Controllers\PropertyController::class, 'update'])->name('property.update');
-    Route::post('/property/store', [App\Http\Controllers\PropertyController::class, 'store'])->name('property.store');
-    Route::delete('/property/destroy/{id}', [App\Http\Controllers\PropertyController::class, 'destroy'])->name('property.destroy');
-    Route::delete('/property/deletecover/{id}', [App\Http\Controllers\PropertyController::class, 'deletecover'])->name('property.deletecover');
-    Route::get('/property/create', [App\Http\Controllers\PropertyController::class, 'create'])->name('property.create');
-    Route::get('allproperties', [App\Http\Controllers\PropertyController::class, 'allproperties'])->name('property.allproperties');
-    Route::post('/fetch-states', [CountryController::class, 'fetchState']);
-});
+]);

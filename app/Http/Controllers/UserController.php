@@ -3,56 +3,71 @@
 namespace App\Http\Controllers;
 
 use App\Models\Role;
+use App\Models\Site;
 use App\Models\User;
-<<<<<<< HEAD
 use App\Models\Login;
 use App\Models\Company;
 use App\Models\Section;
 use App\Mail\WelcomeMail;
 use App\Models\Department;
 use Illuminate\Support\Str;
-=======
->>>>>>> d29d2b411f82256fddca149984e6cef765ac5ec9
 use Illuminate\Http\Request;
 use App\Helpers\UploadHelper;
-use Illuminate\Http\Response;
+use App\Models\SiteAdminPrivilege;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Brian2694\Toastr\Facades\Toastr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\RedirectResponse;
+use App\Http\Controllers\SMSController;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct() {
+        $this->middleware('auth');
+        $this->middleware(['auth', 'permission:view-user'])->only('show');
+        $this->middleware(['auth', 'permission:add-user'])->only('create');
+        $this->middleware(['auth', 'permission:view-user'])->only('index');
+        $this->middleware(['auth', 'permission:edit-user'])->only('edit');
+    }
+    
+    public function searchUsers(Request $request)
+    {
+        $query = $request->get('query');
+        
+        // Fetch users and include role names
+        $users = User::where('name', 'like', '%' . $query . '%')
+            ->orWhere('email', 'like', '%' . $query . '%')
+            ->get()
+            ->map(function ($user) {
+                $user->role_names = $user->getRoleNames(); // Add role names to the user object
+                return $user;
+            });
+    
+        return response()->json($users);
+    }
+    
+   
     public function index()
     {
+        $roles = Role::all();
         $users = User::all();
-        return view('users.index', compact('users'));
+        return view('users.index', compact('users', 'roles'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-<<<<<<< HEAD
         $roles = Role::orderBy('id')->get();
         $sites = Site::all();
         $departments = Department::all();
            $sections = Section::all();
         return view('users.create', compact('roles', 'sites','departments','sections'));
-=======
-        $roles = Role::all();
-        return view('users.create', compact('roles'));
->>>>>>> d29d2b411f82256fddca149984e6cef765ac5ec9
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-<<<<<<< HEAD
         try {
             $request->validate([
                 'email' => 'required|email|unique:users,email',
@@ -267,105 +282,113 @@ class UserController extends Controller
             'user_details' => Auth::user(),
             'user_name' => $authId,
             'user_name_before' => User::find($id),
-=======
-        $request->validate([
-            'email'=>'email|unique:users,email,except,id',
-            'photo' => 'sometimes|nullable|image|mimes:jpeg,gif,png,jpg|max:9048',
->>>>>>> d29d2b411f82256fddca149984e6cef765ac5ec9
         ]);
-        $user = new User();
-        $user->name = $request->name;
-        $user->notes = $request->notes;
-        $user->address = $request->address;
-        $user->email = $request->email;
-        $user->password = Hash::make($request->password);
-        $user->phone = $request->phone;
-        $user->mobile = $request->mobile;
-        $user->skype = $request->skype;
-        $user->facebook_url = $request->facebook_url;
-        $user->instagram_url = $request->instagram_url;
-        $user->snapchat_url = $request->snapchat_url;
-        $user->twitter_url = $request->twitter_url;
-        $user->linkedin_url = $request->linkedin_url;
-        $user->role_id = $request->role_id;
-        $user->save();
+        return redirect()->back()->withSuccess('Successfully Updated');
 
-        if ($request->picture) {
-            $imageName = UploadHelper::upload($request->picture, 'user-' . $user->id, 'images/users');
-            $user->picture = $imageName;
-            $user->save();
-        }
-        return redirect()->route('users.index');
+        } catch (\Throwable $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::channel('error_log')->error('UserController | Update() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
+    }
+    public function destroy($id)
+    {
+        try {
+            $user = User::find($id);
+            $authId = Auth::user()->name;
+    
+            if (!$user) {
+               
+                Log::warning('UserController | destroy | User not found', [
+                    'user_id' => $id,
+                    'user_name' => $authId,
+                ]);
+                return redirect()->route('users.index')->withError('User not found');
+            }
+    
+            Log::info('UserController | destroy', [
+                'user_details' => Auth::user(),
+                'user_name' => $authId,
+                'user_deleted' => $user,
+            ]);
+    
+            $user->delete();
+            return redirect()->route('users.index')->withSuccess('Successfully Updated');
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::channel('error_log')->error('UserController |Destroy() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
+
+    }
+    
+
+
+
+    public static function username()
+    {
+        try {
+            $name = Auth::user()->name;
+            $first_name = strtok($name, " ");
+            // Log::info('UserController | username', [
+            //     'user_details' => Auth::user(),
+            //     'user_name' => $name,
+            // ]);
+            return $first_name;
+        } catch (\Throwable $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
 
     }
 
-    /**
-     * Display the specified resource
-     */
-    public function show(string $id)
+    public static function logo()
     {
-        //
-    }
+        try {
+            $logo = Company::first()->value('image');
+            // Log::info('UserController | logo', [
+            //     'user_details' => Auth::user(),
+            //     'company_logo' => $logo,
+            // ]);
+            return $logo;
+        } catch (\Throwable $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        $user = User::find($id);
-        $roles = Role::all();
-        return view('users.edit',compact('user','roles'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        $user = User::find($id);
-        $request->validate([
-            'email' => 'required|email|unique:users,email,' . $id,
-
-            'picture' => 'sometimes|nullable|image|mimes:jpeg,gif,png,jpg|max:9048',
-        ]);
-        $user->name = $request->name;
-        $user->address = $request->address;
-        $user->notes = $request->notes;
-        $user->email = $request->email;
-        $user->password = Hash::make($request->password);
-        $user->phone = $request->phone;
-        $user->mobile = $request->mobile;
-        $user->skype = $request->skype;
-        $user->facebook_url = $request->facebook_url;
-        $user->instagram_url = $request->instagram_url;
-        $user->snapchat_url = $request->snapchat_url;
-        $user->twitter_url = $request->twitter_url;
-        $user->linkedin_url = $request->linkedin_url;
-        $user->role_id = $request->role_id;
-        if ($request->picture) {
-            // Delete the previous image stored & Upload this image
-            $imageName = UploadHelper::update($request->picture, 'user-' . $user->id, 'images/users', $user->picture);
-
-            $user->picture = $imageName;
-            $user->save();
-        }
-
-
-        $user->update();
-        return redirect()->route('users.index');
+    // Redirect back with the error message
+    return redirect()->back()
+                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+}
 
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public static function lastlogin()
     {
-        $user =  User::find($id);
-        // unlink("images/users/" . $user->image);
-
-        User::where("id", $user->id)->delete();
-
-        return redirect()->route('users.index');
+        $authid = Auth::id();
+        $lastlogin = Login::where('user_id', '=', $authid)->latest()->skip(2)->first();
+        return $lastlogin;
     }
 }
