@@ -353,18 +353,36 @@ class StoreRequestController extends Controller
     public function store_lists()
     {
         $site_id = Auth::user()->site->id;
-        $department_id = Auth::user()->department->id;
+      
 
-        if (Auth::user()->hasRole('Department Authoriser')) {
+        // if (Auth::user()->hasRole('Department Authoriser')) {
+        //     $store_requests = Sorder::leftjoin('users', 'users.id', '=', 'sorders.user_id')
+        //         ->where('sorders.site_id', '=', $site_id)
+        //         ->where('users.department_id', '=', $department_id)
+        //         ->latest()
+        //         ->paginate(15);
+        //         return view('stores.index', compact('store_requests'));
+        // }
+
+        if (Auth::user()->hasRole('Super Admin')) {
+            // If the user is a Super Admin, get all store requests without department filtering
+            $store_requests = Sorder::leftjoin('users', 'users.id', '=', 'sorders.user_id')
+                ->where('sorders.site_id', '=', $site_id)
+                ->latest('sorders.created_at')
+                ->paginate(15);
+        } elseif (Auth::user()->hasRole('Department Authoriser')) {
+            // If the user is a Department Authoriser, filter by department
+            $department_id = Auth::user()->department->id;
             $store_requests = Sorder::leftjoin('users', 'users.id', '=', 'sorders.user_id')
                 ->where('sorders.site_id', '=', $site_id)
                 ->where('users.department_id', '=', $department_id)
-                ->latest()
+                ->latest('sorders.created_at')
                 ->paginate(15);
-                return view('stores.index', compact('store_requests'));
         }
-
-
+        
+        // Return the view with store requests
+        return view('stores.index', compact('store_requests'));
+        
 
         $store_requests = Sorder::where('site_id', '=', $site_id)->latest()->paginate(15);
         return view('stores.index', compact('store_requests'));
