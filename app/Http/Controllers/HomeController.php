@@ -210,12 +210,71 @@ public function index()
     ->where('inventory_items.site_id', '=', $site_id)
     ->count();
 
+// department authoriser dashboard
+$department_id = Auth::user()->department->id ?? null;
+
+if ($department_id === null) {
+    $depart_auth_new_approvals = null;
+    $depart_auth_pending_request_approvals = null;
+    $depart_auth_pending_po_approvals = null;
+    $depart_auth_pending_stock_approvals = null;
+    $depart_auth_approved_request = null;
+    $depart_auth_approved_pos = null;
+    $depart_auth_processed_pos = null;
+    $depart_auth_processed_request = null;
+} else {
+    $depart_auth_new_approvals = Notification::where('site_id', '=', $site_id)
+        ->where('read_at', '=', '0')->count();
+
+    $depart_auth_pending_request_approvals = Order::leftJoin('users', 'users.id', '=', 'orders.user_id')
+        ->where('orders.site_id', '=', $site_id)
+        ->whereNull('orders.approval_status')
+        ->where('users.department_id', '=', $department_id)
+        ->count();
+
+    $depart_auth_pending_po_approvals = Porder::leftJoin('users', 'users.id', '=', 'porders.user_id')
+        ->where('porders.site_id', '=', $site_id)
+        ->whereNull('porders.approval_status')
+        ->where('users.department_id', '=', $department_id)
+        ->count();
+
+    $depart_auth_pending_stock_approvals = Sorder::leftJoin('users', 'users.id', '=', 'sorders.user_id')
+        ->where('users.department_id', '=', $department_id)
+        ->where('sorders.site_id', '=', $site_id)
+        ->whereNull('sorders.approval_status')
+        ->count();
+
+    $depart_auth_approved_request = Order::leftJoin('users', 'users.id', '=', 'orders.user_id')
+        ->where('users.department_id', '=', $department_id)
+        ->where('orders.site_id', '=', $site_id)
+        ->where('orders.approval_status', '=', 'Approved')
+        ->count();
+
+    $depart_auth_approved_pos = Porder::leftJoin('users', 'users.id', '=', 'porders.user_id')
+        ->where('users.department_id', '=', $department_id)
+        ->where('porders.site_id', '=', $site_id)
+        ->where('porders.approval_status', '=', 'Approved')
+        ->count();
+
+    $depart_auth_processed_pos = Porder::leftJoin('users', 'users.id', '=', 'porders.user_id')
+        ->where('users.department_id', '=', $department_id)
+        ->where('porders.site_id', '=', $site_id)
+        ->where('porders.status', '=', 'Ordered')
+        ->count();
+
+    $depart_auth_processed_request = Sorder::leftJoin('users', 'users.id', '=', 'sorders.user_id')
+        ->where('users.department_id', '=', $department_id)
+        ->where('sorders.site_id', '=', $site_id)
+        ->where('sorders.status', '=', 'Supplied')
+        ->count();
+}
 
 
 
     return view('home', compact(
         'all_requests',
-        'all_initiates',
+        'all_initiates','depart_auth_new_approvals','depart_auth_pending_request_approvals','depart_auth_pending_po_approvals',
+        'depart_auth_pending_stock_approvals','depart_auth_approved_request','depart_auth_approved_pos','depart_auth_processed_pos','depart_auth_processed_request',
         'all_approves',
         'all_orders',
         'all_delivers',

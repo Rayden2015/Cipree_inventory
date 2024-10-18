@@ -36,6 +36,9 @@
     {{-- super admin dashboard --}}
     @include('dashboard.super_admin')
 
+    {{-- department authoriser --}}
+    @include('dashboard.department_authoriser')
+
     <script>
         setTimeout(function() {
             window.location.reload();
