@@ -46,7 +46,7 @@ class AuthoriserController extends Controller
                 ->where('orders.site_id', '=', $site_id)
                 ->where('users.department_id', '=', $department_id)
                 ->get();
-                
+
             return view('authoriser.index', compact('all_requests'));
         }
         $purchases = Order::where('site_id', '=', $site_id)->latest()->paginate(10);

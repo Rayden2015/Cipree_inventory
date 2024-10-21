@@ -20,3 +20,4 @@ yarn-error.log
 /storage/*
 !/storage/app/public
 !/storage/logs
+storage/logs/errors/error.log

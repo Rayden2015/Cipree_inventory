@@ -168,7 +168,9 @@ class DashboardNavigationController extends Controller
          ->where('orders.site_id', '=', $site_id)
          ->where('users.department_id', '=', $department_id)
          ->whereNull('orders.approval_status')
-         ->latest('orders.created_at')->paginate(15);
+         ->latest('orders.created_at')->
+         select('orders.*')->
+         paginate(15);
          return view('homepages.pending_request_approvals', compact('pending_request_approvals'));
          }
 

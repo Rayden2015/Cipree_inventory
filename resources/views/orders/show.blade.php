@@ -407,17 +407,17 @@
                     @endif
 {{-- if role is department authoriser --}}
                     @if (Auth::user()->hasRole('Department Authoriser'))
-                    @if ($order->approval_status == '')
+                    @if ($order->depart_auth_approval_status == '')
                         {{-- {{ 'not yet ' }} --}}
                         {{-- <button    class="btn btn-secondary">Approved</button> --}}
                         <a href="{{ route('depart_auth_authorise.approved_status', $order->id) }}"
                             class="btn btn-success float-right" id="printhide">Approve</a>
-                    @elseif ($order->approval_status == 'Approved')
+                    @elseif ($order->depart_auth_approval_status == 'Approved')
                         {{-- {{ 'not yet ' }} --}}
                         {{-- <button    class="btn btn-secondary">Approved</button> --}}
                         <a href="{{ route('depart_auth_authorise.denied_status', $order->id) }}"
                             class="btn btn-danger float-right" id="printhide">Deny</a>
-                    @elseif ($order->approval_status == 'Denied')
+                    @elseif ($order->depart_auth_approval_status == 'Denied')
                         {{-- {{ 'not yet ' }} --}}
                         {{-- <button    class="btn btn-secondary">Approved</button> --}}
                         <a href="{{ route('depart_auth_authorise.approved_status', $order->id) }}"

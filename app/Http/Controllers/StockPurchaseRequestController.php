@@ -613,7 +613,7 @@ public function authoriser_remarks_update(Request $request, $id)
 
             if(Auth::user()->hasRole('Department Authoriser')) {
                 $spr_lists = StockPurchaseRequest::join('users','users.id','=','stock_purchase_requests.user_id')->
-               where('stock_purchase_requests.site_id', '=', $site_id)->latest()->paginate(15);
+               where('stock_purchase_requests.site_id', '=', $site_id)->latest('stock_purchase_requests.created_at')->paginate(15);
                 Log::info("StockPurchaseReqquestController | spr_lists() ", [
                     'user_details' => Auth::user(),
                     'response_payload' => $spr_lists
