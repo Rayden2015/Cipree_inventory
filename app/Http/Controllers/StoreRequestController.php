@@ -377,11 +377,13 @@ class StoreRequestController extends Controller
                 ->where('sorders.site_id', '=', $site_id)
                 ->where('users.department_id', '=', $department_id)
                 ->latest('sorders.created_at')
+                ->select('sorders.*')
                 ->paginate(15);
+                   // Return the view with store requests
+        return view('stores.index', compact('store_requests'));
         }
         
-        // Return the view with store requests
-        return view('stores.index', compact('store_requests'));
+     
         
 
         $store_requests = Sorder::where('site_id', '=', $site_id)->latest()->paginate(15);

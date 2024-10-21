@@ -551,8 +551,8 @@
                     {{-- end of depart auth approval process --}}
                     {{-- process button or edit  --}}
                     @if (
-                        (Auth::user()->hasRole('store_officer') && $sorder->approval_status == 'Approved') ||
-                            (Auth::user()->hasRole('store_assistant') && $sorder->approval_status == 'Approved'))
+                        (Auth::user()->hasRole('store_officer') && $sorder->approval_status == 'Approved' && $sorder->depart_auth_approval_status == 'Approved') ||
+                            (Auth::user()->hasRole('store_assistant') && $sorder->approval_status == 'Approved' && $sorder->depart_auth_approval_status == 'Approved'))
                         <a href="{{ route('stores.store_officer_edit', $sorder->id) }}"
                             class="btn btn-success float-right" style="padding-right:10px;" id="approvebtn">Process</a>
                     @else
