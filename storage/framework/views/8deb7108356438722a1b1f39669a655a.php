@@ -1,1 +1,0 @@
-<?php /**PATH C:\Users\Hackman_GH\Desktop\New folder (2)\resources\views/partials/js/custom_js.blade.php ENDPATH**/ ?>

@@ -1,1 +1,0 @@
-<?php /**PATH /home/pensmqhz/test.cipree.com/resources/views/partials/js/custom_js.blade.php ENDPATH**/ ?>

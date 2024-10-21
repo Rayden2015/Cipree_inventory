@@ -646,6 +646,49 @@ class StoreRequestController extends Controller
         }
     }
 
+
+    public function depart_auth_approved_status($id)
+    {
+        try {
+            $authid = Auth::id();
+            $date = Carbon::now()->toDateTimeString();        
+            // Fetch the order by ID
+            $order = Sorder::find($id);
+        
+            // Check if order exists
+            if (!$order) {
+                return redirect()->back()->withError('Order not found');
+            }
+        
+            // Update the order with department authorization status
+            $order->update([
+                'depart_auth_approval_status' => 'Approved',
+                'depart_auth_approved_by' => $authid,
+                'depart_auth_approved_on' => $date,
+            ]);
+        
+            // Log the successful update
+            Log::info('StoreRequestController | depart_auth_approved_status', [
+                'user_details' => Auth::user(),
+                'request_payload' => $order // Now the actual model is logged
+            ]);
+        
+            return redirect()->back()->with('success', 'Order approved successfully');
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            
+            // Log the error with a unique ID for tracking
+            Log::channel('error_log')->error('StoreRequestController | depart_auth_approved_status() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+        
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
+    }        
+
     public function denied_status($id)
     {
         try {
@@ -671,6 +714,30 @@ class StoreRequestController extends Controller
         }
     }
 
+    public function depart_auth_denied_status($id)
+    {
+        try {
+            $authid = Auth::id();
+            $date = Carbon::now();
+            $order = Sorder::find($id);
+            $order = Sorder::where('id', '=', $id)->update(['depart_auth_approval_status' => 'Denied', 'depart_auth_denied_by' => $authid, 'depart_auth_denied_on' => $date]);
+            Log::info('StoreRequestController | depart_auth_denied_status', [
+                'user_details' => Auth::user(),
+                'request_payload' => $order
+            ]);
+            return redirect()->back();
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::channel('error_log')->error('StoreRequestController | depart_auth_denied_status() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
+    }
 
     public function store_officer_lists()
     {

@@ -417,6 +417,12 @@ class AuthoriserController extends Controller
     public function all_requests()
     {
         $site_id = Auth::user()->site->id;
+        $department_id = Auth::user()->department_id;
+        if(Auth::user()->hasRole('Department Authoriser')){
+            $all_requests = Order::leftjoin('users','users.id','=','orders.user_id')->
+            where('users.department_id','=',$department_id)->
+            where('orders.status', '=', 'Requested')->where('orders.site_id', '=', $site_id)->latest('orders.created_at')->paginate(15);
+        }
         $all_requests = Order::where('status', '=', 'Requested')->where('site_id', '=', $site_id)->latest()->paginate(15);
         return view('authoriser.all_requests', compact('all_requests'));
     }
@@ -718,6 +724,31 @@ class AuthoriserController extends Controller
         }
     }
 
+    public function depart_auth_approved_status($id)
+    {
+        try {
+            $authid = Auth::id();
+            $depart_auth_approved_on = Carbon::now();
+            $order = Order::find($id);
+            Order::where('id', '=', $id)->update(['depart_auth_approval_status' => 'Approved', 'depart_auth_approved_by' => $authid, 'depart_auth_approved_on' => $depart_auth_approved_on]);
+
+            Log::info('AuthoriserController | depart_auth_approved_status() | depart auth Order Approval Status Updated to Approved', [
+                'user_details' => Auth::user(),
+                'order_id' => $id,
+            ]);
+
+            return redirect()->back()->withSucess('Successfully Updated');
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::channel('error_log')->error('AuthoriserController | depart_auth_approved_status() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
+    }
+
 
     public function denied_status($id)
     {
@@ -736,6 +767,30 @@ class AuthoriserController extends Controller
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
             Log::channel('error_log')->error('AuthoriserController | DeniedStatus() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString(),
+            ]);
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
+    }
+    public function depart_auth_denied_status($id)
+    {
+        try {
+            $order = Order::find($id);
+            $authid = Auth::id();
+            $denied_on = Carbon::now()->toDateTimeString();
+            Order::where('id', '=', $id)->update(['depart_auth_approval_status' => 'Denied', 'depart_auth_denied_by' => $authid, 'depart_auth_denied_on' => $denied_on]);
+
+            Log::info('AuthoriserController | depart_auth_denied_status() | Order Approval Status Updated to Denied', [
+                'user_details' => Auth::user(),
+                'order_id' => $id,
+            ]);
+
+            return redirect()->back()->withSucess('Successfully Updated');
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::channel('error_log')->error('AuthoriserController | depart_auth_denied_status() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString(),
             ]);

@@ -6,50 +6,60 @@
             border-radius: 25px;
         }
     </style>
-    
+
     @php
         $first_name = App\Http\Controllers\UserController::username();
         $logo = App\Http\Controllers\UserController::logo();
+        $dashboard_included = false; // To ensure only one dashboard is shown
     @endphp
-    
+
     <br>
 
     {{-- Dashboard Inclusions --}}
-    @can('view-admin-dashboard')
+    @if (!$dashboard_included && Gate::allows('admin-dashboard'))
         @include('dashboard.admin')
-    @endcan
+        @php $dashboard_included = true; @endphp
+    @endif
 
-    @can('view-authoriser-dashboard')
+    @if (!$dashboard_included && Gate::allows('super-authoriser-dashboard'))
         @include('dashboard.authoriser')
-    @endcan
+        @php $dashboard_included = true; @endphp
+    @endif
 
-    @can('view-finance-officer-dashboard')
+    @if (!$dashboard_included && Gate::allows('finance-officer-dashboard'))
         @include('dashboard.finance_officer')
-    @endcan
+        @php $dashboard_included = true; @endphp
+    @endif
 
-    @can('view-purchasing-officer-dashboard')
+    @if (!$dashboard_included && Gate::allows('purchasing-officer-dashboard'))
         @include('dashboard.purchasing_officer')
-    @endcan
+        @php $dashboard_included = true; @endphp
+    @endif
 
-    @can('view-requester-dashboard')
+    @if (!$dashboard_included && Gate::allows('requester-dashboard'))
         @include('dashboard.requester')
-    @endcan
+        @php $dashboard_included = true; @endphp
+    @endif
 
-    @can('view-site-admin-dashboard')
+    @if (!$dashboard_included && Gate::allows('site-admin-dashboard'))
         @include('dashboard.site_admin')
-    @endcan
+        @php $dashboard_included = true; @endphp
+    @endif
 
-    @can('view-store-officer-dashboard')
+    @if (!$dashboard_included && Gate::allows('store-officer-dashboard'))
         @include('dashboard.store_officer')
-    @endcan
+        @php $dashboard_included = true; @endphp
+    @endif
 
-    @can('view-super-admin-dashboard')
+    @if (!$dashboard_included && Gate::allows('super-admin-dashboard'))
         @include('dashboard.super_admin')
-    @endcan
+        @php $dashboard_included = true; @endphp
+    @endif
 
-    @can('department-authoriser-dashboard')
+    @if (!$dashboard_included && Gate::allows('department-authoriser-dashboard'))
         @include('dashboard.department_authoriser')
-    @endcan
+        @php $dashboard_included = true; @endphp
+    @endif
 
     <script>
         setTimeout(function() {

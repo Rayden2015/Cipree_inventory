@@ -178,7 +178,9 @@ Route::put('sorder_update/{id}', [\App\Http\Controllers\StoreRequestController::
 Route::put('requester_sorder_update/{id}', [\App\Http\Controllers\StoreRequestController::class, 'requester_sorder_update'])->name('stores.requester_sorder_update');
 Route::post('stores_action', [\App\Http\Controllers\StoreRequestController::class, 'stores_action'])->name('stores.action');
 Route::get('stores/approved_status/{id}', [\App\Http\Controllers\StoreRequestController::class, 'approved_status'])->name('stores.approved_status');
+Route::get('stores/depart_auth_approved_status/{id}', [\App\Http\Controllers\StoreRequestController::class, 'depart_auth_approved_status'])->name('stores.depart_auth_approved_status');
 Route::get('stores/denied_status/{id}', [\App\Http\Controllers\StoreRequestController::class, 'denied_status'])->name('stores.denied_status');
+Route::get('stores/depart_auth_denied_status/{id}', [\App\Http\Controllers\StoreRequestController::class, 'depart_auth_denied_status'])->name('stores.depart_auth_denied_status');
 Route::get('store_officer_lists', [\App\Http\Controllers\StoreRequestController::class, 'store_officer_lists'])->name('stores.store_officer_lists');
 Route::get('received_history_page', [\App\Http\Controllers\StoreRequestController::class, 'received_history_page'])->name('stores.received_history_page');
 
@@ -207,8 +209,10 @@ Route::get('authorise_all_approves', [\App\Http\Controllers\AuthoriserController
 Route::get('authorise_all_orders', [\App\Http\Controllers\AuthoriserController::class, 'all_orders'])->name('authorise.all_orders');
 Route::get('authorise_all_delivers', [\App\Http\Controllers\AuthoriserController::class, 'all_delivers'])->name('authorise.all_delivers');
 Route::get('approved_status/{id}', [\App\Http\Controllers\AuthoriserController::class, 'approved_status'])->name('authorise.approved_status');
+Route::get('depart_auth_approved_status/{id}', [\App\Http\Controllers\AuthoriserController::class, 'depart_auth_approved_status'])->name('depart_auth_authorise.approved_status');
 Route::get('denied_status/{id}', [\App\Http\Controllers\AuthoriserController::class, 'denied_status'])->name('authorise.denied_status');
 
+Route::get('depart_auth_denied_status/{id}', [\App\Http\Controllers\AuthoriserController::class, 'depart_auth_denied_status'])->name('depart_auth_authorise.denied_status');
 //order
 Route::resource('orders', OrderController::class);
 Route::post('orders_action/{id}', [\App\Http\Controllers\OrderController::class, 'orders_action'])->name('orders.action');

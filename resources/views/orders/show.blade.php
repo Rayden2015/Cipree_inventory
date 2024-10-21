@@ -381,23 +381,7 @@
 
 
                     </table>
-                    {{-- @if ((Auth::user()->role->name == 'store_officer' && $order->approval_status == 'Approved') || (Auth::user()->role->name == 'store_assistant' && $order->approval_status == 'Approved'))
-                    <a href="{{ route('stores.store_officer_edit', $order->id) }}" class="float-right"
-                        style="padding-right:10px;" id="approvebtn"><img src="{{ asset('assets/images/icons/edit.png') }}"
-                            style="width:30px; height:30px;"></a>
-                @else
-                @endif --}}
-
-
-                    {{-- @if (Auth::user()->role->name == 'purchasing_officer')
-                        <td>
-                            <a href="{{ route('purchases.generate_order', $order->id) }}"
-                                class="btn btn-info float-left">Generate PO</a>
-
-                        </td>
-                    @endif --}}
-
-
+                   
                     @if (Auth::user()->hasRole('Super Authoriser'))
                         @if ($order->approval_status == '')
                             {{-- {{ 'not yet ' }} --}}
@@ -421,6 +405,31 @@
                                 class="btn btn-danger float-right" id="printhide">Deny</a>
                         @endif
                     @endif
+{{-- if role is department authoriser --}}
+                    @if (Auth::user()->hasRole('Department Authoriser'))
+                    @if ($order->approval_status == '')
+                        {{-- {{ 'not yet ' }} --}}
+                        {{-- <button    class="btn btn-secondary">Approved</button> --}}
+                        <a href="{{ route('depart_auth_authorise.approved_status', $order->id) }}"
+                            class="btn btn-success float-right" id="printhide">Approve</a>
+                    @elseif ($order->approval_status == 'Approved')
+                        {{-- {{ 'not yet ' }} --}}
+                        {{-- <button    class="btn btn-secondary">Approved</button> --}}
+                        <a href="{{ route('depart_auth_authorise.denied_status', $order->id) }}"
+                            class="btn btn-danger float-right" id="printhide">Deny</a>
+                    @elseif ($order->approval_status == 'Denied')
+                        {{-- {{ 'not yet ' }} --}}
+                        {{-- <button    class="btn btn-secondary">Approved</button> --}}
+                        <a href="{{ route('depart_auth_authorise.approved_status', $order->id) }}"
+                            class="btn btn-success float-right" id="printhide">Approve</a>
+                    @else
+                        {{-- {{ 'another time' }} --}}
+                        {{-- <button class="btn btn-warning">Assigned</button> --}}
+                        <a href="{{ route('depart_auth_authorise.denied_status', $order->id) }}"
+                            class="btn btn-danger float-right" id="printhide">Deny</a>
+                    @endif
+                @endif
+                {{-- end of the department authoriser section --}}
                 </main>
 
             </div>

@@ -173,8 +173,8 @@
                 }
 
                 /* .invoice div:last-child {
-                                    page-break-before: always
-                                } */
+                                            page-break-before: always
+                                        } */
             }
 
             @media print {
@@ -210,7 +210,7 @@
 
 
             {{-- back button --}}
-          
+
             @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Super Authoriser'))
                 <a href="{{ route('sorders.store_lists') }}" id="printbtn" class="btn btn-primary float-right">Back</a>
             @elseif (Auth::user()->hasRole('store_officer') || Auth::user()->hasRole('store_assistant'))
@@ -433,14 +433,14 @@
                 background: #eee;
                 border-bottom: 1px solid #fff">
                                         {{ $ph->qty_supplied ?? '' }}</td>
-                                  
-                                        <td
+
+                                    <td
                                         style=" padding: 15px;
                 background: #eee;
                 border-bottom: 1px solid #fff">
                                         {{ $ph->item_parts->location->name ?? '' }}</td>
 
-                                        <td
+                                    <td
                                         style=" padding: 15px;
                 background: #eee;
                 border-bottom: 1px solid #fff">
@@ -459,11 +459,10 @@
                                 <tr>
                                     <td class="text-center" colspan="12">Data Not Found!</td>
                                 </tr>
-                                
                         @endforelse
 
                         </tr>
-                       
+
                         </tbody>
                         <thead>
                             <tr>
@@ -481,8 +480,8 @@
 
                             </tr>
                         </thead>
-                      
-                          <tbody>
+
+                        <tbody>
                             <tr>
                                 <td></td>
                                 <td></td>
@@ -495,60 +494,67 @@
                                 <td style="font-weight: bold">Total (USD):</td>
                                 <td style="font-weight: bold">$ {{ $sorder->total ?? '' }} </td>
                             </tr>
-                          </tbody>
-                                                  
+                        </tbody>
+
                     </table>
                     {{-- <label for="" class="float-right"><p style="padding-right: 10px;">Total (USD): </p>  {{ $sorder->total ?? '' }} </label> <br> --}}
                     <div style=" padding: 10px; width:40%;">
-                        <p style="font-weight: bold;">Received in Good Condition by: {{ $sorder->supplied_to ?? ' '  }}</p> <br>
+                        <p style="font-weight: bold;">Received in Good Condition by: {{ $sorder->supplied_to ?? ' ' }}</p>
+                        <br>
                         <p style="font-weight: bold;">Signed by:</p> <br>
                     </div>
 
-                   
+
                     <div style=" padding: 10px; width:40%;">
                         <p style="font-weight: bold;">Notes: </p>
-                         
-                            <p>{{ $sorder->manual_remarks ?? ' '  }}</p> 
-                      
+
+                        <p>{{ $sorder->manual_remarks ?? ' ' }}</p>
+
                     </div>
-                    
+
                     <br>
-                    {{-- <a href="#" id="printbtn" onclick="window.print()" class="btn btn-primary float-right">Print</a> --}}
-                    @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Super Authoriser') || Auth::user()->hasRole('Department Authoriser'))
-                        {{-- <a href="{{ URL::previous() }}" class="btn btn-primary float-right">Approve</a> --}}
+
+                    @if (Auth::user()->hasRole('admin') ||
+                            Auth::user()->hasRole('Super Authoriser'))
                         @if ($sorder->approval_status == '')
-                            {{-- {{ 'not yet ' }} --}}
-                            {{-- <button    class="btn btn-secondary">Approved</button> --}}
                             <a href="{{ route('stores.approved_status', $sorder->id) }}" id="approvebtn"
                                 class="btn btn-success float-right">Approve</a>
                         @elseif ($sorder->approval_status == 'Approved')
-                            {{-- {{ 'not yet ' }} --}}
-                            {{-- <button    class="btn btn-secondary">Approved</button> --}}
                             <a href="{{ route('stores.denied_status', $sorder->id) }}" id="approvebtn"
                                 class="btn btn-danger float-right">Deny</a>
                         @elseif ($sorder->approval_status == 'Denied')
-                            {{-- {{ 'not yet ' }} --}}
-                            {{-- <button    class="btn btn-secondary">Approved</button> --}}
                             <a href="{{ route('stores.approved_status', $sorder->id) }}" id="approvebtn"
                                 class="btn btn-success float-right">Approve</a>
                         @else
-                            {{-- {{ 'another time' }} --}}
-                            {{-- <button class="btn btn-warning">Assigned</button> --}}
                             <a href="{{ route('stores.denied_status', $sorder->id) }}" id="approvebtn"
                                 class="btn btn-danger float-right">Deny</a>
                         @endif
                     @endif
-                    {{-- @if ((Auth::user()->role->name == 'store_officer' && $sorder->approval_status == 'Approved') || (Auth::user()->role->name == 'store_assistant' && $sorder->approval_status == 'Approved'))
-                        <td><a href="{{ route('stores.store_officer_edit', $sorder->id) }}"
-                                class="btn btn-success float-right" id="approvebtn">Process</a></td>
-                    @else
-                    @endif --}}
+
+
+                    {{-- department authoriser approval process --}}
+                    @if (Auth::user()->hasRole('Department Authoriser'))
+                        @if ($sorder->depart_auth_approval_status == '')
+                            <a href="{{ route('stores.depart_auth_approved_status', $sorder->id) }}" id="approvebtn"
+                                class="btn btn-success float-right">Approve</a>
+                        @elseif ($sorder->depart_auth_approval_status == 'Approved')
+                            <a href="{{ route('stores.depart_auth_denied_status', $sorder->id) }}" id="approvebtn"
+                                class="btn btn-danger float-right">Deny</a>
+                        @elseif ($sorder->depart_auth_approval_status == 'Denied')
+                            <a href="{{ route('stores.depart_auth_approved_status', $sorder->id) }}" id="approvebtn"
+                                class="btn btn-success float-right">Approve</a>
+                        @else
+                            <a href="{{ route('stores.depart_auth_denied_status', $sorder->id) }}" id="approvebtn"
+                                class="btn btn-danger float-right">Deny</a>
+                        @endif
+                    @endif
+                    {{-- end of depart auth approval process --}}
                     {{-- process button or edit  --}}
                     @if (
                         (Auth::user()->hasRole('store_officer') && $sorder->approval_status == 'Approved') ||
                             (Auth::user()->hasRole('store_assistant') && $sorder->approval_status == 'Approved'))
-                        <a href="{{ route('stores.store_officer_edit', $sorder->id) }}" class="btn btn-success float-right"
-                            style="padding-right:10px;" id="approvebtn">Process</a>
+                        <a href="{{ route('stores.store_officer_edit', $sorder->id) }}"
+                            class="btn btn-success float-right" style="padding-right:10px;" id="approvebtn">Process</a>
                     @else
                     @endif
                     {{-- end of process or edit button --}}

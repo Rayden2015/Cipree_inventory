@@ -173,8 +173,8 @@
                 }
 
                 /* .invoice div:last-child {
-                        page-break-before: always
-                    } */
+                            page-break-before: always
+                        } */
             }
 
             @media print {
@@ -194,7 +194,7 @@
             <a href="#" id="printbtn" onclick="window.print()" class="btn btn-primary float-lef">Print</a>
             <a href="{{ route('dashboard.pending_stock_approvals') }}" id="backbtn"
                 class="btn btn-primary float-right">Back</a>
-           
+
             <br>
             <div style="min-width: 600px">
                 <header>
@@ -428,26 +428,26 @@
                                 <tr>
                                     <td class="text-center" colspan="12">Data Not Found!</td>
                                 </tr>
-                                
                         @endforelse
 
                         </tr>
-                       
+
                         </tbody>
-                       
-                      
-                          
-                                                  
+
+
+
+
                     </table>
                     <label for="" class="float-right">Total (USD): {{ $sorder->total ?? '' }} </label> <br>
                     <div style=" padding: 10px; width:40%;">
-                        <p>Received in Good Condition by: {{ $sorder->supplied_to ?? ' '  }}</p> <br>
+                        <p>Received in Good Condition by: {{ $sorder->supplied_to ?? ' ' }}</p> <br>
                         <p>Signed by:</p> <br>
                     </div>
-                    
+
                     <br>
                     {{-- <a href="#" id="printbtn" onclick="window.print()" class="btn btn-primary float-right">Print</a> --}}
-                    @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Super Authoriser') || Auth::user()->hasRole('Department Authoriser'))
+                    @if (Auth::user()->hasRole('admin') ||
+                            Auth::user()->hasRole('Super Authoriser'))
                         {{-- <a href="{{ URL::previous() }}" class="btn btn-primary float-left">Approve</a> --}}
                         @if ($sorder->approval_status == '')
                             {{-- {{ 'not yet ' }} --}}
@@ -471,6 +471,32 @@
                                 class="btn btn-danger float-right">Deny</a>
                         @endif
                     @endif
+                    {{-- department authoriser approval status --}}
+                    @if (Auth::user()->hasRole('Department Authoriser') )
+                        {{-- <a href="{{ URL::previous() }}" class="btn btn-primary float-left">Approve</a> --}}
+                        @if ($sorder->depart_auth_approval_status == '')
+                            {{-- {{ 'not yet ' }} --}}
+                            {{-- <button    class="btn btn-secondary">Approved</button> --}}
+                            <a href="{{ route('stores.depart_auth_approved_status', $sorder->id) }}" id="approvebtn"
+                                class="btn btn-success float-right">Approve</a>
+                        @elseif ($sorder->depart_auth_approval_status == 'Approved')
+                            {{-- {{ 'not yet ' }} --}}
+                            {{-- <button    class="btn btn-secondary">Approved</button> --}}
+                            <a href="{{ route('stores.depart_auth_denied_status', $sorder->id) }}" id="approvebtn"
+                                class="btn btn-danger float-right">Deny</a>
+                        @elseif ($sorder->depart_auth_approval_status == 'Denied')
+                            {{-- {{ 'not yet ' }} --}}
+                            {{-- <button    class="btn btn-secondary">Approved</button> --}}
+                            <a href="{{ route('stores.depart_auth_approved_status', $sorder->id) }}" id="approvebtn"
+                                class="btn btn-success float-right">Approve</a>
+                        @else
+                            {{-- {{ 'another time' }} --}}
+                            {{-- <button class="btn btn-warning">Assigned</button> --}}
+                            <a href="{{ route('stores.depart_auth_denied_status', $sorder->id) }}" id="approvebtn"
+                                class="btn btn-danger float-right">Deny</a>
+                        @endif
+                    @endif
+                    {{-- end of department authoriser appproval status  --}}
                     @if (
                         (Auth::user()->hasRole('store_officer') && $sorder->approval_status == 'Approved') ||
                             (Auth::user()->hasRole('store_assistant') && $sorder->approval_status == 'Approved'))
