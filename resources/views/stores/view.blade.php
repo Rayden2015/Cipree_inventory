@@ -173,8 +173,8 @@
                 }
 
                 /* .invoice div:last-child {
-                                            page-break-before: always
-                                        } */
+                                                page-break-before: always
+                                            } */
             }
 
             @media print {
@@ -321,10 +321,74 @@
                             <div style="margin-right: 50px;">
 
                                 <table style="width:450px; font-size:12px;">
+                                    {{-- department approval status --}}
+<tr>
+    <th style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
+        Department Approval Status:
+    </th>
+    <th style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
+        {{ $sorder->depart_auth_approval_status ?? 'Pending' }}
+    </th>
+</tr>
+                                    {{-- Conditional Approved or Denied sections --}}
+                                    @if ($sorder->depart_auth_approval_status == 'Approved')
+                                        {{-- department approved by --}}
+                                        <tr>
+                                            <th
+                                                style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
+                                                Approved By:
+                                            </th>
+                                            <th
+                                                style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
+                                                {{ $sorder->depart_auth_name->name ?? '' }}
+                                            </th>
+                                        </tr>
+                                        {{-- end of department approved by --}}
+
+                                        {{-- department approved on --}}
+                                        <tr>
+                                            <th
+                                                style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
+                                                Approved On:
+                                            </th>
+                                            <th
+                                                style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
+                                                {{ $sorder->depart_auth_approved_on ?? '' }}
+                                            </th>
+                                        </tr>
+                                        {{-- end of department approved on --}}
+                                    @elseif($sorder->depart_auth_approval_status == 'Denied')
+                                        {{-- department denied by --}}
+                                        <tr>
+                                            <th
+                                                style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
+                                                Denied By:
+                                            </th>
+                                            <th
+                                                style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
+                                                {{ $sorder->depart_auth_denied_name->name ?? '' }}
+                                            </th>
+                                        </tr>
+                                        {{-- end of department denied by --}}
+
+                                        {{-- department denied on --}}
+                                        <tr>
+                                            <th
+                                                style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
+                                                Denied On:
+                                            </th>
+                                            <th
+                                                style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
+                                                {{ $sorder->depart_auth_denied_on ?? '' }}
+                                            </th>
+                                        </tr>
+                                        {{-- end of department denied on --}}
+                                    @endif
+
                                     <tr>
                                         <th
                                             style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
-                                            Approval Status:</th>
+                                            Supply Chain Approval:</th>
                                         <th
                                             style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
                                             {{ $sorder->approval_status ?? 'Pending' }}</th>
@@ -514,8 +578,7 @@
 
                     <br>
 
-                    @if (Auth::user()->hasRole('admin') ||
-                            Auth::user()->hasRole('Super Authoriser'))
+                    @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('Super Authoriser'))
                         @if ($sorder->approval_status == '')
                             <a href="{{ route('stores.approved_status', $sorder->id) }}" id="approvebtn"
                                 class="btn btn-success float-right">Approve</a>
@@ -551,8 +614,12 @@
                     {{-- end of depart auth approval process --}}
                     {{-- process button or edit  --}}
                     @if (
-                        (Auth::user()->hasRole('store_officer') && $sorder->approval_status == 'Approved' && $sorder->depart_auth_approval_status == 'Approved') ||
-                            (Auth::user()->hasRole('store_assistant') && $sorder->approval_status == 'Approved' && $sorder->depart_auth_approval_status == 'Approved'))
+                        (Auth::user()->hasRole('store_officer') &&
+                            $sorder->approval_status == 'Approved' &&
+                            $sorder->depart_auth_approval_status == 'Approved') ||
+                            (Auth::user()->hasRole('store_assistant') &&
+                                $sorder->approval_status == 'Approved' &&
+                                $sorder->depart_auth_approval_status == 'Approved'))
                         <a href="{{ route('stores.store_officer_edit', $sorder->id) }}"
                             class="btn btn-success float-right" style="padding-right:10px;" id="approvebtn">Process</a>
                     @else

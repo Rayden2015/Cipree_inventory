@@ -40,5 +40,12 @@ class Sorder extends Model
     public function enduser(){
         return $this->belongsTo(Enduser::class,'enduser_id');
     }
+    public function depart_auth_name(){
+        return $this->belongsTo(User::class,'depart_auth_approved_by');
+    }
+    public function depart_auth_denied_name(){
+        return $this->belongsTo(User::class,'depart_auth_denied_by');
+    }
 
+    
 }
