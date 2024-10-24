@@ -415,23 +415,7 @@
                                             </th>
                                         @endif
                                     </tr>
-                                    <tr>
-                                        <th
-                                            style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
-                                            Supplied By:</th>
-                                        <th
-                                            style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
-                                            {{ $sorder->user->name ?? ' ' }}</th>
-                                    </tr>
-
-                                    <tr>
-                                        <th
-                                            style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
-                                            Supplied On:</th>
-                                        <th
-                                            style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
-                                            {{ $sorder->delivered_on ?? ' ' }}</th>
-                                    </tr>
+                                 
                                     <tr>
                                         <th
                                             style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
@@ -563,9 +547,11 @@
                     </table>
                     {{-- <label for="" class="float-right"><p style="padding-right: 10px;">Total (USD): </p>  {{ $sorder->total ?? '' }} </label> <br> --}}
                     <div style=" padding: 10px; width:40%;">
+                        <p style="font-weight: bold;">Supplied by:  {{ $sorder->user->name ?? ' ' }}</p>
+                        <p style="font-weight: bold;">Supplied On: {{ $sorder->delivered_on ?? ' ' }}</p>
                         <p style="font-weight: bold;">Received in Good Condition by: {{ $sorder->supplied_to ?? ' ' }}</p>
-                        <br>
-                        <p style="font-weight: bold;">Signed by:</p> <br>
+                        
+                        <p style="font-weight: bold;">Signed by: ....................................</p> <br>
                     </div>
 
 
