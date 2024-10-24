@@ -88,14 +88,12 @@
                             <th>Part Number</th>
                             <th>Stock Code</th>
                             <th>Quantity</th>
-
                             <th>Cost</th>
                             <th>End User</th>
                             <th>Location</th>
                             @if (Auth::user()->hasRole('Super Admin'))
                                 <th>Delete</th>
                             @endif
-
                         </tr>
                     </thead>
                     @forelse ($total_cost_of_parts_within_the_month as $in)
@@ -103,23 +101,29 @@
                             <tr>
                                 <td>{{ $in->id }}</td>
                                 <td>{{ date('d-m-Y (H:i)', strtotime($in->sorder->delivered_on ?? '')) }}</td>
-                                <!-- Accessing delivered_on from sorder -->
-                                <td>{{ $in->sorder->delivery_reference_number ?? '' }}</td>
-                                <!-- Accessing delivery_reference_number from sorder -->
-                                <td>{{ $in->inventoryItem->inventory->grn_number ?? 'Not Found or Deleted' }}</td>
-                                <!-- Accessing GRN Number -->
+            
+                                <!-- Clickable Delivery Reference Number -->
+                                <td>
+                                    <a href="{{ route('sorders.store_list_view', $in->sorder->id) }}">
+                                        {{ $in->sorder->delivery_reference_number ?? '' }}
+                                    </a>
+                                </td>
+            
+                                <!-- Clickable GRN Number -->
+                                <td>
+                                    <a href="{{ route('inventories.show', $in->inventoryItem->inventory->id ?? 0) }}">
+                                        {{ $in->inventoryItem->inventory->grn_number ?? 'Not Found or Deleted' }}
+                                    </a>
+                                </td>
+            
                                 <td>{{ $in->item->item_description ?? ' ' }}</td>
-                                <!-- Accessing item_description from item -->
                                 <td>{{ $in->item->item_part_number ?? ' ' }}</td>
-                                <!-- Accessing item_part_number from item -->
                                 <td>{{ $in->item->item_stock_code ?? ' ' }}</td>
-                                <!-- Accessing item_stock_code from item -->
                                 <td>{{ $in->qty_supplied ?? '' }}</td>
                                 <td>{{ $in->sub_total ?? '' }}</td>
                                 <td>{{ $in->sorder->enduser->asset_staff_id ?? 'Not Set' }}</td>
-                                <!-- Adjust as necessary -->
-                                <td>{{ $in->inventoryItem->location->name ?? 'Not Set' }}</td> <!-- Adjust as necessary -->
-
+                                <td>{{ $in->inventoryItem->location->name ?? 'Not Set' }}</td>
+            
                                 @if (Auth::user()->hasRole('Super Admin'))
                                     <td>
                                         <form action="{{ route('sorderpart_delete', $in->id) }}" method="POST">
@@ -136,14 +140,10 @@
                                 <td class="text-center" colspan="12">Item not available!</td>
                             </tr>
                     @endforelse
-
-
-                    </tr>
-
                     </tbody>
-
                 </table>
             </div>
+            
             {{ $total_cost_of_parts_within_the_month->links('pagination::bootstrap-4') }}
             <!-- /.card-body -->
         </div>
