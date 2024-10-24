@@ -106,7 +106,11 @@
                                 <td>{{ $in->inv_quantity ?? '' }}</td>
                                 <td>{{ $in->inv_amount ?? '' }}</td>
                                 <td>{{ $in->location->name ?? '' }}</td>                             
-                                <td>{{ $in->grn_number ?? '' }}</td>  
+                                <td>
+                                    <a href="{{ route('inventories.show', ['inventory' => $in->inventory_id]) }}">
+                                        {{ $in->grn_number ?? '' }}
+                                    </a>
+                                </td>
 
                             @empty
                             <tr>
