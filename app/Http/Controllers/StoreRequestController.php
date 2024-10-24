@@ -1033,6 +1033,7 @@ class StoreRequestController extends Controller
                 ->whereIn('sorders.status', ['Supplied', 'Partially Supplied'])
                 ->select(
                     'sorder_parts.id', 
+                    'sorders.id as sorder_id',
                     'items.item_description', 
                     'items.item_part_number', 
                     'items.item_stock_code', 
@@ -1042,7 +1043,8 @@ class StoreRequestController extends Controller
                     'inventories.grn_number', 
                     'sorders.enduser_id',
                     'sorders.delivered_on',
-                    'inventory_items.location_id'
+                    'inventory_items.location_id',
+                    'inventory_items.inventory_id' 
                 );
     
             // Apply search filter if present
@@ -1092,6 +1094,7 @@ class StoreRequestController extends Controller
                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
+    
     
     
 

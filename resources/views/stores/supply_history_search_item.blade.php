@@ -53,27 +53,19 @@
                         </a>
                     </div>
                 </form>
-                
-
-                {{-- <form action="{{ route('exportSearchResults') }}" method="GET">
-                   
-                           
-                            <button class="btn btn-success ml-2" type="submit">Export Excel</button>
-                     
-                </form> --}}
             </div>
-            <!-- /.card-header -->
+
             @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
+            @endif
 
-        @if (session('error'))
-            <div class="alert alert-danger">
-                {{ session('error') }}
-            </div>
-        @endif
+            @if (session('error'))
+                <div class="alert alert-danger">
+                    {{ session('error') }}
+                </div>
+            @endif
 
             <div class="card-body">
                 <table id="example1" class="table table-bordered table-striped">
@@ -82,7 +74,7 @@
                             <th>ID</th>
                             <th>Supply Date</th>
                             <th>SR Number</th>
-                        <th>GRN Number</th>
+                            <th>GRN Number</th>
                             <th>Description</th>
                             <th>Part Number</th>
                             <th>Stock Code</th>
@@ -91,8 +83,7 @@
                             <th>End User</th>
                             <th>Location</th>
                             @if (Auth::user()->hasRole('Super Admin'))
-                            
-                            <th>Delete</th>
+                                <th>Delete</th>
                             @endif
                         </tr>
                     </thead>
@@ -101,24 +92,44 @@
                             <tr>
                                 <td>{{ $in->id }}</td>
                                 <td>{{ date('d-m-Y (H:i)', strtotime($in->delivered_on)) }}</td>
-                                <td>{{ $in->delivery_reference_number ?? '' }}</td>
-                                <td>{{ $in->grn_number ?? 'Not Found or Deleted' }}</td>
+<!-- Delivery Reference Number -->
+<td>
+    @if ($in->sorder_id && $in->delivery_reference_number)
+        <a href="{{ route('sorders.store_list_view', ['id' => $in->sorder_id]) }}">
+            {{ $in->delivery_reference_number }}
+        </a>
+    @else
+        Not Found
+    @endif
+</td>
+
+<!-- GRN Number -->
+<td>
+    @if ($in->inventory_id && $in->grn_number)
+        <a href="{{ route('inventories.show', ['inventory' => $in->inventory_id]) }}">
+            {{ $in->grn_number }}
+        </a>
+    @else
+        Not Found
+    @endif
+</td>
+
+
                                 <td>{{ $in->item_description ?? ' ' }}</td>
                                 <td>{{ $in->item_part_number ?? ' ' }}</td>
                                 <td>{{ $in->item_stock_code ?? ' ' }}</td>
                                 <td>{{ $in->qty_supplied ?? '' }}</td>
                                 <td>{{ $in->sub_total ?? '' }}</td>
                                 <td>{{ $in->enduser->asset_staff_id ?? 'Not Set' }}</td>
-
                                 <td>{{ $in->location->name ?? 'Not Set' }}</td>
                                 @if (Auth::user()->hasRole('Super Admin'))
-                                <td>
-                                    <form action="{{ route('sorderpart_delete', $in->id) }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this item?')">Delete</button>
-                                    </form>
-                                </td>
+                                    <td>
+                                        <form action="{{ route('sorderpart_delete', $in->id) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this item?')">Delete</button>
+                                        </form>
+                                    </td>
                                 @endif
                             </tr>
                         @empty
@@ -129,18 +140,34 @@
                     </tbody>
                 </table>
             </div>
-            
-            <!-- Pagination links -->
-            {{ $total_cost_of_parts_within_the_month->links() }}
-            
-
+            <div class="pagination">
+                {{ $total_cost_of_parts_within_the_month->links() }}
+            </div>
         </div>
 
+        <!-- jQuery -->
+        <script src="{{ asset('/assets/plugins/jquery/jquery.min.js') }}"></script>
+        <!-- Bootstrap 4 -->
+        <script src="{{ asset('/assets/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+        <!-- DataTables  & Plugins -->
+        <script src="{{ asset('/assets/plugins/datatables/jquery.dataTables.min.js') }}"></script>
+        <script src="{{ asset('/assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+        <script src="{{ asset('/assets/plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+        <script src="{{ asset('/assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+        <script src="{{ asset('/assets/plugins/datatables-buttons/js/dataTables.buttons.min.js') }}"></script>
+        <script src="{{ asset('/assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
+        <script src="{{ asset('/assets/plugins/jszip/jszip.min.js') }}"></script>
+        <script src="{{ asset('/assets/plugins/pdfmake/pdfmake.min.js') }}"></script>
+        <script src="{{ asset('/assets/plugins/pdfmake/vfs_fonts.js') }}"></script>
+        <script src="{{ asset('/assets/plugins/datatables-buttons/js/buttons.html5.min.js') }}"></script>
+        <script src="{{ asset('/assets/plugins/datatables-buttons/js/buttons.print.min.js') }}"></script>
+        <script src="{{ asset('/assets/plugins/datatables-buttons/js/buttons.colVis.min.js') }}"></script>
+        <!-- AdminLTE App -->
+        <script src="{{ asset('/assets/dist/js/adminlte.min.js') }}"></script>
+        <!-- Toastr -->
+        <script src="https://cdn.bootcss.com/toastr.js/latest/js/toastr.min.js"></script>
 
     </body>
-    <script src="https://cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
-    <script src="https://cdn.bootcss.com/toastr.js/latest/js/toastr.min.js"></script>
-    {!! Toastr::message() !!}
 
     </html>
 @endsection

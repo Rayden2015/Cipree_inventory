@@ -46,6 +46,10 @@ class Sorder extends Model
     public function depart_auth_denied_name(){
         return $this->belongsTo(User::class,'depart_auth_denied_by');
     }
-
+    public function inventory()
+    {
+        return $this->hasOneThrough(Inventory::class, InventoryItem::class, 'inventory_id', 'id', 'id', 'id');
+    }
+    
     
 }
