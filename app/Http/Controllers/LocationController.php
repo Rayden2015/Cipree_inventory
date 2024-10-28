@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class LocationController extends Controller
 {
@@ -22,27 +23,37 @@ class LocationController extends Controller
     {
         try {
             $site_id = Auth::user()->site->id;
+    
+            // Log the user's action
             Log::info('LocationController | index', [
                 'user_details' => Auth::user(),
                 'message' => 'Viewing location index'
             ]);
-
-            $locations = Location::where('site_id', '=', $site_id)->latest()->paginate(15);
+    
+            // Define cache key based on site ID and page number for unique caching
+            $page = request()->get('page', 1);
+            $cacheKey = "locations_site_{$site_id}_page_{$page}";
+    
+            // Cache the paginated results
+            $locations = Cache::remember($cacheKey, 60 * 5, function () use ($site_id) {
+                return Location::where('site_id', '=', $site_id)->latest()->paginate(15);
+            });
+    
             return view('locations.index', compact('locations'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('LocationController | Index() Error ' . $unique_id,[
+    
+            // Log the error with a unique ID
+            Log::channel('error_log')->error('LocationController | Index() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
+    
+            // Redirect back with the error message
+            return redirect()->back()
+                             ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
-
   
     public function create()
     {

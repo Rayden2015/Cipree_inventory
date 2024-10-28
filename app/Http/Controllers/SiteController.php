@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class SiteController extends Controller
 {
@@ -22,20 +23,27 @@ class SiteController extends Controller
     public function index()
     {
         try {
-            $sites = Site::paginate(20);
+            $page = request()->get('page', 1); // Get the current page
+    
+            // Cache the paginated results
+            $sites = Cache::remember("sites_paginated_page_{$page}", 60 * 5, function () {
+                return Site::paginate(20);
+            });
+    
             return view('sites.index', compact('sites'));
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-                Log::channel('error_log')->error('SiteController | Index() Error ' . $unique_id ,[
-                    'message' => $e->getMessage(),
-                    'stack_trace' => $e->getTraceAsString()
-                ]);
     
-        // Redirect back with the error message
-        return redirect()->back()
-                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-    }
+            // Log the error with a unique ID
+            Log::channel('error_log')->error('SiteController | Index() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
     
+            // Redirect back with an error message
+            return redirect()->back()
+                             ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
   

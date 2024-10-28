@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\SMSController;
 
 class UserController extends Controller
@@ -51,11 +52,17 @@ class UserController extends Controller
     
    
     public function index()
-    {
-        $roles = Role::all();
-        $users = User::all();
-        return view('users.index', compact('users', 'roles'));
-    }
+{
+    // Get all roles without caching
+    $roles = Role::all();
+
+    // Cache the users data for 5 minutes
+    $users = Cache::remember('users_all', 60 * 5, function () {
+        return User::all();
+    });
+
+    return view('users.index', compact('users', 'roles'));
+}
 
     public function create()
     {
