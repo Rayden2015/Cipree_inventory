@@ -605,45 +605,49 @@ public function authoriser_remarks_update(Request $request, $id)
     }
 
     public function auth_spr_lists()
-    {
-        try {
-            $auth = Auth::id();
-            $site_id = Auth::user()->site->id;
-            $department_id = Auth::user()->department->id;
+{
+    try {
+        $auth = Auth::id();
+        $site_id = Auth::user()->site->id;
+        $department_id = Auth::user()->department->id;
 
-            if(Auth::user()->hasRole('Department Authoriser')) {
-                $spr_lists = StockPurchaseRequest::join('users','users.id','=','stock_purchase_requests.user_id')->
-               where('stock_purchase_requests.site_id', '=', $site_id)
-               ->latest('stock_purchase_requests.created_at')
-               ->select('stock_purchase_requests.*')
-               ->paginate(15);
-                Log::info("StockPurchaseReqquestController | spr_lists() ", [
-                    'user_details' => Auth::user(),
-                    'response_payload' => $spr_lists
-                ]);
-                return view('stockpurchases.auth_spr_lists', compact('spr_lists'));
-            }
+        if(Auth::user()->hasRole('Department Authoriser')) {
+            $spr_lists = StockPurchaseRequest::join('users', 'users.id', '=', 'stock_purchase_requests.user_id')
+                ->where('stock_purchase_requests.site_id', '=', $site_id)
+                ->latest('stock_purchase_requests.created_at') // Specify the table name here
+                ->select('stock_purchase_requests.*')
+                ->paginate(15);
 
-            $spr_lists = StockPurchaseRequest::where('site_id', '=', $site_id)->latest()->paginate(15);
-            Log::info("StockPurchaseReqquestController | spr_lists() ", [
+            Log::info("StockPurchaseRequestController | spr_lists() ", [
                 'user_details' => Auth::user(),
                 'response_payload' => $spr_lists
             ]);
-            return view('stockpurchases.auth_spr_lists', compact('spr_lists'));
-        } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('StockPurchaseRequestController | AuthSprLists() Error ' . $unique_id
-            ,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return view('stockpurchases.auth_spr_lists', compact('spr_lists'));
+        }
+
+        $spr_lists = StockPurchaseRequest::where('site_id', '=', $site_id)
+            ->latest('created_at')
+            ->paginate(15);
+
+        Log::info("StockPurchaseRequestController | spr_lists() ", [
+            'user_details' => Auth::user(),
+            'response_payload' => $spr_lists
+        ]);
+
+        return view('stockpurchases.auth_spr_lists', compact('spr_lists'));
+    } catch (\Exception $e) {
+        $unique_id = floor(time() - 999999999);
+        Log::channel('error_log')->error('StockPurchaseRequestController | AuthSprLists() Error ' . $unique_id, [
+            'message' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString()
+        ]);
+
+        return redirect()->back()
+            ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+    }
 }
 
-    }
     public function auth_spr_list_edit($id)
     {
         try {
