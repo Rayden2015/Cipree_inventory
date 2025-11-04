@@ -24,17 +24,30 @@ class LogSuccessfulLogin
      */
     public function handle(object $event)
     {
-        // // Get the ID of the authenticated user
-        // $userId = Auth::id();
-    
-        // // Create a new Login record with the user ID and attempt
-        // Login::create([
-        //     'user_id' => $userId,
-        //     'attempt' => 1,  // Provide a value for 'attempt'
-        // ]);
-    
-        // // Find the user by ID if needed for further logic
-        // $user = User::find($userId);
+        try {
+            // Get the authenticated user from the event
+            $user = $event->user;
+            
+            if ($user) {
+                // Create a new Login record for successful login
+                Login::create([
+                    'user_id' => $user->id,
+                    'attempt' => 1, // 1 for successful login
+                    'site_id' => $user->site_id ?? null,
+                ]);
+                
+                \Log::info('LogSuccessfulLogin | Successful login recorded', [
+                    'user_id' => $user->id,
+                    'user_email' => $user->email,
+                    'login_time' => now()
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('LogSuccessfulLogin | Error logging successful login', [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+        }
     }
     
 }

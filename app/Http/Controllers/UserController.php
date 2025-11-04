@@ -252,14 +252,14 @@ class UserController extends Controller
             $originalUserData = $user->toArray();
 
             // Validate request with proper uniqueness rules
-            try {
-                $request->validate([
-                    'name' => 'required|string|max:255',
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
                     'email' => 'required|email|max:255|unique:users,email,' . $id,
                     'phone' => 'nullable|string|unique:users,phone,' . $id,
                     'staff_id' => 'nullable|string|unique:users,staff_id,' . $id,
-                    'dob' => 'nullable|date',
-                    'address' => 'nullable|string',
+                'dob' => 'nullable|date',
+                'address' => 'nullable|string',
                     'password' => 'nullable|string|min:8',
                     'image' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:10240', // 10MB max
                     'status' => 'nullable|string',
@@ -334,39 +334,39 @@ class UserController extends Controller
             }
 
             // Update user basic information
-            $user->name = $request->name;
-            $user->email = $request->email;
-            $user->dob = $request->dob;
-            $user->address = $request->address;
-            $user->phone = $request->phone;
-            $user->status = $request->status;
-            $user->role_id = $request->role_id;
-            $user->staff_id = $request->staff_id;
-            $user->site_id = $request->site_id;
-            $user->department_id = $request->department_id;
-            $user->section_id = $request->section_id;
-            $user->add_admin = $request->add_admin;
-            $user->add_site_admin = $request->add_site_admin;
-            $user->add_requester = $request->add_requester;
-            $user->add_finance_officer = $request->add_finance_officer;
-            $user->add_store_officer = $request->add_store_officer;
-            $user->add_purchasing_officer = $request->add_purchasing_officer;
-            $user->add_authoriser = $request->add_authoriser;
-            $user->add_store_assistant = $request->add_store_assistant;
-            $user->add_procurement_assistant = $request->add_procurement_assistant;
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->dob = $request->dob;
+        $user->address = $request->address;
+        $user->phone = $request->phone;
+        $user->status = $request->status;
+        $user->role_id = $request->role_id;
+        $user->staff_id = $request->staff_id;
+        $user->site_id = $request->site_id;
+        $user->department_id = $request->department_id;
+        $user->section_id = $request->section_id;
+        $user->add_admin = $request->add_admin;
+        $user->add_site_admin = $request->add_site_admin;
+        $user->add_requester = $request->add_requester;
+        $user->add_finance_officer = $request->add_finance_officer;
+        $user->add_store_officer = $request->add_store_officer;
+        $user->add_purchasing_officer = $request->add_purchasing_officer;
+        $user->add_authoriser = $request->add_authoriser;
+        $user->add_store_assistant = $request->add_store_assistant;
+        $user->add_procurement_assistant = $request->add_procurement_assistant;
             
             // Update password if provided
-            if ($request->filled('password')) {
-                $user->password = Hash::make($request->input('password'));
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->input('password'));
                 Log::info('UserController | update | Password updated', [
                     'user_id' => $id,
                     'updated_by' => $authId
                 ]);
-            }
+        }
 
             // Save user data
             try {
-                $user->save();
+        $user->save();
                 Log::info('UserController | update | User data saved', [
                     'user_id' => $id,
                     'updated_by' => $authId
@@ -391,14 +391,14 @@ class UserController extends Controller
 
             // Sync roles - this will update the user's roles
             try {
-                if ($request->roles) {
+    if ($request->roles) {
                     $user->syncRoles($request->roles);
                     Log::info('UserController | update | Roles synced', [
                         'user_id' => $id,
                         'updated_by' => $authId,
                         'roles' => $request->roles
                     ]);
-                } else {
+    } else {
                     $user->syncRoles([]);
                     Log::info('UserController | update | All roles removed', [
                         'user_id' => $id,
@@ -414,9 +414,9 @@ class UserController extends Controller
                 ]);
                 return redirect()->back()
                     ->withError('User updated but role assignment failed. Please try updating the roles again.');
-            }
-
-            // Handle the image upload if an image is provided
+    }
+    
+        // Handle the image upload if an image is provided
             if ($request->hasFile('image')) {
                 try {
                     // Check if directory exists and is writable
@@ -439,8 +439,8 @@ class UserController extends Controller
                     }
 
                     $imageName = UploadHelper::upload($request->image, 'user-' . $user->id, $uploadDir);
-                    $user->image = $imageName;
-                    $user->save();
+            $user->image = $imageName;
+            $user->save();
                     
                     Log::info('UserController | update | Image uploaded', [
                         'user_id' => $id,
@@ -477,7 +477,7 @@ class UserController extends Controller
             ]);
             return redirect()->back()
                 ->withError('You do not have permission to update users.');
-                
+
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
             Log::channel('error_log')->error('UserController | Update() Error ' . $unique_id, [
@@ -490,11 +490,11 @@ class UserController extends Controller
                 'request_data' => $request->except(['password', 'image'])
             ]);
 
-            // Redirect back with the error message
-            return redirect()->back()
+    // Redirect back with the error message
+    return redirect()->back()
                 ->withInput()
                 ->withError('An unexpected error occurred while updating the user. Please contact the administrator with error ID: ' . $unique_id);
-        }
+}
     }
     public function destroy($id)
     {
@@ -585,8 +585,45 @@ class UserController extends Controller
 
     public static function lastlogin()
     {
-        $authid = Auth::id();
-        $lastlogin = Login::where('user_id', '=', $authid)->latest()->skip(2)->first();
-        return $lastlogin;
+        try {
+            if (!Auth::check()) {
+                return null;
+            }
+            
+            $authid = Auth::id();
+            
+            // Get the previous login (skip current session, get the one before)
+            // The logins table tracks each login, skip(1) gets the PREVIOUS login
+            $lastlogin = Login::where('user_id', '=', $authid)
+                ->where('attempt', '=', 1) // Only successful logins (attempt = 1)
+                ->latest()
+                ->skip(1) // Skip current login, get previous one
+                ->first();
+            
+            // If no previous login found in logins table, create a response with last_login_at
+            if (!$lastlogin) {
+                $user = Auth::user();
+                
+                // Check if user has last_login_at timestamp
+                if ($user->last_login_at) {
+                    // Create a mock Login object for display compatibility
+                    $lastlogin = new \stdClass();
+                    $lastlogin->created_at = $user->last_login_at;
+                    return $lastlogin;
+                }
+                
+                // First time login - no previous login
+                return null;
+            }
+            
+            return $lastlogin;
+        } catch (\Exception $e) {
+            Log::error('UserController | lastlogin() | Error retrieving last login', [
+                'user_id' => Auth::id() ?? 'unknown',
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+            return null;
+        }
     }
 }

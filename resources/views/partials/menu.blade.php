@@ -19,7 +19,7 @@
                 @endforeach
             @endif
         </h6>
-        <h6 style="text-align:center;">Last Login: {{ $lastlogin ? ' ' . $lastlogin->created_at : '' }}</h6>
+        <h6 style="text-align:center;">Last Login: {{ $lastlogin ? \Carbon\Carbon::parse($lastlogin->created_at)->format('d-M-Y H:i') : 'First Login' }}</h6>
 
         {{-- <h6 style="text-align:center; font-weight:bold;">{{ Auth::user()->role->name }}</h6> --}}
     </a>
