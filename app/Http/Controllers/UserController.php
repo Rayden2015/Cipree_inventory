@@ -29,7 +29,7 @@ class UserController extends Controller
     public function __construct() {
         $this->middleware('auth');
         $this->middleware(['auth', 'permission:view-user'])->only('show');
-        $this->middleware(['auth', 'permission:add-user'])->only('create');
+        $this->middleware(['auth', 'permission:add-user'])->only(['create', 'store']); // FIXED: Added store method
         $this->middleware(['auth', 'permission:view-user'])->only('index');
         $this->middleware(['auth', 'permission:edit-user'])->only(['edit', 'update']);
     }
@@ -76,17 +76,53 @@ class UserController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
-                'email' => 'required|email|unique:users,email',
-                'name' => 'required',
-                'dob' => 'nullable',
-                'role_id' => 'nullable',
-                'site_id' => 'nullable',
-                'staff_id' => 'nullable|string|unique:users',
-                'phone' => 'string|nullable|unique:users',
-                'address' => 'nullable',
-                'photo' => 'sometimes|nullable|image|mimes:jpeg,gif,png,jpg|max:9048',
+            // Log user creation attempt
+            Log::info('UserController | store | Attempt started', [
+                'created_by' => Auth::user()->name,
+                'request_data' => $request->except(['password', 'image'])
             ]);
+
+            // Validate request with comprehensive rules
+            try {
+                $request->validate([
+                    'email' => 'required|email|max:255|unique:users,email',
+                    'name' => 'required|string|max:255',
+                    'dob' => 'nullable|date',
+                    'role_id' => 'nullable|integer',
+                    'site_id' => 'required|integer|exists:sites,id', // Site is required
+                    'staff_id' => 'nullable|string|unique:users,staff_id',
+                    'phone' => 'nullable|string|unique:users,phone',
+                    'address' => 'nullable|string|max:500',
+                    'image' => 'sometimes|nullable|image|mimes:jpeg,gif,png,jpg|max:10240', // 10MB
+                    'department_id' => 'nullable|integer|exists:departments,id',
+                    'section_id' => 'nullable|integer|exists:sections,id',
+                    'status' => 'nullable|in:Active,Inactive',
+                ]);
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                Log::warning('UserController | store | Validation failed', [
+                    'created_by' => Auth::user()->name,
+                    'validation_errors' => $e->errors()
+                ]);
+                
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors($e->errors());
+            }
+
+            // Validate roles if provided
+            if ($request->roles) {
+                $validRoles = \App\Models\Role::whereIn('name', $request->roles)->pluck('name')->toArray();
+                if (count($validRoles) !== count($request->roles)) {
+                    $invalidRoles = array_diff($request->roles, $validRoles);
+                    Log::warning('UserController | store | Invalid roles provided', [
+                        'created_by' => Auth::user()->name,
+                        'invalid_roles' => $invalidRoles
+                    ]);
+                    return redirect()->back()
+                        ->withInput()
+                        ->withError('Some selected roles are invalid. Please contact the administrator.');
+                }
+            }
     
             // Generate a random alphanumeric password of length 6
             $password = strtoupper(Str::random(3)) . rand(100, 999);
@@ -97,65 +133,158 @@ class UserController extends Controller
             $user->name = $request->name;
             $user->email = $request->email;
             $user->dob = $request->dob;
-            $user->password = Hash::make($password); // Hash the random password
+            $user->password = Hash::make($password);
             $user->phone = $request->phone;
             $user->address = $request->address;
-            $user->status = $request->status;
+            $user->status = $request->status ?? 'Active'; // Default to Active if not provided
             $user->staff_id = $request->staff_id;
             $user->site_id = $request->site_id;
             $user->role_id = $request->role_id;
             $user->department_id = $request->department_id;
-               $user->section_id = $request->section_id;
-            $user->save();
+            $user->section_id = $request->section_id;
+            
+            // Save user
+            try {
+                $user->save();
+                Log::info('UserController | store | User created in database', [
+                    'user_id' => $user->id,
+                    'created_by' => Auth::user()->name
+                ]);
+            } catch (\Illuminate\Database\QueryException $e) {
+                Log::error('UserController | store | Database error during user creation', [
+                    'created_by' => Auth::user()->name,
+                    'error_code' => $e->getCode(),
+                    'error_message' => $e->getMessage()
+                ]);
+                
+                if ($e->getCode() == '23000') {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withError('A database constraint was violated. Email, phone, or staff ID may already be in use.');
+                }
+                
+                throw $e;
+            }
     
-             // Assign roles to the user
-        if ($request->roles) {
-            foreach ($request->roles as $role) {
-                if (!$user->hasRole($role)) {
-                    $user->assignRole($role);
+            // Assign roles to the user
+            if ($request->roles) {
+                try {
+                    foreach ($request->roles as $role) {
+                        if (!$user->hasRole($role)) {
+                            $user->assignRole($role);
+                        }
+                    }
+                    Log::info('UserController | store | Roles assigned', [
+                        'user_id' => $user->id,
+                        'roles' => $request->roles
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('UserController | store | Role assignment failed', [
+                        'user_id' => $user->id,
+                        'error_message' => $e->getMessage()
+                    ]);
+                    // Continue - user created but roles failed
                 }
             }
-        }
     
-        // Handle the image upload if an image is provided
-        if ($request->image) {
-            $imageName = UploadHelper::upload($request->image, 'user-' . $user->id, 'images/users');
-            $user->image = $imageName;
-            $user->save();
-        }
+            // Handle the image upload if an image is provided
+            if ($request->hasFile('image')) {
+                try {
+                    $uploadDir = 'images/users';
+                    if (!file_exists($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    
+                    $imageName = UploadHelper::upload($request->image, 'user-' . $user->id, $uploadDir);
+                    $user->image = $imageName;
+                    $user->save();
+                    
+                    Log::info('UserController | store | Image uploaded', [
+                        'user_id' => $user->id,
+                        'image_name' => $imageName
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('UserController | store | Image upload failed', [
+                        'user_id' => $user->id,
+                        'error_message' => $e->getMessage()
+                    ]);
+                    // Continue - user created but image upload failed
+                }
+            }
+            
             // Send email to the user with the generated password
-            Mail::to($user->email)->send(new WelcomeMail([
-                'name' => $user->name,
-                'email' => $user->email,
-                'password' => $password, // Pass the generated password to the email template
-            ]));
+            try {
+                Mail::to($user->email)->send(new WelcomeMail([
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'password' => $password,
+                ]));
+                
+                Log::info('UserController | store | Welcome email sent', [
+                    'user_id' => $user->id,
+                    'email' => $user->email
+                ]);
+            } catch (\Exception $e) {
+                Log::warning('UserController | store | Email sending failed', [
+                    'user_id' => $user->id,
+                    'error_message' => $e->getMessage()
+                ]);
+                // Continue - user created but email failed (non-critical)
+            }
     
             // Send SMS to the user
-            $message = "Welcome! Your account is ready. Please login at www.test.cipree.com\nEmail: " . $user->email . "\nPassword: " . $password . "\nThanks - Cipree Team";
-            $smsController = new SMSController();
-            $smsController->sendSms($user->phone, $message);
+            try {
+                if ($user->phone) {
+                    $message = "Welcome! Your account is ready. Please login at www.test.cipree.com\nEmail: " . $user->email . "\nPassword: " . $password . "\nThanks - Cipree Team";
+                    $smsController = new SMSController();
+                    $smsController->sendSms($user->phone, $message);
+                    
+                    Log::info('UserController | store | SMS sent', [
+                        'user_id' => $user->id,
+                        'phone' => $user->phone
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::warning('UserController | store | SMS sending failed', [
+                    'user_id' => $user->id,
+                    'error_message' => $e->getMessage()
+                ]);
+                // Continue - user created but SMS failed (non-critical)
+            }
     
-            Log::info('UserController | store', [
-                'user_details' => auth()->user(),
-                'message' => 'User created successfully.',
-                'request_payload' => $request->all(),
+            Log::info('UserController | store | User created successfully', [
+                'user_id' => $user->id,
+                'created_by' => Auth::user()->name,
+                'user_email' => $user->email
             ]);
     
-            return redirect()->route('users.index')->withSuccess('Successfully Updated');
-        }
-         catch (\Exception $e) {
+            return redirect()->route('users.index')
+                ->withSuccess('User created successfully! Login credentials sent to ' . $user->email);
+                
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            Log::warning('UserController | store | Unauthorized user creation attempt', [
+                'attempted_by' => Auth::user()->id ?? 'guest',
+                'error_message' => $e->getMessage()
+            ]);
+            return redirect()->back()
+                ->withError('You do not have permission to create users.');
+                
+        } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
             Log::channel('error_log')->error('UserController | Store() Error ' . $unique_id, [
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
+                'created_by' => Auth::user()->name ?? 'unknown',
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'stack_trace' => $e->getTraceAsString(),
+                'request_data' => $request->except(['password', 'image'])
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
-       
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withInput()
+                ->withError('An unexpected error occurred while creating the user. Please contact the administrator with error ID: ' . $unique_id);
+        }
     }
 
 
@@ -590,7 +719,7 @@ class UserController extends Controller
                 return null;
             }
             
-            $authid = Auth::id();
+        $authid = Auth::id();
             
             // Get the previous login (skip current session, get the one before)
             // The logins table tracks each login, skip(1) gets the PREVIOUS login
@@ -616,7 +745,7 @@ class UserController extends Controller
                 return null;
             }
             
-            return $lastlogin;
+        return $lastlogin;
         } catch (\Exception $e) {
             Log::error('UserController | lastlogin() | Error retrieving last login', [
                 'user_id' => Auth::id() ?? 'unknown',
