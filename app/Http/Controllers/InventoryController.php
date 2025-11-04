@@ -45,8 +45,8 @@ class InventoryController extends Controller
     public function index()
     {
         $site_id = Auth::user()->site->id;
-        // Fix N+1 query by eager loading supplier, enduser, and deliveredBy relationships
-        $inventories = Inventory::with(['supplier', 'enduser', 'deliveredBy'])
+        // Fix N+1 query by eager loading supplier, enduser, user, and delivery relationships
+        $inventories = Inventory::with(['supplier', 'enduser', 'user', 'delivery'])
             ->where('site_id', '=', $site_id)
             ->latest()
             ->paginate(20);
