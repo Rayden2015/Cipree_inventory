@@ -87,22 +87,26 @@ class StoreRequestController extends Controller
                     'request_payload' => $request
                 ]);
                 $site_id = Auth::user()->site->id;
-                // $inventory = InventoryItem::join('items','items.id','=','inventory_items.item_id')
-                $inventory = Item::join('inventory_items', 'items.id', '=', 'inventory_items.item_id')
-
-                    ->where('items.item_description', 'like', "%" . $request->search . "%")->where('inventory_items.quantity', '>', '0')
-                    ->orWhere('items.item_part_number', 'like', "%" . $request->search . "%")->where('inventory_items.quantity', '>', '0')
-                    ->orWhere('items.item_stock_code', 'like', "%" . $request->search . "%")->where('inventory_items.quantity', '>', '0')
+                
+                // Fix N+1 query by eager loading site relationship and fixing WHERE clause grouping
+                $inventory = Item::with(['site', 'category', 'user'])
+                    ->join('inventory_items', 'items.id', '=', 'inventory_items.item_id')
                     ->where('inventory_items.site_id', '=', $site_id)
+                    ->where('inventory_items.quantity', '>', '0')
+                    ->where(function($query) use ($request) {
+                        $query->where('items.item_description', 'like', "%" . $request->search . "%")
+                            ->orWhere('items.item_part_number', 'like', "%" . $request->search . "%")
+                            ->orWhere('items.item_stock_code', 'like', "%" . $request->search . "%");
+                    })
+                    ->select('items.*', 'inventory_items.quantity', 'inventory_items.id as inventory_item_id')
                     ->get();
 
                 Log::info('StoreRequestController | requester_search() | ', [
                     'user_details' => Auth::user(),
-                    'response' => $inventory
+                    'result_count' => $inventory->count()
                 ]);
 
                 if ($inventory->isEmpty()) {
-
                     return redirect()->back()->withError('Item not in stock', 'Oops');
                 } elseif ($inventory->isNotEmpty()) {
                     return view('purchases.request_search', compact('inventory'));

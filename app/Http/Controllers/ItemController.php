@@ -34,22 +34,21 @@ class ItemController extends Controller
     public function index()
     {
         try {
-
-            // $items = Item::all();
-            $items = Item::orderBy('item_description')->paginate(20);
-            // $items = Item::join('inventory_items','items.id', '=','inventory_items.item_id')->latest('items.created_at')->paginate(20);
+            // Fix N+1 query by eager loading user and category relationships
+            $items = Item::with(['user', 'modified', 'category', 'site'])
+                ->orderBy('item_description')
+                ->paginate(20);
 
             // Log successful user input and request
             Log::info('ItemController| Index() | Items listed', [
                 'user_details' => Auth::user(),
                 'message' => 'Items Listed Successfully',
-                //'itmes' => $items
             ]);
             return view('items.index', compact('items'));
         } catch (\Exception $e) {
             // Log errors
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('HomeController | Index() Error ' . $unique_id, [
+            Log::channel('error_log')->error('ItemController | Index() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
@@ -266,20 +265,28 @@ class ItemController extends Controller
 
     public function item_search(Request $request)
     {
-
         if ($request->search) {
-
-            $items = Item::where('item_description', 'like', "%" . $request->search . "%")
-                ->orWhere('item_part_number', 'like', "%" . $request->search . "%")
-                ->orWhere('item_stock_code', 'like', "%" . $request->search . "%")
-                ->latest()->paginate();
+            // Fix N+1 query by eager loading user and category relationships
+            $items = Item::with(['user', 'modified', 'category', 'site'])
+                ->where(function($query) use ($request) {
+                    $query->where('item_description', 'like', "%" . $request->search . "%")
+                        ->orWhere('item_part_number', 'like', "%" . $request->search . "%")
+                        ->orWhere('item_stock_code', 'like', "%" . $request->search . "%");
+                })
+                ->latest()
+                ->paginate(20);
+                
             if ($items->isEmpty()) {
-
                 return redirect()->back()->withError('Item not found');
             } elseif ($items->isNotEmpty()) {
                 return view('items.index', compact('items'));
             }
-        } else     $items = Item::latest()->paginate(20);
+        } else {
+            // Also eager load for non-search results
+            $items = Item::with(['user', 'modified', 'category', 'site'])
+                ->latest()
+                ->paginate(20);
+        }
 
         return view('items.index', compact('items'));
     }
