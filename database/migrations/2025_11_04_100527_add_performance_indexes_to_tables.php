@@ -18,20 +18,21 @@ return new class extends Migration
             // Index for user_id + status combinations (for user dashboard queries)
             $table->index(['user_id', 'status'], 'idx_orders_user_status');
             
-            // Index for site_id + status + approval_status (for site admin queries)
-            $table->index(['site_id', 'status', 'approval_status'], 'idx_orders_site_status_approval');
-            
-            // Index for approval status queries
+            // Separate indexes for site queries (composite with 3 varchar columns too long)
+            $table->index('site_id', 'idx_orders_site_id');
+            $table->index('status', 'idx_orders_status');
             $table->index('approval_status', 'idx_orders_approval_status');
+            
+            // Composite index with site_id and status only (2 columns)
+            $table->index(['site_id', 'status'], 'idx_orders_site_status');
         });
 
         // Sorders table indexes - for store requests and supply history
         Schema::table('sorders', function (Blueprint $table) {
-            // Index for site_id + status combinations (most common query pattern)
-            $table->index(['site_id', 'status'], 'idx_sorders_site_status');
-            
-            // Index for site_id + approval_status
-            $table->index(['site_id', 'approval_status'], 'idx_sorders_site_approval');
+            // Single column indexes for better compatibility
+            $table->index('site_id', 'idx_sorders_site_id');
+            $table->index('status', 'idx_sorders_status');
+            $table->index('approval_status', 'idx_sorders_approval_status');
             
             // Index for requested_by user queries
             $table->index('requested_by', 'idx_sorders_requested_by');
@@ -180,17 +181,10 @@ return new class extends Migration
 
         // Porders table indexes - for purchase order queries  
         Schema::table('porders', function (Blueprint $table) {
-            // Index for site_id
+            // Single column indexes (avoid composite with multiple varchar columns)
             $table->index('site_id', 'idx_porders_site_id');
-            
-            // Index for status
             $table->index('status', 'idx_porders_status');
-            
-            // Index for approval_status
             $table->index('approval_status', 'idx_porders_approval_status');
-            
-            // Composite index for status queries
-            $table->index(['site_id', 'status'], 'idx_porders_site_status');
         });
     }
 
@@ -204,7 +198,6 @@ return new class extends Migration
             $table->dropIndex('idx_porders_site_id');
             $table->dropIndex('idx_porders_status');
             $table->dropIndex('idx_porders_approval_status');
-            $table->dropIndex('idx_porders_site_status');
         });
 
         Schema::table('porder_parts', function (Blueprint $table) {
@@ -268,8 +261,9 @@ return new class extends Migration
         });
 
         Schema::table('sorders', function (Blueprint $table) {
-            $table->dropIndex('idx_sorders_site_status');
-            $table->dropIndex('idx_sorders_site_approval');
+            $table->dropIndex('idx_sorders_site_id');
+            $table->dropIndex('idx_sorders_status');
+            $table->dropIndex('idx_sorders_approval_status');
             $table->dropIndex('idx_sorders_requested_by');
             $table->dropIndex('idx_sorders_delivered_on');
             $table->dropIndex('idx_sorders_enduser_id');
@@ -278,8 +272,10 @@ return new class extends Migration
 
         Schema::table('orders', function (Blueprint $table) {
             $table->dropIndex('idx_orders_user_status');
-            $table->dropIndex('idx_orders_site_status_approval');
+            $table->dropIndex('idx_orders_site_id');
+            $table->dropIndex('idx_orders_status');
             $table->dropIndex('idx_orders_approval_status');
+            $table->dropIndex('idx_orders_site_status');
         });
     }
 };
