@@ -30,10 +30,30 @@ class EnduserController extends Controller
                 'user_details' => Auth::user(),
                 'message' => 'Fetching endusers.'
             ]);
+            
+            // Fix: Check if user has a site assigned
+            if (!Auth::user()->site) {
+                Log::error('EnduserController | index() | User has no site assigned', [
+                    'user_id' => Auth::user()->id,
+                    'user_email' => Auth::user()->email
+                ]);
+                return redirect()->back()
+                    ->withError('Your account is not assigned to a site. Please contact the administrator.');
+            }
+            
             $site_id = Auth::user()->site->id;
-            $endusers = Enduser::where('site_id','=',$site_id)->latest()->paginate(15);
-            // $endusercategories = EndUsersCategory::all();
-            $endusercategories = Enduser::groupBy('type')->pluck('type');
+            
+            // Fix N+1 query by eager loading department relationship
+            $endusers = Enduser::with(['department', 'section'])
+                ->where('site_id','=',$site_id)
+                ->latest()
+                ->paginate(15);
+            
+            // Fix: Filter categories by site_id
+            $endusercategories = Enduser::where('site_id','=',$site_id)
+                ->groupBy('type')
+                ->pluck('type');
+                
             return view('endusers.index', compact('endusers','endusercategories'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
@@ -42,11 +62,10 @@ class EnduserController extends Controller
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
     public function search(Request $request)

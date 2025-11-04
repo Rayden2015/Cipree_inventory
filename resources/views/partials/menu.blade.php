@@ -35,8 +35,8 @@
                 data-accordion="false">
                 <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
-                <li class="nav-item menu-open">
-                    <a style="background-color: #0e6258" href="{{ route('home') }}" class="nav-link active">
+                <li class="nav-item {{ request()->routeIs('home') ? 'menu-open' : '' }}">
+                    <a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" style="{{ request()->routeIs('home') ? 'background-color: #0e6258' : '' }}">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>
                             Dashboard
@@ -49,9 +49,9 @@
                     {{-- @if (Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'site_admin') --}}
                     @can('company-module')
                     <li
-                        class="nav-item {{ request()->routeIs('company.index', 'users.index', 'reviews.index', 'sites*', 'roles*', 'permissions*', 'uom*','send.bulk.email') ? 'menu-open' : '' }}">
+                        class="nav-item {{ request()->routeIs('company.*', 'users.*', 'reviews.*', 'sites.*', 'roles.*', 'permissions.*', 'uom.*','send.bulk.email') ? 'menu-open' : '' }}">
                         <a href="#"
-                            class="nav-link {{ request()->routeIs('company.index', 'users.index', 'reviews.index', 'sites*', 'roles*', 'permissions*', 'uom*','send.bulk.email') ? 'active' : '' }}">
+                            class="nav-link {{ request()->routeIs('company.*', 'users.*', 'reviews.*', 'sites.*', 'roles.*', 'permissions.*', 'uom.*','send.bulk.email') ? 'active' : '' }}" style="{{ request()->routeIs('company.*', 'users.*', 'reviews.*', 'sites.*', 'roles.*', 'permissions.*', 'uom.*','send.bulk.email') ? 'background-color: #0e6258' : '' }}">
                             <i>
                                 <img src="{{ asset('assets/images/icons/comp.png') }}"width="26" height="26"
                                     alt="" />
@@ -65,7 +65,7 @@
                             @can('info')
                                 <li class="nav-item">
                                     <a href="{{ route('company.index') }}"
-                                        class="nav-link {{ request()->routeIs('company.index') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('company.*') ? 'active' : '' }}" style="{{ request()->routeIs('company.*') ? 'background-color: #0e6258' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Info</p>
                                     </a>
@@ -75,7 +75,7 @@
                             @can('account')
                                 <li class="nav-item">
                                     <a href="{{ route('users.index') }}"
-                                        class="nav-link {{ request()->routeIs('users.index') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" style="{{ request()->routeIs('users.*') ? 'background-color: #0e6258' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Account</p>
                                     </a>
@@ -84,7 +84,7 @@
                             @can('reviews')
                                 <li class="nav-item">
                                     <a href="{{ route('reviews.index') }}"
-                                        class="nav-link {{ request()->routeIs('reviews.index') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('reviews.*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Reviews</p>
                                     </a>
@@ -94,7 +94,7 @@
                             @can('view-site')
                                 <li class="nav-item">
                                     <a href="{{ route('sites.index') }}"
-                                        class="nav-link {{ request()->routeIs('sites.index') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('sites.*') ? 'active' : '' }}" style="{{ request()->routeIs('sites.*') ? 'background-color: #0e6258' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Sites</p>
                                     </a>
@@ -104,7 +104,7 @@
                             @can('bulk-mails')
                             <li class="nav-item">
                                 <a href="{{ route('send.bulk.email') }}"
-                                    class="nav-link {{ request()->routeIs('send.bulk.email') ? 'active' : '' }}">
+                                    class="nav-link {{ request()->routeIs('send.bulk.email*') ? 'active' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Bulk Emails</p>
                                 </a>
@@ -114,7 +114,7 @@
                             @can('view-uom')
                                 <li class="nav-item">
                                     <a href="{{ route('uom.index') }}"
-                                        class="nav-link {{ request()->routeIs('uom.index') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('uom.*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>UoM</p>
                                     </a>
@@ -124,7 +124,7 @@
                             @can('view-role')
                                 <li class="nav-item">
                                     <a href="{{ route('roles.index') }}"
-                                        class="nav-link {{ request()->routeIs('roles.index') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('roles.*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Roles</p>
                                     </a>
@@ -134,7 +134,7 @@
                             @can('view-permission')
                                 <li class="nav-item">
                                     <a href="{{ route('permissions.index') }}"
-                                        class="nav-link {{ request()->routeIs('permissions.index') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('permissions.*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Permissions</p>
                                     </a>
@@ -167,7 +167,7 @@
 
                             <li class="nav-item">
                                 <a href="{{ route('employees.index') }}"
-                                    class="nav-link {{ request()->routeIs('employees.index') ? 'active' : '' }}">
+                                    class="nav-link {{ request()->routeIs('employees.*') ? 'active' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Employees</p>
                                 </a>
@@ -184,8 +184,8 @@
                 {{-- endusers tab --}}
                 {{-- @if (Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'site_admin') --}}
                 @can('endusers-module')
-                    <li class="nav-item {{ request()->routeIs('endusers.index') ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ request()->routeIs('endusers.index') ? 'active' : '' }}">
+                    <li class="nav-item {{ request()->routeIs('endusers.*') || request()->is('endusersearch*', 'endusersort*', 'enduser_show*') ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ request()->routeIs('endusers.*') || request()->is('endusersearch*', 'endusersort*', 'enduser_show*') ? 'active' : '' }}" style="{{ request()->routeIs('endusers.*') || request()->is('endusersearch*', 'endusersort*', 'enduser_show*') ? 'background-color: #0e6258' : '' }}">
                             <i>
                                 <img src="{{ asset('assets/images/icons/enduser.jpg') }}"width="26" height="26"
                                     alt="" />
@@ -199,7 +199,7 @@
 
                             <li class="nav-item">
                                 <a href="{{ route('endusers.index') }}"
-                                    class="nav-link {{ request()->routeIs('endusers.index') ? 'active' : '' }}">
+                                    class="nav-link {{ request()->routeIs('endusers.*') || request()->is('endusersearch*', 'endusersort*', 'enduser_show*') ? 'active' : '' }}" style="{{ request()->routeIs('endusers.*') || request()->is('endusersearch*', 'endusersort*', 'enduser_show*') ? 'background-color: #0e6258' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Endusers</p>
                                 </a>
@@ -216,8 +216,8 @@
                 {{-- suppliers tab --}}
                 {{-- @if (Auth::user()->role->name == 'admin') --}}
                 @can('suppliers-module')
-                    <li class="nav-item {{ request()->routeIs('suppliers.index') ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ request()->routeIs('suppliers.index') ? 'active' : '' }}">
+                    <li class="nav-item {{ request()->routeIs('suppliers.*') || request()->is('supplier_search*') ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ request()->routeIs('suppliers.*') || request()->is('supplier_search*') ? 'active' : '' }}" style="{{ request()->routeIs('suppliers.*') || request()->is('supplier_search*') ? 'background-color: #0e6258' : '' }}">
                             <i>
                                 <img src="{{ asset('assets/images/icons/supplier.png') }}" width="26" height="26"
                                     alt="" />
@@ -230,7 +230,7 @@
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="{{ route('suppliers.index') }}"
-                                    class="nav-link {{ request()->routeIs('suppliers.index') ? 'active' : '' }}">
+                                    class="nav-link {{ request()->routeIs('suppliers.*') || request()->is('supplier_search*') ? 'active' : '' }}" style="{{ request()->routeIs('suppliers.*') || request()->is('supplier_search*') ? 'background-color: #0e6258' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Suppliers</p>
                                 </a>
@@ -245,9 +245,9 @@
                 {{-- @if (Auth::user()->role->name == 'store_officer' || Auth::user()->role->name == 'store_assistant' || Auth::user()->role->name == 'site_admin') --}}
                 @can('inventory-management-module')
                     <li
-                        class="nav-item {{ request()->is('items*', 'locations*', 'stores*', 'inventories*', 'categories*', 'spr_lists*', 'auth_spr_lists*','itemspersite','product_history','product_history_show*') ? 'menu-open' : '' }}">
+                        class="nav-item {{ request()->is('items*', 'locations*', 'stores*', 'inventories*', 'categories*', 'spr_*', 'auth_spr_*', 'itemspersite*', 'product_history*', 'store_officer_*', 'store_list_*', 'item_search*', 'inventory_*') || request()->routeIs('items.*', 'locations.*', 'stores.*', 'inventories.*', 'categories.*') ? 'menu-open' : '' }}">
                         <a href="#"
-                            class="nav-link {{ request()->is('items*', 'locations*', 'stores*', 'inventories*', 'categories*', 'spr_lists*', 'auth_spr_lists*','itemspersite','product_history','product_history_show*') ? 'active' : '' }}">
+                            class="nav-link {{ request()->is('items*', 'locations*', 'stores*', 'inventories*', 'categories*', 'spr_*', 'auth_spr_*', 'itemspersite*', 'product_history*', 'store_officer_*', 'store_list_*', 'item_search*', 'inventory_*') || request()->routeIs('items.*', 'locations.*', 'stores.*', 'inventories.*', 'categories.*') ? 'active' : '' }}" style="{{ request()->is('items*', 'locations*', 'stores*', 'inventories*', 'categories*', 'spr_*', 'auth_spr_*', 'itemspersite*', 'product_history*', 'store_officer_*', 'store_list_*', 'item_search*', 'inventory_*') || request()->routeIs('items.*', 'locations.*', 'stores.*', 'inventories.*', 'categories.*') ? 'background-color: #0e6258' : '' }}">
                             <i>
                                 <img src="{{ asset('assets/images/icons/invmanagement.png') }}" width="26"
                                     height="26" alt="" />
@@ -262,7 +262,7 @@
                             @can('view-item')
                                 <li class="nav-item">
                                     <a href="{{ route('items.index') }}"
-                                        class="nav-link {{ request()->routeIs('items.index') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('items.*') || request()->is('item_search*', 'product_history*', 'itemspersite*') ? 'active' : '' }}" style="{{ request()->routeIs('items.*') || request()->is('item_search*', 'product_history*', 'itemspersite*') ? 'background-color: #0e6258' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Items</p>
                                     </a>
@@ -283,7 +283,7 @@
                             @can('item-history')
                             <li class="nav-item">
                                 <a href="{{ route('product_history') }}"
-                                    class="nav-link {{ request()->routeIs('product_history') ? 'active' : '' }}">
+                                    class="nav-link {{ request()->routeIs('product_history*') || request()->is('product_history*') ? 'active' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Item History</p>
                                 </a>
@@ -295,7 +295,7 @@
                             @can('view-location')
                                 <li class="nav-item">
                                     <a href="{{ route('locations.index') }}"
-                                        class="nav-link {{ request()->routeIs('locations.index') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('locations.*') ? 'active' : '' }}" style="{{ request()->routeIs('locations.*') ? 'background-color: #0e6258' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Location</p>
                                     </a>
@@ -306,7 +306,7 @@
                             @can('stock-request-lists')
                                 <li class="nav-item">
                                     <a href="{{ route('stores.store_officer_lists') }}"
-                                        class="nav-link {{ request()->routeIs('stores.store_officer_lists') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('stores.store_officer_lists') || request()->is('store_officer_edit*', 'store_list_edit*', 'store_list_view*') ? 'active' : '' }}" style="{{ request()->routeIs('stores.store_officer_lists') || request()->is('store_officer_edit*', 'store_list_edit*', 'store_list_view*') ? 'background-color: #0e6258' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Stock Request Lists</p>
                                     </a>
@@ -315,7 +315,7 @@
                             @can('add-grn')
                                 <li class="nav-item">
                                     <a href="{{ route('inventories.create') }}"
-                                        class="nav-link {{ request()->routeIs('inventories.create') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('inventories.create', 'inventories.store') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Add GRN</p>
                                     </a>
@@ -326,7 +326,7 @@
                             @can('view-item-group')
                                 <li class="nav-item">
                                     <a href="{{ route('categories.index') }}"
-                                        class="nav-link {{ request()->routeIs('categories.index') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}" style="{{ request()->routeIs('categories.*') ? 'background-color: #0e6258' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Item Group</p>
                                     </a>
@@ -337,7 +337,7 @@
                             @can('stock-purchase-requests')
                                 <li class="nav-item">
                                     <a href="{{ route('spr_lists') }}"
-                                        class="nav-link {{ request()->routeIs('spr_lists') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('spr_lists') || request()->is('spr_*', 'store_officer_spr_*', 'so_spr_*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Stock Purchase Requests</p>
                                     </a>
@@ -348,7 +348,7 @@
                             @can('authoriser-stock-purchase-requests')
                                 <li class="nav-item">
                                     <a href="{{ route('auth_spr_lists') }}"
-                                        class="nav-link {{ request()->routeIs('auth_spr_lists') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('auth_spr_lists') || request()->is('auth_spr_*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Stock Purchase Requests</p>
                                     </a>
@@ -364,9 +364,9 @@
                 {{-- navigate --}}
                 @can('navigate-module')
                     <li
-                        class="nav-item {{ request()->routeIs('purchases.purchase_list', 'sorders.store_lists', 'auth_spr_lists', 'purchases.all_requests', 'purchases.req_all', 'inventories.inventory_item_history', 'stores.supply_history', 'authorise.all_requests', 'inventories.inventory_item_history', 'stores.supply_history', 'stores.requester_store_lists', 'stores.store_officer_lists', 'purchases.drafts', 'inventories.index', 'po_spr_lists', 'spr_pos') ? 'menu-open' : '' }}">
+                        class="nav-item {{ request()->routeIs('purchases.*', 'sorders.*', 'auth_spr_lists', 'authorise.*', 'stores.*', 'po_spr_lists', 'spr_pos*') || request()->is('purchase_*', 'all_requests*', 'req_all*', 'inventory_history*', 'supply_history*', 'requester_store_*', 'store_officer_*', 'drafts*', 'po_spr_*', 'spr_pos*', 'generatePDF*', 'generatesorderPDF*') ? 'menu-open' : '' }}">
                         <a href="#"
-                            class="nav-link {{ request()->routeIs('sorders.store_lists', 'auth_spr_lists', 'purchases.all_requests', 'purchases.purchase_list', 'purchases.req_all', 'inventories.inventory_item_history', 'stores.supply_history', 'authorise.all_requests', 'inventories.inventory_item_history', 'stores.supply_history', 'stores.requester_store_lists', 'stores.store_officer_lists', 'purchases.drafts', 'inventories.index', 'po_spr_lists', 'spr_pos') ? 'active' : '' }}">
+                            class="nav-link {{ request()->routeIs('purchases.*', 'sorders.*', 'auth_spr_lists', 'authorise.*', 'stores.*', 'po_spr_lists', 'spr_pos*') || request()->is('purchase_*', 'all_requests*', 'req_all*', 'inventory_history*', 'supply_history*', 'requester_store_*', 'store_officer_*', 'drafts*', 'po_spr_*', 'spr_pos*', 'generatePDF*', 'generatesorderPDF*') ? 'active' : '' }}" style="{{ request()->routeIs('purchases.*', 'sorders.*', 'auth_spr_lists', 'authorise.*', 'stores.*', 'po_spr_lists', 'spr_pos*') || request()->is('purchase_*', 'all_requests*', 'req_all*', 'inventory_history*', 'supply_history*', 'requester_store_*', 'store_officer_*', 'drafts*', 'po_spr_*', 'spr_pos*', 'generatePDF*', 'generatesorderPDF*') ? 'background-color: #0e6258' : '' }}">
                             <i>
                                 <img src="{{ asset('assets/images/icons/purchasing.png') }}" width="26"
                                     height="26" alt="" />
@@ -382,7 +382,7 @@
                             @can('authoriser-request-lists')
                                 <li class="nav-item">
                                     <a href="{{ route('authorise.all_requests') }}"
-                                        class="nav-link {{ request()->routeIs('authorise.all_requests') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('authorise.*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Request Lists</p>
                                     </a>
@@ -392,7 +392,7 @@
                             @can('authoriser-purchase-lists')
                                 <li class="nav-item">
                                     <a href="{{ route('purchases.purchase_list') }}"
-                                        class="nav-link {{ request()->routeIs('purchases.purchase_list') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('purchases.purchase_list') || request()->is('purchase_list*', 'purchase_edit*', 'showlist*', 'editlist*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Purchase Lists</p>
                                     </a>
@@ -402,7 +402,7 @@
                             @can('authoriser-stock-requests')
                                 <li class="nav-item">
                                     <a href="{{ route('sorders.store_lists') }}"
-                                        class="nav-link {{ request()->routeIs('sorders.store_lists') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('sorders.*') || request()->is('stores/approved_status*', 'stores/denied_status*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Stock Requests</p>
                                     </a>
@@ -412,7 +412,7 @@
                             @can('authoriser-stock-purchase-requests')
                                 <li class="nav-item">
                                     <a href="{{ route('auth_spr_lists') }}"
-                                        class="nav-link {{ request()->routeIs('auth_spr_lists') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('auth_spr_lists') || request()->is('auth_spr_*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Stock Purchase Requests</p>
                                     </a>
@@ -423,7 +423,7 @@
                             @can('request-lists')
                                 <li class="nav-item">
                                     <a href="{{ route('purchases.all_requests') }}"
-                                        class="nav-link {{ request()->routeIs('purchases.all_requests') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('purchases.all_requests', 'purchases.req_all', 'purchases.requested', 'purchases.initiated', 'purchases.approved', 'purchases.ordered', 'purchases.delivered') || request()->is('req_all*', 'all_requests*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p> Request Lists</p>
                                     </a>
@@ -432,7 +432,7 @@
                             @can('purchase-lists')
                                 <li class="nav-item">
                                     <a href="{{ route('purchases.purchase_list') }}"
-                                        class="nav-link {{ request()->routeIs('purchases.purchase_list') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('purchases.purchase_list') || request()->is('purchase_list*', 'purchase_edit*', 'showlist*', 'editlist*', 'generatePDF*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p> Purchase Lists</p>
                                     </a>
@@ -444,7 +444,7 @@
                             @can('purchase-requests')
                                 <li class="nav-item">
                                     <a href="{{ route('purchases.req_all') }}"
-                                        class="nav-link {{ request()->routeIs('purchases.req_all') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('purchases.req_all', 'purchases.requested', 'purchases.initiated', 'purchases.approved', 'purchases.ordered', 'purchases.delivered') || request()->is('req_all*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p> Purchase Requests</p>
                                     </a>
@@ -455,7 +455,7 @@
                             @can('received-history')
                                 <li class="nav-item">
                                     <a href="{{ route('inventories.inventory_item_history') }}"
-                                        class="nav-link {{ request()->routeIs('inventories.inventory_item_history') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('inventories.inventory_item_history') || request()->is('inventory_history*', 'inventory_item_history*') ? 'active' : '' }}" style="{{ request()->routeIs('inventories.inventory_item_history') || request()->is('inventory_history*', 'inventory_item_history*') ? 'background-color: #0e6258' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p> Received History</p>
                                     </a>
@@ -464,7 +464,7 @@
                             @can('supply-history')
                                 <li class="nav-item">
                                     <a href="{{ route('stores.supply_history') }}"
-                                        class="nav-link {{ request()->routeIs('stores.supply_history') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('stores.supply_history') || request()->is('supply_history*') ? 'active' : '' }}" style="{{ request()->routeIs('stores.supply_history') || request()->is('supply_history*') ? 'background-color: #0e6258' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p> Supply History</p>
                                     </a>
@@ -475,7 +475,7 @@
                             @can('requester-stock-requests')
                                 <li class="nav-item">
                                     <a href="{{ route('stores.requester_store_lists') }}"
-                                        class="nav-link {{ request()->routeIs('stores.requester_store_lists') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('stores.requester_store_lists') || request()->is('requester_store_*', 'requester_edit*') ? 'active' : '' }}" style="{{ request()->routeIs('stores.requester_store_lists') || request()->is('requester_store_*', 'requester_edit*') ? 'background-color: #0e6258' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Stock Requests</p>
                                     </a>
@@ -521,7 +521,7 @@
                             @can('direct-purchase-requests')
                                 <li class="nav-item">
                                     <a href="{{ route('authorise.all_requests') }}"
-                                        class="nav-link {{ request()->routeIs('authorise.all_requests') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('authorise.*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p> Direct Purchase Requests</p>
                                     </a>
@@ -532,7 +532,7 @@
                             @can('direct-purchase-requests')
                                 <li class="nav-item">
                                     <a href="{{ route('purchases.purchase_list') }}"
-                                        class="nav-link {{ request()->routeIs('purchases.purchase_list') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('purchases.purchase_list') || request()->is('purchase_list*', 'purchase_edit*', 'showlist*', 'editlist*', 'generatePDF*', 'generatePurchaseOrderPDF*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Direct Purchase Orders</p>
                                     </a>
@@ -543,7 +543,7 @@
                             @can('stock-purchase-requests')
                                 <li class="nav-item">
                                     <a href="{{ route('po_spr_lists') }}"
-                                        class="nav-link {{ request()->routeIs('po_spr_lists') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('po_spr_lists') || request()->is('po_spr_*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Stock Purchase Requests</p>
                                     </a>
@@ -555,7 +555,7 @@
                             @can('stock-purchase-orders')
                                 <li class="nav-item">
                                     <a href="{{ route('purchases.purchase_list') }}"
-                                        class="nav-link {{ request()->routeIs('purchases.purchase_list') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('purchases.purchase_list') || request()->is('purchase_list*', 'purchase_edit*', 'showlist*', 'editlist*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Stock Purchase Orders</p>
                                     </a>
@@ -567,7 +567,7 @@
                             @can('draft-purchase-orders')
                                 <li class="nav-item">
                                     <a href="{{ route('purchases.drafts') }}"
-                                        class="nav-link {{ request()->routeIs('purchases.drafts') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('purchases.drafts') || request()->is('drafts*', 'save_draft*', 'purchase_order_draft*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Draft Purchase Orders</p>
                                     </a>
@@ -579,7 +579,7 @@
                             @can('stock-purchase-request-pos')
                                 <li class="nav-item">
                                     <a href="{{ route('spr_pos') }}"
-                                        class="nav-link {{ request()->routeIs('spr_pos') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('spr_pos*') || request()->is('spr_pos*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Stock Purchase Request POs</p>
                                     </a>
@@ -591,7 +591,7 @@
                             @can('view-grn')
                                 <li class="nav-item">
                                     <a href="{{ route('inventories.index') }}"
-                                        class="nav-link {{ request()->routeIs('inventories.index') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('inventories.index', 'inventories.show', 'inventories.edit') || request()->is('generateinventoryPDF*') ? 'active' : '' }}" style="{{ request()->routeIs('inventories.index', 'inventories.show', 'inventories.edit') || request()->is('generateinventoryPDF*') ? 'background-color: #0e6258' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>GRN</p>
                                     </a>
@@ -607,9 +607,9 @@
                 {{-- @if (Auth::user()->role->name == 'site_admin' || Auth::user()->role->name == 'purchasing_officer') --}}
                 @can('purchase-management-module')
                     <li
-                        class="nav-item  {{ request()->routeIs('suppliers.index', 'taxes.index', 'levies.index', 'items.index') ? 'menu-open' : '' }}">
+                        class="nav-item {{ request()->routeIs('taxes.*', 'levies.*') ? 'menu-open' : '' }}">
                         <a href="#"
-                            class="nav-link {{ request()->routeIs('suppliers.index', 'taxes.index', 'levies.index', 'items.index') ? 'active' : '' }}">
+                            class="nav-link {{ request()->routeIs('taxes.*', 'levies.*') ? 'active' : '' }}" style="{{ request()->routeIs('taxes.*', 'levies.*') ? 'background-color: #0e6258' : '' }}">
                             <i>
                                 <img src="{{ asset('assets/images/icons/pm.jpg') }}" width="26" height="26"
                                     alt="" />
@@ -620,54 +620,31 @@
                             </p>
                         </a>
                         <ul class="nav nav-treeview">
-                            {{-- authoriser module --}}
-                            @can('view-supplier')
-                                <li class="nav-item">
-                                    <a href="{{ route('suppliers.index') }}"
-                                        class="nav-link {{ request()->routeIs('suppliers.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Suppliers/Vendors</p>
-                                    </a>
-                                </li>
-                            @endcan
-                        </ul>
-                        {{-- @if (Auth::user()->role->name == 'purchasing_officer') --}}
-                        <ul class="nav nav-treeview">
-                            {{-- authoriser module --}}
-                            @can('view-item')
-                                <li class="nav-item">
-                                    <a href="{{ route('items.index') }}"
-                                        class="nav-link {{ request()->routeIs('items.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Items/Parts</p>
-                                    </a>
-                                </li>
-                            @endcan
-                        </ul>
-                        {{-- @endif --}}
-                        {{-- @if (Auth::user()->role->name == 'purchasing_officer') --}}
-                        <ul class="nav nav-treeview">
-                            {{-- authoriser module --}}
+                            {{-- Note: Suppliers is in standalone menu, not duplicated here --}}
+                            {{-- Removed duplicate Items/Parts - use "Items" under Inventory Management instead --}}
+                            
+                            {{-- Levies --}}
                             @can('view-levy')
                                 <li class="nav-item">
                                     <a href="{{ route('taxes.index') }}"
-                                        class="nav-link {{ request()->routeIs('taxes.index') ? ' active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('taxes.*') ? 'active' : '' }}" style="{{ request()->routeIs('taxes.*') ? 'background-color: #0e6258' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Levies </p>
+                                        <p>Levies</p>
                                     </a>
                                 </li>
                             @endcan
+                            
+                            {{-- Taxes --}}
                             @can('view-tax')
                                 <li class="nav-item">
                                     <a href="{{ route('levies.index') }}"
-                                        class="nav-link {{ request()->routeIs('levies.index') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('levies.*') ? 'active' : '' }}" style="{{ request()->routeIs('levies.*') ? 'background-color: #0e6258' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p> Taxes</p>
+                                        <p>Taxes</p>
                                     </a>
                                 </li>
                             @endcan
                         </ul>
-                        {{-- @endif --}}
 
                     </li>
                     {{-- @endif --}}
@@ -675,8 +652,8 @@
                 {{-- end purchase model  --}}
                 {{-- reports --}}
                 @can('reports-module')
-                    <li class="nav-item {{ request()->routeIs('monthlyreport') ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ request()->routeIs('monthlyreport') ? 'active' : '' }}">
+                    <li class="nav-item {{ request()->routeIs('monthlyreport*') || request()->is('monthlyreport*') ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ request()->routeIs('monthlyreport*') || request()->is('monthlyreport*') ? 'active' : '' }}">
                             <i>
                                 <img src="{{ asset('assets/images/icons/reports.jpg') }}" width="26" height="26"
                                     alt="" />
@@ -692,7 +669,7 @@
                             @can('monthly-reports')
                                 <li class="nav-item">
                                     <a href="{{ route('monthlyreport') }}"
-                                        class="nav-link {{ request()->routeIs('monthlyreport') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('monthlyreport*') || request()->is('monthlyreport*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Monthly Reports</p>
                                     </a>
@@ -710,7 +687,7 @@
             {{--  --}}
 
             <a href="{{ route('myaccounts.index') }}"
-                class="nav-link {{ request()->routeIs('myaccounts.index') ? 'active' : '' }}">
+                class="nav-link {{ request()->routeIs('myaccounts.*') || request()->is('myaccounts*') ? 'active' : '' }}">
                 <i>
                     <img src="{{ asset('assets/images/icons/myaccount.png') }}" width="26" height="26"
                         alt="" />
@@ -718,7 +695,7 @@
                 <span>My Account</span>
             </a>
 
-            <a href="{{ route('logout') }}" class="nav-link {{ request()->routeIs('logout') ? 'active' : '' }}">
+            <a href="{{ route('logout') }}" class="nav-link">
                 <i>
                     <img src="{{ asset('assets/images/icons/logout.jpg') }}" width="26" height="26"
                         alt="" />

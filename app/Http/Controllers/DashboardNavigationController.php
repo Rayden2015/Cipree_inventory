@@ -295,8 +295,13 @@ return redirect()->back()
             'message' => 'Fetching SO officer stock request pending.'
          ]);
          $site_id = Auth::user()->site->id;
-         $sofficer_stock_request_pending = Sorder::where('site_id', '=', $site_id)->where('status', '!=', 'Supplied')->where('status', '!=', 'Partially Supplied')
-            ->latest()->paginate(15);
+         // Fix N+1 query by eager loading enduser relationship
+         $sofficer_stock_request_pending = Sorder::with(['enduser', 'request_by', 'user'])
+            ->where('site_id', '=', $site_id)
+            ->where('status', '!=', 'Supplied')
+            ->where('status', '!=', 'Partially Supplied')
+            ->latest()
+            ->paginate(15);
 
          return view('homepages.sofficer_stock_request_pending', compact('sofficer_stock_request_pending'));
       } catch (\Exception $e) {

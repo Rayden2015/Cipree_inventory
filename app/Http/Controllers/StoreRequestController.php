@@ -392,9 +392,11 @@ class StoreRequestController extends Controller
 
     public function store_list_view($id)
     {
-        $sorder = Sorder::find($id);
+        // Fix N+1 query by eager loading relationships
+        $sorder = Sorder::with(['enduser', 'request_by', 'user'])->find($id);
         $company = Company::first();
-        $sorder_parts = SorderPart::where('sorder_id', '=', $id)->get();
+        // Eager load item relationship to prevent N+1 queries
+        $sorder_parts = SorderPart::with(['item', 'inventoryItem.location'])->where('sorder_id', '=', $id)->get();
         // Calculate the total amount from sorder_parts
         $total_amount = $sorder_parts->sum('sub_total');
 
@@ -745,10 +747,15 @@ class StoreRequestController extends Controller
     {
         try {
             $site_id = Auth::user()->site->id;
-            $officer_lists = Sorder::where('approval_status', '=', 'approved')->where('site_id', '=', $site_id)->latest('id')->paginate(15);
+            // Fix N+1 query by eager loading user relationships
+            $officer_lists = Sorder::with(['enduser', 'request_by', 'user'])
+                ->where('approval_status', '=', 'approved')
+                ->where('site_id', '=', $site_id)
+                ->latest('id')
+                ->paginate(15);
             Log::info('StoreRequestController | store_officer_lists()', [
                 'user_details' => Auth::user(),
-                'response_payload' => $officer_lists
+                'result_count' => $officer_lists->total()
             ]);
             return view('stores.officer_lists', compact('officer_lists'));
         } catch (\Exception $e) {
@@ -974,22 +981,26 @@ class StoreRequestController extends Controller
     {
         try {
             $site_id = Auth::user()->site->id;            
+            // Fix N+1 queries by eager loading all necessary relationships
             $total_cost_of_parts_within_the_month = SorderPart::with([
                 'sorder' => function ($query) use ($site_id) {
                     $query->where('site_id', $site_id)
                           ->whereIn('status', ['Supplied', 'Partially Supplied']);
                 },
-                'item', // Ensure item relationship is defined
-                'inventoryItem.inventory' // Ensure inventory relationship is defined
+                'sorder.enduser', // Eager load enduser relationship
+                'item', // Eager load item relationship
+                'inventoryItem.inventory', // Eager load inventory relationship
+                'inventoryItem.location' // Eager load location relationship
             ])
             ->where('sorder_parts.site_id', $site_id) // Ensure filtering by site_id in sorder_parts
             ->join('sorders', 'sorder_parts.sorder_id', '=', 'sorders.id') // Join with sorders
+            ->whereIn('sorders.status', ['Supplied', 'Partially Supplied']) // Add status filter in join
             ->orderBy('sorders.delivered_on', 'desc') // Order by delivered_on in descending order
             ->select('sorder_parts.*') // Select only columns from sorder_parts
             ->paginate(100);
             
 
-            Log::info("StoreReqquestController | store_officer_update() | Sorder before edit", [
+            Log::info("StoreReqquestController | supply_history() | Supply history loaded", [
                 'user_details' => Auth::user(),
                 'response_message' => 'Supply history displayed succesfully'
             ]);
@@ -1021,8 +1032,14 @@ class StoreRequestController extends Controller
     
             $site_id = Auth::user()->site->id;
     
-            // Initialize the query with joins and base conditions
-            $query = SorderPart::with(['item_details', 'location', 'sorder', 'sorder.inventory'])
+            // Initialize the query with eager loading to prevent N+1 queries
+            $query = SorderPart::with([
+                    'item_details', 
+                    'location', 
+                    'sorder.enduser', // Eager load enduser to prevent N+1
+                    'sorder.inventory',
+                    'inventoryItem.inventory' // Eager load inventory relationship
+                ])
                 ->leftjoin('sorders', 'sorders.id', '=', 'sorder_parts.sorder_id')
                 ->leftjoin('items', 'items.id', '=', 'sorder_parts.item_id')
                 ->leftjoin('endusers', 'sorders.enduser_id', '=', 'endusers.id')
@@ -1033,7 +1050,7 @@ class StoreRequestController extends Controller
                 ->whereIn('sorders.status', ['Supplied', 'Partially Supplied'])
                 ->select(
                     'sorder_parts.id', 
-                    'sorders.id as sorder_id',
+                    'sorder_parts.sorder_id',
                     'items.item_description', 
                     'items.item_part_number', 
                     'items.item_stock_code', 
@@ -1044,7 +1061,8 @@ class StoreRequestController extends Controller
                     'sorders.enduser_id',
                     'sorders.delivered_on',
                     'inventory_items.location_id',
-                    'inventory_items.inventory_id' 
+                    'inventory_items.inventory_id',
+                    'sorder_parts.inventory_id as sp_inventory_id' // Add alias to avoid conflicts
                 );
     
             // Apply search filter if present
@@ -1159,10 +1177,15 @@ class StoreRequestController extends Controller
         try {
             $site_id = Auth::user()->site->id;
             $auth = Auth::id();
-            $requester_store_lists = Sorder::where('requested_by', '=', $auth)->where('site_id', '=', $site_id)->latest()->paginate(15);
+            // Fix N+1 query by eager loading user and enduser relationships
+            $requester_store_lists = Sorder::with(['enduser', 'request_by', 'user'])
+                ->where('requested_by', '=', $auth)
+                ->where('site_id', '=', $site_id)
+                ->latest()
+                ->paginate(15);
             Log::info("StoreReqquestController | requester_store_lists() ", [
                 'user_details' => Auth::user(),
-                'response_payload' => $requester_store_lists
+                'result_count' => $requester_store_lists->total()
             ]);
             return view('stores.requester_store_lists', compact('requester_store_lists'));
         } catch (\Exception $e) {
@@ -1392,19 +1415,20 @@ class StoreRequestController extends Controller
     public function authoriser_store_list_view_dash($id)
     {
         try {
-            $sorder = Sorder::find($id);
+            // Fix N+1 query by eager loading relationships
+            $sorder = Sorder::with(['enduser', 'request_by', 'user'])->find($id);
             $company = Company::first();
-            $sorder_parts = SorderPart::where('sorder_id', '=', $id)->get();
+            // Eager load item relationship to prevent N+1 queries
+            $sorder_parts = SorderPart::with(['item', 'inventoryItem.location'])->where('sorder_id', '=', $id)->get();
             $total_amount = $sorder_parts->sum('sub_total');
 
             // Update the total column of the Sorder record
             $sorder->total = $total_amount;
 
             $sorder->save();
-            Log::info("StoreReqquestController | store_officer_update() ", [
+            Log::info("StoreReqquestController | authoriser_store_list_view_dash() ", [
                 'user_details' => Auth::user(),
-                'response_message' => 'Authoriser Store List View Dashboard Successfully',
-                //'response_payload' => $purchase
+                'response_message' => 'Authoriser Store List View Dashboard Successfully'
             ]);
             return view('stores.authoriser_store_list_view', compact('sorder', 'sorder_parts', 'company'));
         } catch (\Exception $e) {

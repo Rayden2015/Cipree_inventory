@@ -55,44 +55,91 @@ class LoginController extends Controller
 
   protected function credentials(Request $request)
   {
-
-
-
-
+    // Fix: Always check status for both phone and email login
+    $credentials = [];
+    
     if (is_numeric($request->get('email'))) {
-      return ['phone' => $request->get('email'), 'password' => $request->get('password'), 'status' => 'Active'];
-    } elseif (filter_var($request->get('email'))) {
-      return ['email' => $request->get('email'), 'password' => $request->get('password')];
+      // Phone login
+      $credentials = [
+        'phone' => $request->get('email'), 
+        'password' => $request->get('password'), 
+        'status' => 'Active'
+      ];
+    } elseif (filter_var($request->get('email'), FILTER_VALIDATE_EMAIL)) {
+      // Email login - NOW checks status
+      $credentials = [
+        'email' => $request->get('email'), 
+        'password' => $request->get('password'), 
+        'status' => 'Active'
+      ];
+    } else {
+      // Fallback
+      $credentials = $request->only($this->username(), 'password');
+      $credentials['status'] = 'Active';
     }
-    return $request->only($this->username(), 'password');
-    $email = $request->get('email');
-    $data = (['email' => $request->get('email'),
+    
+    Log::info('LoginController | credentials() | Credentials prepared', [
+      'login_method' => is_numeric($request->get('email')) ? 'phone' : 'email',
+      'identifier' => $request->get('email')
     ]);
-    Mail::to($email)->send(new WelcomeMail($data));
-    Mail::to($email)->send(new LoggedinMail($request));
+    
+    return $credentials;
+  }
 
+  /**
+   * Override the login method to add status checking
+   */
+  public function login(Request $request)
+  {
     $this->validateLogin($request);
 
+    // Check for too many login attempts
     if ($this->hasTooManyLoginAttempts($request)) {
       $this->fireLockoutEvent($request);
-
       return $this->sendLockoutResponse($request);
     }
-    $credentials = $this->credentials($request);
 
-    $user = User::where('email', $credentials['email'])->first();
+    // Pre-check if user exists and is active BEFORE attempting login
+    $identifier = $request->get('email');
+    $user = null;
+    
+    if (is_numeric($identifier)) {
+      $user = User::where('phone', $identifier)->first();
+    } else {
+      $user = User::where('email', $identifier)->first();
+    }
 
-    if ($user && $user->status == 'Inactive') {
-      // Account is disabled, handle accordingly (e.g., show a custom error message)
+    // Check if user exists
+    if (!$user) {
+      $this->incrementLoginAttempts($request);
+      Log::warning('LoginController | login() | User not found', [
+        'identifier' => $identifier
+      ]);
+      return $this->sendFailedLoginResponse($request);
+    }
+
+    // Check if user status is inactive
+    if ($user->status !== 'Active') {
+      Log::warning('LoginController | login() | Inactive user attempted login', [
+        'user_id' => $user->id,
+        'user_email' => $user->email,
+        'user_status' => $user->status
+      ]);
       return $this->sendDisabledResponse($request);
     }
 
+    // Attempt login with credentials that include status check
     if ($this->attemptLogin($request)) {
       return $this->sendLoginResponse($request);
     }
 
+    // Login failed
     $this->incrementLoginAttempts($request);
-
+    
+    Log::warning('LoginController | login() | Login failed', [
+      'identifier' => $identifier
+    ]);
+    
     return $this->sendFailedLoginResponse($request);
   }
 
@@ -130,17 +177,35 @@ class LoginController extends Controller
 
   protected function authenticated(Request $request, $user)
   {
+    // Double-check status after authentication (defense in depth)
+    if ($user->status !== 'Active') {
+      Log::critical('LoginController | authenticated() | Inactive user bypassed login check', [
+        'user_id' => $user->id,
+        'user_email' => $user->email,
+        'status' => $user->status
+      ]);
+      
+      // Force logout
+      $this->guard()->logout();
+      $request->session()->invalidate();
+      $request->session()->regenerateToken();
+      
+      return redirect()->route('login')
+        ->withErrors(['email' => 'Your account has been deactivated. Please contact the administrator.']);
+    }
+
     Event::dispatch(new \Illuminate\Auth\Events\Login($user, false, 0));
     $user->update(['last_login_at' => now()]);
 
-    return redirect()->intended($this->redirectPath());
-
-
+    Log::info('LoginController | authenticated() | User logged in successfully', [
+      'user_id' => $user->id,
+      'user_email' => $user->email,
+      'login_time' => now()
+    ]);
+    
     $this->logUserActivity($user->id, 'Login', $request->url(), $request->userAgent());
+    
     return redirect()->intended($this->redirectPath());
-    // Retrieve the last successful login
-
-
   }
 
   private function logUserActivity($userId, $activity, $url, $userAgent)
@@ -161,14 +226,19 @@ class LoginController extends Controller
   {
     Event::dispatch(new \Illuminate\Auth\Events\Failed($request->only($this->username()), false, 0));
     throw ValidationException::withMessages([
-      $this->username() => [trans('auth.throttle')],
+      $this->username() => ['These credentials do not match our records.'],
     ]);
   }
 
   protected function sendDisabledResponse(Request $request)
   {
+    Log::warning('LoginController | sendDisabledResponse() | Account disabled message sent', [
+      'identifier' => $request->get('email')
+    ]);
+    
     throw ValidationException::withMessages([
-      $this->username() => [trans('auth.disabled')],
+      $this->username() => ['Your account has been deactivated. Please contact the administrator.'],
     ]);
   }
 }
+
