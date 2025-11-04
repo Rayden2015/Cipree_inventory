@@ -31,7 +31,7 @@ class UserController extends Controller
         $this->middleware(['auth', 'permission:view-user'])->only('show');
         $this->middleware(['auth', 'permission:add-user'])->only('create');
         $this->middleware(['auth', 'permission:view-user'])->only('index');
-        $this->middleware(['auth', 'permission:edit-user'])->only('edit');
+        $this->middleware(['auth', 'permission:edit-user'])->only(['edit', 'update']);
     }
     
     public function searchUsers(Request $request)
@@ -229,81 +229,272 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|email|max:255',
-                'phone' => 'nullable|unique:users,phone,' . $id, // Nullable and unique validation except for the current user
-                'dob' => 'nullable|date',
-                'address' => 'nullable|string',
-                // Add other validation rules as needed
-            ]);
+            $authId = Auth::user()->name;
             
-        $user = User::find($id);
-        //   dd($user);
+            // Log the update attempt
+            Log::info('UserController | update | Attempt started', [
+                'user_id' => $id,
+                'updated_by' => $authId,
+                'request_data' => $request->except(['password', 'image'])
+            ]);
 
-        $authId = Auth::user()->name;
+            // Check if user exists
+            $user = User::find($id);
+            if (!$user) {
+                Log::warning('UserController | update | User not found', [
+                    'user_id' => $id,
+                    'updated_by' => $authId
+                ]);
+                return redirect()->back()->withError('User not found. The user may have been deleted.');
+            }
 
+            // Store original user data for logging
+            $originalUserData = $user->toArray();
 
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->dob = $request->dob;
-        $user->address = $request->address;
-        $user->phone = $request->phone;
-        $user->status = $request->status;
-        $user->role_id = $request->role_id;
-        $user->staff_id = $request->staff_id;
-        $user->site_id = $request->site_id;
-        $user->department_id = $request->department_id;
-        $user->section_id = $request->section_id;
-        $user->add_admin = $request->add_admin;
-        $user->add_site_admin = $request->add_site_admin;
-        $user->add_requester = $request->add_requester;
-        $user->add_finance_officer = $request->add_finance_officer;
-        $user->add_store_officer = $request->add_store_officer;
+            // Validate request with proper uniqueness rules
+            try {
+                $request->validate([
+                    'name' => 'required|string|max:255',
+                    'email' => 'required|email|max:255|unique:users,email,' . $id,
+                    'phone' => 'nullable|string|unique:users,phone,' . $id,
+                    'staff_id' => 'nullable|string|unique:users,staff_id,' . $id,
+                    'dob' => 'nullable|date',
+                    'address' => 'nullable|string',
+                    'password' => 'nullable|string|min:8',
+                    'image' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:10240', // 10MB max
+                    'status' => 'nullable|string',
+                    'role_id' => 'nullable|integer',
+                    'site_id' => 'nullable|integer|exists:sites,id',
+                    'department_id' => 'nullable|integer|exists:departments,id',
+                    'section_id' => 'nullable|integer|exists:sections,id',
+                ]);
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                Log::warning('UserController | update | Validation failed', [
+                    'user_id' => $id,
+                    'updated_by' => $authId,
+                    'validation_errors' => $e->errors()
+                ]);
+                
+                // Create user-friendly error messages
+                $errors = $e->errors();
+                $friendlyMessages = [];
+                
+                if (isset($errors['email'])) {
+                    $friendlyMessages[] = 'The email address is already in use by another user.';
+                }
+                if (isset($errors['phone'])) {
+                    $friendlyMessages[] = 'The phone number is already in use by another user.';
+                }
+                if (isset($errors['staff_id'])) {
+                    $friendlyMessages[] = 'The staff ID is already in use by another user.';
+                }
+                if (isset($errors['site_id'])) {
+                    $friendlyMessages[] = 'The selected site does not exist.';
+                }
+                if (isset($errors['department_id'])) {
+                    $friendlyMessages[] = 'The selected department does not exist.';
+                }
+                if (isset($errors['section_id'])) {
+                    $friendlyMessages[] = 'The selected section does not exist.';
+                }
+                if (isset($errors['image'])) {
+                    $friendlyMessages[] = 'The uploaded image must be a valid image file (JPEG, PNG, GIF) and less than 10MB.';
+                }
+                if (isset($errors['dob'])) {
+                    $friendlyMessages[] = 'The date of birth must be a valid date.';
+                }
+                if (isset($errors['password'])) {
+                    $friendlyMessages[] = 'The password must be at least 8 characters long.';
+                }
+                
+                // If no specific friendly message, use generic validation error
+                if (empty($friendlyMessages)) {
+                    $friendlyMessages[] = 'Please check your input and try again.';
+                }
+                
+                return redirect()->back()
+                    ->withInput()
+                    ->withError(implode(' ', $friendlyMessages));
+            }
 
+            // Validate roles if provided
+            if ($request->roles) {
+                $validRoles = Role::whereIn('name', $request->roles)->pluck('name')->toArray();
+                if (count($validRoles) !== count($request->roles)) {
+                    $invalidRoles = array_diff($request->roles, $validRoles);
+                    Log::warning('UserController | update | Invalid roles provided', [
+                        'user_id' => $id,
+                        'updated_by' => $authId,
+                        'invalid_roles' => $invalidRoles
+                    ]);
+                    return redirect()->back()
+                        ->withInput()
+                        ->withError('Some selected roles are invalid. Please contact the administrator.');
+                }
+            }
 
-        $user->add_purchasing_officer = $request->add_purchasing_officer;
-        $user->add_authoriser = $request->add_authoriser;
-        $user->add_store_assistant = $request->add_store_assistant;
-        $user->add_procurement_assistant = $request->add_procurement_assistant;
-        if ($request->filled('password')) {
-            $user->password = Hash::make($request->input('password'));
-        }
-        $user->save();
-      
+            // Update user basic information
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->dob = $request->dob;
+            $user->address = $request->address;
+            $user->phone = $request->phone;
+            $user->status = $request->status;
+            $user->role_id = $request->role_id;
+            $user->staff_id = $request->staff_id;
+            $user->site_id = $request->site_id;
+            $user->department_id = $request->department_id;
+            $user->section_id = $request->section_id;
+            $user->add_admin = $request->add_admin;
+            $user->add_site_admin = $request->add_site_admin;
+            $user->add_requester = $request->add_requester;
+            $user->add_finance_officer = $request->add_finance_officer;
+            $user->add_store_officer = $request->add_store_officer;
+            $user->add_purchasing_officer = $request->add_purchasing_officer;
+            $user->add_authoriser = $request->add_authoriser;
+            $user->add_store_assistant = $request->add_store_assistant;
+            $user->add_procurement_assistant = $request->add_procurement_assistant;
+            
+            // Update password if provided
+            if ($request->filled('password')) {
+                $user->password = Hash::make($request->input('password'));
+                Log::info('UserController | update | Password updated', [
+                    'user_id' => $id,
+                    'updated_by' => $authId
+                ]);
+            }
 
-         // Sync roles - this will update the user's roles, adding new roles and removing unchecked ones
-    if ($request->roles) {
-        $user->syncRoles($request->roles);  // Use syncRoles to replace current roles with the ones submitted
-    } else {
-        $user->syncRoles([]); // If no roles are checked, remove all roles
-    }
-    
-        // Handle the image upload if an image is provided
-        if ($request->image) {
-            $imageName = UploadHelper::upload($request->image, 'user-' . $user->id, 'images/users');
-            $user->image = $imageName;
-            $user->save();
-        }
-        Log::info('UserController | update', [
-            'user_details' => Auth::user(),
-            'user_name' => $authId,
-            'user_name_before' => User::find($id),
-        ]);
-        return redirect()->back()->withSuccess('Successfully Updated');
+            // Save user data
+            try {
+                $user->save();
+                Log::info('UserController | update | User data saved', [
+                    'user_id' => $id,
+                    'updated_by' => $authId
+                ]);
+            } catch (\Illuminate\Database\QueryException $e) {
+                Log::error('UserController | update | Database error during save', [
+                    'user_id' => $id,
+                    'updated_by' => $authId,
+                    'error_code' => $e->getCode(),
+                    'error_message' => $e->getMessage()
+                ]);
+                
+                // Check for specific database errors
+                if ($e->getCode() == '23000') {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withError('A database constraint was violated. This email, phone, or staff ID may already be in use.');
+                }
+                
+                throw $e; // Re-throw to be caught by outer catch
+            }
 
+            // Sync roles - this will update the user's roles
+            try {
+                if ($request->roles) {
+                    $user->syncRoles($request->roles);
+                    Log::info('UserController | update | Roles synced', [
+                        'user_id' => $id,
+                        'updated_by' => $authId,
+                        'roles' => $request->roles
+                    ]);
+                } else {
+                    $user->syncRoles([]);
+                    Log::info('UserController | update | All roles removed', [
+                        'user_id' => $id,
+                        'updated_by' => $authId
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('UserController | update | Role sync failed', [
+                    'user_id' => $id,
+                    'updated_by' => $authId,
+                    'error_message' => $e->getMessage(),
+                    'stack_trace' => $e->getTraceAsString()
+                ]);
+                return redirect()->back()
+                    ->withError('User updated but role assignment failed. Please try updating the roles again.');
+            }
+
+            // Handle the image upload if an image is provided
+            if ($request->hasFile('image')) {
+                try {
+                    // Check if directory exists and is writable
+                    $uploadDir = 'images/users';
+                    if (!file_exists($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                        Log::info('UserController | update | Created upload directory', [
+                            'directory' => $uploadDir
+                        ]);
+                    }
+                    
+                    if (!is_writable($uploadDir)) {
+                        Log::error('UserController | update | Upload directory not writable', [
+                            'directory' => $uploadDir,
+                            'user_id' => $id,
+                            'updated_by' => $authId
+                        ]);
+                        return redirect()->back()
+                            ->withError('User updated but image upload failed due to server permissions. Please contact the administrator.');
+                    }
+
+                    $imageName = UploadHelper::upload($request->image, 'user-' . $user->id, $uploadDir);
+                    $user->image = $imageName;
+                    $user->save();
+                    
+                    Log::info('UserController | update | Image uploaded', [
+                        'user_id' => $id,
+                        'updated_by' => $authId,
+                        'image_name' => $imageName
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('UserController | update | Image upload failed', [
+                        'user_id' => $id,
+                        'updated_by' => $authId,
+                        'error_message' => $e->getMessage(),
+                        'stack_trace' => $e->getTraceAsString()
+                    ]);
+                    return redirect()->back()
+                        ->withError('User updated but image upload failed. Please try uploading the image again.');
+                }
+            }
+
+            // Log successful update with before/after data
+            Log::info('UserController | update | Update completed successfully', [
+                'user_id' => $id,
+                'updated_by' => $authId,
+                'original_data' => $originalUserData,
+                'updated_data' => $user->fresh()->toArray()
+            ]);
+
+            return redirect()->back()->withSuccess('User updated successfully!');
+
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            Log::warning('UserController | update | Unauthorized access attempt', [
+                'user_id' => $id,
+                'attempted_by' => Auth::user()->id ?? 'guest',
+                'error_message' => $e->getMessage()
+            ]);
+            return redirect()->back()
+                ->withError('You do not have permission to update users.');
+                
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
             Log::channel('error_log')->error('UserController | Update() Error ' . $unique_id, [
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
+                'user_id' => $id,
+                'updated_by' => Auth::user()->name ?? 'unknown',
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'stack_trace' => $e->getTraceAsString(),
+                'request_data' => $request->except(['password', 'image'])
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withInput()
+                ->withError('An unexpected error occurred while updating the user. Please contact the administrator with error ID: ' . $unique_id);
+        }
     }
     public function destroy($id)
     {
