@@ -24,10 +24,13 @@ use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Symfony\Component\Console\Input\Input;
+use App\Traits\LogsErrors;
 
 
 class InventoryController extends Controller
 {
+    use LogsErrors;
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -241,15 +244,7 @@ class InventoryController extends Controller
             // Rollback the transaction
             DB::rollback();
     
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | Store() Error ' . $unique_id, [
-                'exception' => $exception->getMessage(),
-                'trace' => $exception->getTraceAsString(),
-            ]);
-    
-            // Redirect back with the error message
-            return redirect()->back()
-                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'store()');
         }
     }
     
@@ -291,15 +286,7 @@ class InventoryController extends Controller
 
             return view('inventories.edit', compact('suppliers', 'deliveries', 'categories', 'locations', 'inventory', 'endusers', 'inventory_items', 'selectedRole', 'items'));
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | Edit() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'edit()');
 }
 
         }
@@ -348,19 +335,7 @@ class InventoryController extends Controller
 
     } catch (\Exception $e) {
         // Generate a unique error ID for logging
-        $unique_id = floor(time() - 999999999);
-        
-        // Log the error with the exception message and stack trace
-        Log::channel('error_log')->error('InventoryController | Update() Error ' . $unique_id, [
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString(),
-            'user' => Auth::user(),
-            'request_data' => $request->all(),
-            'inventory_id' => $id,
-        ]);
-
-        // Redirect back with the error message
-        return redirect()->back()->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        return $this->handleError($e, 'update()');
     }
 }public function update_inventory_item(Request $request, $id)
 {
@@ -425,15 +400,7 @@ class InventoryController extends Controller
         return redirect()->back()->withSuccess('Inventory item updated and logged successfully.');
 
     } catch (\Exception $e) {
-        $unique_id = floor(time() - 999999999);
-        Log::channel('error_log')->error('InventoryController | UpdateInventoryItem() Error ' . $unique_id, [
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-        ]);
-
-        // Redirect back with the error message
-        return redirect()->back()
-            ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        return $this->handleError($e, 'update_inventory_item()');
     }
 }
 
@@ -444,15 +411,7 @@ class InventoryController extends Controller
             $bookData = InventoryItemDetail::find($request->book_id);
             dd($bookData);
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | bookUpdate() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'bookUpdate()');
 }
 
     }
@@ -512,15 +471,7 @@ class InventoryController extends Controller
         
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | Destroy() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'destroy()');
 }
 
     }
@@ -540,15 +491,7 @@ class InventoryController extends Controller
             }
             return response()->json($movies);
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | SelectCategory() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'selectCategory()');
 }
 
     }
@@ -564,15 +507,7 @@ class InventoryController extends Controller
             }
             return response()->json($movies);
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | SelectLocation() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'selectLocation()');
 }
 
     }
@@ -593,15 +528,7 @@ class InventoryController extends Controller
             }
             return response()->json($movies);
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | SelectDeliveredBy() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'selectDeliveredBy()');
 }
 
     }
@@ -620,15 +547,7 @@ class InventoryController extends Controller
             return $output;
             // return response()->json($products);
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | FetchLocations() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'fetch_locations()');
 }
 
     }
@@ -644,15 +563,7 @@ class InventoryController extends Controller
             Log::info('InventoryController| getItem() | Items loaded succesffully');
             return $output;
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | getItem() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'getItem()');
 }
 
     }
@@ -734,15 +645,7 @@ class InventoryController extends Controller
                 return response()->json($request);
             }
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | InventoryAction() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'inventory_action()');
 }
 
     }
@@ -764,15 +667,7 @@ class InventoryController extends Controller
             Log::info('InventoryController | inventory_search | search completed successfully');
             return view('inventories.index', compact('inventories'));
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | InventorySearch() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'inventory_search()');
 }
 
     }
@@ -795,15 +690,7 @@ class InventoryController extends Controller
 
             return view('inventories.index', compact('inventories'));
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | InventoryHomeSearch() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'inventory_home_search()');
 }
 
     }
@@ -815,15 +702,7 @@ class InventoryController extends Controller
             Log::info('InventoryController | inventory_home_search');
             return response()->json($product);
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | FetchSingleProduct() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'fetch_single_product()');
 }
 
     }
@@ -843,15 +722,7 @@ class InventoryController extends Controller
             Log::info('InventoryController | inventory_item_history() |  search succesfull');
             return view('inventories.history', compact('inventory_item_history'));
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | InventoryItemHistory() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'inventory_item_history()');
 }
 
     }
@@ -873,15 +744,7 @@ class InventoryController extends Controller
             return view('inventories.history_show', compact('inventory', 'company', 'inventories'));
             // dd($inventory,$inventories);
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | InventoryHistoryShow() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'inventory_history_show()');
 }
 
     }
@@ -905,15 +768,7 @@ class InventoryController extends Controller
             Log::info('InventoryController | inventory_history_edit()');
             return view('inventories.history_edit', compact('suppliers', 'deliveries', 'categories', 'locations', 'inventory', 'endusers', 'inventory_items', 'selectedRole', 'items'));
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | InventoryHistoryEdit() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'inventory_history_edit()');
 }
 
     }
@@ -949,15 +804,7 @@ class InventoryController extends Controller
 
             return redirect()->back()->withSuccess('Successfully updated');
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | InventoryHistoryUpdate() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'inventory_history_update()');
 }
 
     }
@@ -1000,15 +847,7 @@ class InventoryController extends Controller
                 return response()->json($request);
             }
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | InventoryHistoryAction() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'inventory_history_action()');
 }
 
     }
@@ -1047,15 +886,7 @@ class InventoryController extends Controller
             ]);
             return back();
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | UpdateInventoryHistory() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'update_inventory_history()');
 }
 
     }
@@ -1092,15 +923,7 @@ class InventoryController extends Controller
             }
             return view('inventories.search_history', compact('inventory_item_history'));
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | InventoryHistorySearch() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'inventory_history_search()');
 }
 
     }
@@ -1130,15 +953,7 @@ class InventoryController extends Controller
             ]);
             return view('inventories.search_history', compact('inventory_item_history'));
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | InventoryHistoryDateSearch() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'inventory_history_date_search()');
 }
 
     }
@@ -1156,15 +971,7 @@ class InventoryController extends Controller
          
             return back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | InventoryHistoryDestroy() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'inventory_history_destroy()');
 }
 
     }
@@ -1183,15 +990,7 @@ class InventoryController extends Controller
 
             return $inventory->download($filename);
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | GenerateInventoryPDF() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'generateinventoryPDF()');
 }
 
     }
@@ -1214,15 +1013,7 @@ class InventoryController extends Controller
             // dd($unstocked);
             return view('inventories.unstocked', compact('unstocked'));
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | OutOfStock() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'out_of_stock()');
 }
 
     }
@@ -1249,15 +1040,7 @@ class InventoryController extends Controller
             ]);
             return view('inventories.unstocked', compact('unstocked'));
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('InventoryController | OutOfStockSearch() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'out_of_stock_search()');
 }
 
     }

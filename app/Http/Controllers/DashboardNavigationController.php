@@ -21,11 +21,14 @@ use App\Exports\ItemsListSiteExport;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Traits\LogsErrors;
 
 
 class DashboardNavigationController extends Controller
 {
-   public function __construct()
+    use LogsErrors;
+    
+    public function __construct()
    {
       $this->middleware('auth');
    }
@@ -49,15 +52,7 @@ class DashboardNavigationController extends Controller
          $pending_po_approvals = Porder::where('site_id', '=', $site_id)->whereNull('approval_status')->latest()->paginate(15);
          return view('homepages.pending_po_approvals', compact('pending_po_approvals'));
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | PendingPoApprovals() Error ' . $unique_id, [
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-         ]);
-
-         // Redirect back with the error message
-         return redirect()->back()
-            ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'pending_po_approvals()');
       }
    }
 
@@ -80,15 +75,7 @@ class DashboardNavigationController extends Controller
          $approved_request = Order::where('site_id', '=', $site_id)->where('approval_status', '=', 'Approved')->latest()->paginate(15);
          return view('homepages.approved_request', compact('approved_request'));
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | ApprovedRequest() Error ' . $unique_id, [
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-         ]);
-
-         // Redirect back with the error message
-         return redirect()->back()
-            ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'approved_request()');
       }
    }
 
@@ -111,15 +98,7 @@ class DashboardNavigationController extends Controller
          $approved_pos = Porder::where('site_id', '=', $site_id)->where('approval_status', '=', 'Approved')->latest()->paginate(15);
          return view('homepages.approved_pos', compact('approved_pos'));
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | ApprovedPos() Error ' . $unique_id, [
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-         ]);
-
-         // Redirect back with the error message
-         return redirect()->back()
-            ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'approved_pos()');
       }
    }
 
@@ -142,15 +121,7 @@ class DashboardNavigationController extends Controller
          $processed_request = Sorder::where('site_id', '=', $site_id)->where('status', '=', 'Supplied')->latest()->paginate(15);
          return view('homepages.processed_request', compact('processed_request'));
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | ProcessedRequst() Error ' . $unique_id, [
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-         ]);
-
-         // Redirect back with the error message
-         return redirect()->back()
-            ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'processed_request()');
       }
    }
 
@@ -179,15 +150,7 @@ class DashboardNavigationController extends Controller
 
 
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | PendingRequestApprovals() Error ' . $unique_id, [
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-         ]);
-
-         // Redirect back with the error message
-         return redirect()->back()
-            ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'pending_request_approvals()');
       }
    }
 
@@ -218,15 +181,7 @@ class DashboardNavigationController extends Controller
 
          return view('homepages.pending_stock_approvals', compact('pending_stock_approvals'));
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | PendingStockApprovals() Error ' . $unique_id, [
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-         ]);
-
-         // Redirect back with the error message
-         return redirect()->back()
-            ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'pending_stock_approvals()');
       }
    }
 
@@ -250,15 +205,7 @@ class DashboardNavigationController extends Controller
          $processed_pos = Porder::where('site_id', '=', $site_id)->where('status', '=', 'Ordered')->latest()->paginate(15);
          return view('homepages.processed_pos', compact('processed_pos'));
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | ProcessedPos() Error ' . $unique_id,[
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-        ]);
-
-// Redirect back with the error message
-return redirect()->back()
-                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'processed_pos()');
 }
 
    }
@@ -274,15 +221,7 @@ return redirect()->back()
          $stock_request_pending = Sorder::where('site_id', '=', $site_id)->whereNull('approval_status')->latest()->paginate(15);
          return view('homepages.stock_request_pending', compact('stock_request_pending'));
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | StockRequestPending() Error ' . $unique_id,[
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-        ]);
-
-// Redirect back with the error message
-return redirect()->back()
-                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'stock_request_pending()');
 }
 
    }
@@ -305,15 +244,7 @@ return redirect()->back()
 
          return view('homepages.sofficer_stock_request_pending', compact('sofficer_stock_request_pending'));
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | SofficerStockRequestPending() Error ' . $unique_id,[
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-        ]);
-
-// Redirect back with the error message
-return redirect()->back()
-                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'sofficer_stock_request_pending()');
 }
 
    }
@@ -330,15 +261,7 @@ return redirect()->back()
          $rfi_pending_approval = Sorder::where('site_id', '=', $site_id)->whereNull('approval_status')->where('requested_by', '=', $authid)->latest()->paginate(15);
          return view('homepages.rfi_pending_approval', compact('rfi_pending_approval'));
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | RfiPendingApproval() Error ' . $unique_id,[
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-        ]);
-
-// Redirect back with the error message
-return redirect()->back()
-                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'rfi_pending_approval()');
 }
 
    }
@@ -355,15 +278,7 @@ return redirect()->back()
          $rfi_approved_requests = Sorder::where('site_id', '=', $site_id)->where('approval_status', '=', 'Approved')->where('requested_by', '=', $authid)->latest()->paginate(15);
          return view('homepages.rfi_approved_requests', compact('rfi_approved_requests'));
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | RfiApprovedRequests() Error ' . $unique_id,[
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-        ]);
-
-// Redirect back with the error message
-return redirect()->back()
-                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'rfi_approved_requests()');
 }
 
    }
@@ -382,15 +297,7 @@ return redirect()->back()
 
          return view('homepages.rfi_processed_requests', compact('rfi_processed_requests'));
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | RfiProcessedRequests() Error ' . $unique_id,[
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-        ]);
-
-// Redirect back with the error message
-return redirect()->back()
-                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'rfi_processed_requests()');
 }
 
    }
@@ -407,15 +314,7 @@ return redirect()->back()
          $rfi_denied =  Sorder::where('site_id', '=', $site_id)->where('approval_status', '=', 'Denied')->where('requested_by', '=', $authid)->latest()->paginate(15);
          return view('homepages.rfi_denied', compact('rfi_denied'));
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | RfiDenied() Error ' . $unique_id,[
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-        ]);
-
-// Redirect back with the error message
-return redirect()->back()
-                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'rfi_denied()');
 }
 
    }
@@ -431,15 +330,7 @@ return redirect()->back()
          $po_total_value_of_approved_pos_mtd =  PorderPart::where('site_id', '=', $site_id)->whereBetween('created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])->latest()->paginate(15);
          return view('homepages.po_total_value_of_approved_pos_mtd', compact('po_total_value_of_approved_pos_mtd'));
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | PoTotalValueOfApprovedPosMtd() Error ' . $unique_id,[
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-        ]);
-
-// Redirect back with the error message
-return redirect()->back()
-                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'po_total_value_of_approved_pos_mtd()');
 }
 
    }
@@ -456,15 +347,7 @@ return redirect()->back()
          $po_total_value_of_supplied_pos_mtd =  Porder::join('porder_parts', 'porders.order_id', '=', 'porder_parts.order_id')->whereBetween('porders.created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])->where('porders.status', '=', 'Supplied')->where('site_id', '=', $site_id)->latest()->paginate(15);
          return view('homepages.po_total_value_of_supplied_pos_mtd', compact('po_total_value_of_supplied_pos_mtd'));
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | PoTotalValueOfSuppliedPosMtd() Error ' . $unique_id,[
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-        ]);
-
-// Redirect back with the error message
-return redirect()->back()
-                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'po_total_value_of_supplied_pos_mtd()');
 }
 
    }
@@ -481,15 +364,7 @@ return redirect()->back()
          $po_total_value_of_pending_pos_mtd =  Porder::join('porder_parts', 'porders.order_id', '=', 'porder_parts.order_id')->whereBetween('porders.created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])->whereNull('porders.approval_status')->where('site_id', '=', $site_id)->latest()->paginate(15);
          return view('homepages.po_total_value_of_pending_pos_mtd', compact('po_total_value_of_pending_pos_mtd'));
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | PoTotalValueOfPendingPosMtd() Error ' . $unique_id,[
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-        ]);
-
-// Redirect back with the error message
-return redirect()->back()
-                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'po_total_value_of_pending_pos_mtd()');
 }
 
    }
@@ -506,15 +381,7 @@ return redirect()->back()
          $po_approved_stock_requests =  Sorder::where('site_id', '=', $site_id)->where('approval_status', '=', 'Approved')->latest()->paginate(15);
          return view('homepages.po_approved_stock_requests', compact('po_approved_stock_requests'));
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | PoApprovedStockRequests() Error ' . $unique_id,[
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-        ]);
-
-// Redirect back with the error message
-return redirect()->back()
-                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'po_approved_stock_requests()');
 }
 
    }
@@ -531,15 +398,7 @@ return redirect()->back()
          $po_approved_direct_requests =   Order::where('site_id', '=', $site_id)->where('approval_status', '=', 'Approved')->latest()->paginate(15);
          return view('homepages.po_approved_direct_requests', compact('po_approved_direct_requests'));
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | PoApprovedDirectRequests() Error ' . $unique_id,[
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-        ]);
-
-// Redirect back with the error message
-return redirect()->back()
-                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'po_approved_direct_requests()');
 }
 
    }
@@ -556,15 +415,7 @@ return redirect()->back()
          $po_approved_pos =   Porder::where('site_id', '=', $site_id)->where('approval_status', '=', 'Approved')->latest()->paginate(15);
          return view('homepages.po_approved_pos', compact('po_approved_pos'));
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | PoApprovedPos() Error ' . $unique_id,[
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-        ]);
-
-// Redirect back with the error message
-return redirect()->back()
-                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'po_approved_pos()');
 }
 
    }
@@ -582,15 +433,7 @@ return redirect()->back()
          $po_denied_requests =   Order::where('site_id', '=', $site_id)->where('approval_status', '=', 'Denied')->latest()->paginate(15);
          return view('homepages.po_denied_requests', compact('po_denied_requests'));
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | PoDeniedRequests() Error ' . $unique_id,[
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-        ]);
-
-// Redirect back with the error message
-return redirect()->back()
-                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'po_denied_requests()');
 }
 
    }
@@ -755,15 +598,7 @@ return redirect()->back()
          // dd($unstocked);
          return view('homepages.out_of_stock', compact('unstocked'));
       } catch (\Exception $e) {
-         $unique_id = floor(time() - 999999999);
-         Log::channel('error_log')->error('DashboardController | OutOfStock() Error ' . $unique_id,[
-            'message' => $e->getMessage(),
-            'stack_trace' => $e->getTraceAsString()
-        ]);
-
-// Redirect back with the error message
-return redirect()->back()
-                 ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+         return $this->handleError($e, 'out_of_stock()');
 }
 
    }

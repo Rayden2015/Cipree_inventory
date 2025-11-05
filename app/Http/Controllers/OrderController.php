@@ -21,9 +21,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Auth;
+use App\Traits\LogsErrors;
 
 class OrderController extends Controller
 {
+    use LogsErrors;
+    
     public function __construct(){
         $this->middleware('auth');
     }
@@ -42,15 +45,7 @@ class OrderController extends Controller
             return view('orders.index', compact('orders'));
             // dd($orders);
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('OrderController | Index() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'index()');
 }
 
     }
@@ -73,15 +68,7 @@ class OrderController extends Controller
             ]);
             return view('orders.create', compact('customers', 'products', 'request_number', 'request_date','uom'));
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('OrderController | Create() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'create()');
 }
 
     }
@@ -101,15 +88,7 @@ class OrderController extends Controller
             ]);
             return view('orders.admincreate', compact('customers', 'products', 'request_number', 'request_date'));
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('OrderController | AdminCreate() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'admincreate()');
 }
 
         }
@@ -189,15 +168,7 @@ class OrderController extends Controller
 
             return back()->withSuccess('Order #' . $order->id . ' Placed Successfully');
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('OrderController | Store() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'store()');
 }
 
         }
@@ -279,15 +250,7 @@ class OrderController extends Controller
 
             return back()->withSuccess('Order #' . $order->id . ' Placed Successfully');
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('OrderController | OrderStore() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'orderstore()');
 }
 
     }
@@ -306,15 +269,7 @@ class OrderController extends Controller
             ]);
             return view('orders.show', compact('order', 'company', 'order_parts'));
         } catch (\Throwable $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('OrderController | Show() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'show()');
 }
 
     }
@@ -330,15 +285,7 @@ class OrderController extends Controller
             ]);
             return view('orders.view', compact('order'));
         } catch (\Throwable $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('OrderController | View() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'view()');
 }
 
         
@@ -358,15 +305,7 @@ class OrderController extends Controller
             $order_parts = OrderPart::where('order_id', '=', $id)->get();
             return view('orders.edit', compact('purchase', 'suppliers', 'sites', 'locations', 'parts', 'endusers', 'order_parts','uom'));
         }catch (\Exception $e){
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('OrderController | Edit() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'edit()');
 }
 
        
@@ -395,15 +334,7 @@ class OrderController extends Controller
            
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Throwable $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('OrderController | Update() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'update()');
 }
 
     }
@@ -428,15 +359,7 @@ class OrderController extends Controller
                 return back()->with('error', 'Whoops! Something went wrong.');
             }
         } catch (\Throwable $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('OrderController | Destroy() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'destroy()');
 }
 
     }
@@ -462,15 +385,7 @@ class OrderController extends Controller
             
             return response()->json($product);
         } catch (\Throwable $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('OrderController | FetchSingleProduct() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'fetch_single_product()');
 }
 
     }
@@ -499,15 +414,7 @@ $product = DB::select('select price,quantity from products where id = ? and site
 
             return view('orders.search', compact('orders'));
         } catch (\Throwable $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('OrderController | OrdersSearch() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'orders_search()');
 }
 
     }
@@ -527,15 +434,7 @@ $product = DB::select('select price,quantity from products where id = ? and site
       
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('OrderController | OrdersAction() Error ' . $unique_id,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'orders_action()');
 }
 
     }
