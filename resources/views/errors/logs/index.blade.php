@@ -17,7 +17,7 @@
                             Error Logs
                         </h3>
                         <div class="ms-auto">
-                            <span class="badge bg-red text-white">{{ isset($errorLogs) ? $errorLogs->total() : 0 }} Total Errors</span>
+                            <span class="badge bg-red text-white">{{ isset($errorLogs) && method_exists($errorLogs, 'total') ? $errorLogs->total() : 0 }} Total Errors</span>
                         </div>
                     </div>
 
@@ -147,7 +147,7 @@
                         </table>
                     </div>
 
-                    @if(isset($errorLogs) && $errorLogs->hasPages())
+                    @if(isset($errorLogs) && method_exists($errorLogs, 'hasPages') && $errorLogs->hasPages())
                     <div class="card-footer">
                         {{ $errorLogs->links() }}
                     </div>
