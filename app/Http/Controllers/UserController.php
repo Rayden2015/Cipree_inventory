@@ -23,9 +23,12 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\SMSController;
+use App\Traits\LogsErrors;
 
 class UserController extends Controller
 {
+    use LogsErrors;
+    
     public function __construct() {
         $this->middleware('auth');
         $this->middleware(['auth', 'permission:view-user'])->only('show');
@@ -270,20 +273,10 @@ class UserController extends Controller
                 ->withError('You do not have permission to create users.');
                 
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('UserController | Store() Error ' . $unique_id, [
+            return $this->handleError($e, 'store()', [
                 'created_by' => Auth::user()->name ?? 'unknown',
-                'error_message' => $e->getMessage(),
-                'error_file' => $e->getFile(),
-                'error_line' => $e->getLine(),
-                'stack_trace' => $e->getTraceAsString(),
-                'request_data' => $request->except(['password', 'image'])
+                'attempted_user_email' => $request->input('email')
             ]);
-
-            // Redirect back with the error message
-            return redirect()->back()
-                ->withInput()
-                ->withError('An unexpected error occurred while creating the user. Please contact the administrator with error ID: ' . $unique_id);
         }
     }
 
@@ -305,16 +298,8 @@ class UserController extends Controller
 
             return view('users.show', compact('user'));
         } catch (\Throwable $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('UserController | Show() Error ' . $unique_id, [
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
+            return $this->handleError($e, 'show()', ['user_id' => $id]);
+        }
 
     }
 
@@ -341,16 +326,8 @@ class UserController extends Controller
     
             return view('users.edit', compact('user', 'roles', 'sites', 'userRoles','departments','sections'));
         } catch (\Throwable $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('UserController | Edit() Error ' . $unique_id, [
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
+            return $this->handleError($e, 'edit()', ['user_id' => $id]);
+        }
 
     }
     
@@ -608,22 +585,11 @@ class UserController extends Controller
                 ->withError('You do not have permission to update users.');
 
         } catch (\Throwable $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('UserController | Update() Error ' . $unique_id, [
+            return $this->handleError($e, 'update()', [
                 'user_id' => $id,
-                'updated_by' => Auth::user()->name ?? 'unknown',
-                'error_message' => $e->getMessage(),
-                'error_file' => $e->getFile(),
-                'error_line' => $e->getLine(),
-                'stack_trace' => $e->getTraceAsString(),
-                'request_data' => $request->except(['password', 'image'])
+                'updated_by' => Auth::user()->name ?? 'unknown'
             ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                ->withInput()
-                ->withError('An unexpected error occurred while updating the user. Please contact the administrator with error ID: ' . $unique_id);
-}
+        }
     }
     public function destroy($id)
     {
@@ -649,16 +615,8 @@ class UserController extends Controller
             $user->delete();
             return redirect()->route('users.index')->withSuccess('Successfully Updated');
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('UserController |Destroy() Error ' . $unique_id, [
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
+            return $this->handleError($e, 'destroy()', ['user_id' => $id]);
+        }
 
     }
     
@@ -676,16 +634,9 @@ class UserController extends Controller
             // ]);
             return $first_name;
         } catch (\Throwable $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
+            $errorId = $this->logError($e, 'username()');
+            return 'User';  // Fallback name
+        }
 
     }
 
@@ -699,16 +650,9 @@ class UserController extends Controller
             // ]);
             return $logo;
         } catch (\Throwable $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('An error occurred with id ' . $unique_id  ,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
+            $errorId = $this->logError($e, 'logo()');
+            return null;  // Fallback logo
+        }
 
     }
 

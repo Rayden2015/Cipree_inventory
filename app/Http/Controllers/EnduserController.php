@@ -11,10 +11,13 @@ use App\Models\EndUsersCategory;
 use Illuminate\Support\Facades\Log;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Auth;
+use App\Traits\LogsErrors;
 
 class EnduserController extends Controller
 {
-     public function __construct() {
+    use LogsErrors;
+    
+    public function __construct() {
         $this->middleware('auth');
         $this->middleware(['auth', 'permission:view-enduser'])->only('show');
         $this->middleware(['auth', 'permission:add-enduser'])->only('create');
@@ -56,15 +59,7 @@ class EnduserController extends Controller
                 
             return view('endusers.index', compact('endusers','endusercategories'));
         } catch (\Exception $e) {
-            $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('EndUserController | Index() Error ' . $unique_id ,[
-                'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
-            ]);
-
-            // Redirect back with the error message
-            return redirect()->back()
-                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+            return $this->handleError($e, 'index()');
         }
     }
 

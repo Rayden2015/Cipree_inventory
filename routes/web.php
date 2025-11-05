@@ -37,6 +37,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\StoreRequestController;
 use App\Http\Controllers\DashboardNavigationController;
 use App\Http\Controllers\StockPurchaseRequestController;
+use App\Http\Controllers\ErrorLogController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -56,6 +57,15 @@ Route::get('/', function () {
 Route::resource('users', UserController::class);
 Route::resource('uom', UomController::class);
 Route::get('search_users', [UserController::class, 'searchUsers'])->name('search.users');
+
+// Error Logs (Admin Only)
+Route::prefix('error-logs')->name('error-logs.')->group(function () {
+    Route::get('/', [ErrorLogController::class, 'index'])->name('index');
+    Route::get('/search', [ErrorLogController::class, 'search'])->name('search');
+    Route::get('/search-files', [ErrorLogController::class, 'searchFiles'])->name('search-files');
+    Route::get('/{id}', [ErrorLogController::class, 'show'])->name('show');
+});
+
 Route::resource('company', CompanyController::class);
 Route::resource('suppliers', SupplierController::class);
 Route::get('supplier_search', [SupplierController::class, 'supplier_search'])->name('supplier_search');
