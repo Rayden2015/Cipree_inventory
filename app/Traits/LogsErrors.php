@@ -4,6 +4,8 @@ namespace App\Traits;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
+use App\Models\ErrorLog;
 
 trait LogsErrors
 {
@@ -43,11 +45,34 @@ trait LogsErrors
             'timestamp' => now()->toDateTimeString()
         ], $additionalContext);
         
-        // Log with standardized format
-        Log::channel('error_log')->error(
-            "[ERROR_ID:{$unique_id}] {$controller} | {$action} | {$exception->getMessage()}", 
-            $context
-        );
+        $logMessage = "[ERROR_ID:{$unique_id}] {$controller} | {$action} | {$exception->getMessage()}";
+        
+        // Log to file
+        Log::channel('error_log')->error($logMessage, $context);
+        
+        // Log to database if table exists
+        if (Schema::hasTable('error_logs')) {
+            try {
+                ErrorLog::create([
+                    'message' => $logMessage,
+                    'context' => json_encode($context),
+                    'level' => 500, // ERROR level
+                    'level_name' => 'ERROR',
+                    'channel' => 'error_log',
+                    'record_datetime' => now()->toDateTimeString(),
+                    'extra' => json_encode([]),
+                    'formatted' => $exception->getMessage() . "\n" . $exception->getTraceAsString(),
+                    'remote_addr' => $context['ip_address'],
+                    'user_agent' => $context['user_agent'],
+                ]);
+            } catch (\Throwable $dbException) {
+                // If database logging fails, log to file only
+                Log::warning('Failed to log error to database', [
+                    'original_error_id' => $unique_id,
+                    'db_error' => $dbException->getMessage()
+                ]);
+            }
+        }
         
         return $unique_id;
     }
