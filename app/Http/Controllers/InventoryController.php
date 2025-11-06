@@ -711,13 +711,10 @@ class InventoryController extends Controller
     {
         try {
             $site_id = Auth::user()->site->id;
-            // Fix N+1 query by eager loading enduser relationship
-            $inventory_item_history = Inventory::with(['enduser'])
-                ->leftjoin('inventory_item_details', 'inventories.id', '=', 'inventory_item_details.inventory_id')
-                ->where('inventory_item_details.site_id', '=', $site_id)
-                ->where('inventories.site_id', '=', $site_id)
-                ->latest('inventories.id')
-                ->select('inventories.*')
+            // Return InventoryItemDetail models with proper relationships for the view
+            $inventory_item_history = InventoryItemDetail::with(['inventory.enduser', 'item', 'location'])
+                ->where('site_id', '=', $site_id)
+                ->latest('id')
                 ->paginate(20);
             Log::info('InventoryController | inventory_item_history() |  search succesfull');
             return view('inventories.history', compact('inventory_item_history'));

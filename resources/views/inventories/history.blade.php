@@ -99,15 +99,15 @@
                             <tr>
                                 <td>{{ $in->id }}</td>
                                 <td>{{ date('d-m-Y (H:i)', strtotime($in->created_at)) }}</td>
-                                <td>{{ $in->enduser->asset_staff_id ?? '' }}</td>
-                                <td>{{ $in->po_number ?? '' }}</td>
+                                <td>{{ $in->inventory->enduser->asset_staff_id ?? '' }}</td>
+                                <td>{{ $in->inventory->po_number ?? '' }}</td>
                                 <td>{{ $in->item->item_description ?? '' }}</td>
                                 <td>{{ $in->item->item_stock_code ?? '' }}</td>
                                 <td>{{ $in->quantity ?? '' }}</td>
                                 <td>{{ $in->amount ?? '' }}</td>
                                 <td>
                                     <a href="{{ route('inventories.show', ['inventory' => $in->inventory_id]) }}">
-                                        {{ $in->grn_number ?? '' }}
+                                        {{ $in->inventory->grn_number ?? '' }}
                                     </a>
                                 </td>
                                 
