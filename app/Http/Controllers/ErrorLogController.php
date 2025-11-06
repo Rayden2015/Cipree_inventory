@@ -17,24 +17,51 @@ class ErrorLogController extends Controller
     }
 
     /**
-     * Display error logs
+     * Display error logs - Shows most recent errors by default
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             // Check if error_logs table exists
             if (!DB::getSchemaBuilder()->hasTable('error_logs')) {
                 return view('errors.logs.index', [
                     'errorLogs' => collect([]),
-                    'table_missing' => true
+                    'table_missing' => true,
+                    'users' => []
                 ]);
             }
 
-            $errorLogs = DB::table('error_logs')
-                ->orderBy('id', 'desc')
-                ->paginate(50);
+            // Get recent errors ordered by newest first
+            $query = DB::table('error_logs')
+                ->orderBy('id', 'desc');
 
-            return view('errors.logs.index', compact('errorLogs'));
+            // Filter by user if specified
+            if ($request->filled('user_id')) {
+                $query->where('context', 'like', '%"user_id":' . $request->input('user_id') . '%')
+                      ->orWhere('context', 'like', '%"user_id":"' . $request->input('user_id') . '"%');
+            }
+
+            $errorLogs = $query->paginate(50)->appends($request->all());
+
+            // Get unique users from error logs for filter dropdown
+            $users = DB::table('error_logs')
+                ->select(DB::raw('DISTINCT JSON_EXTRACT(context, "$.user_id") as user_id, JSON_EXTRACT(context, "$.user_name") as user_name'))
+                ->whereNotNull('context')
+                ->get()
+                ->filter(function($user) {
+                    return !empty($user->user_id) && $user->user_id != 'null';
+                })
+                ->map(function($user) {
+                    return [
+                        'id' => trim($user->user_id, '"'),
+                        'name' => trim($user->user_name ?? 'Unknown', '"')
+                    ];
+                })
+                ->unique('id')
+                ->sortBy('name')
+                ->values();
+
+            return view('errors.logs.index', compact('errorLogs', 'users'));
         } catch (\Exception $e) {
             Log::error('ErrorLogController | index() | Error loading error logs', [
                 'error' => $e->getMessage(),
@@ -63,6 +90,14 @@ class ErrorLogController extends Controller
                       ->orWhere('message', 'like', '%with id ' . $errorId . '%');
             }
 
+            // Search by user ID
+            if ($request->filled('user_id')) {
+                $query->where(function($q) use ($request) {
+                    $q->where('context', 'like', '%"user_id":' . $request->input('user_id') . '%')
+                      ->orWhere('context', 'like', '%"user_id":"' . $request->input('user_id') . '"%');
+                });
+            }
+
             // Search by user email
             if ($request->filled('user_email')) {
                 $query->where('context', 'like', '%' . $request->input('user_email') . '%');
@@ -88,7 +123,25 @@ class ErrorLogController extends Controller
 
             $errorLogs = $query->paginate(50)->appends($request->all());
 
-            return view('errors.logs.index', compact('errorLogs'));
+            // Get unique users for filter dropdown
+            $users = DB::table('error_logs')
+                ->select(DB::raw('DISTINCT JSON_EXTRACT(context, "$.user_id") as user_id, JSON_EXTRACT(context, "$.user_name") as user_name'))
+                ->whereNotNull('context')
+                ->get()
+                ->filter(function($user) {
+                    return !empty($user->user_id) && $user->user_id != 'null';
+                })
+                ->map(function($user) {
+                    return [
+                        'id' => trim($user->user_id, '"'),
+                        'name' => trim($user->user_name ?? 'Unknown', '"')
+                    ];
+                })
+                ->unique('id')
+                ->sortBy('name')
+                ->values();
+
+            return view('errors.logs.index', compact('errorLogs', 'users'));
         } catch (\Exception $e) {
             Log::error('ErrorLogController | search() | Error searching logs', [
                 'error' => $e->getMessage(),

@@ -14,7 +14,8 @@
                                 <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"></path>
                                 <path d="M12 16h.01"></path>
                             </svg>
-                            Error Logs
+                            Recent Error Logs
+                            <small class="text-muted">(Newest First)</small>
                         </h3>
                         <div class="ms-auto">
                             <span class="badge bg-red text-white">{{ isset($errorLogs) && method_exists($errorLogs, 'total') ? $errorLogs->total() : 0 }} Total Errors</span>
@@ -40,7 +41,19 @@
                                     <small class="text-muted">9-digit error ID shown to users</small>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label">Controller/Message</label>
+                                    <label class="form-label">User</label>
+                                    <select name="user_id" class="form-select">
+                                        <option value="">All Users</option>
+                                        @foreach($users ?? [] as $user)
+                                            <option value="{{ $user['id'] }}" {{ request('user_id') == $user['id'] ? 'selected' : '' }}>
+                                                {{ $user['name'] }} (ID: {{ $user['id'] }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <small class="text-muted">Filter errors by user</small>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Controller</label>
                                     <input type="text" name="controller" class="form-control" placeholder="UserController" value="{{ request('controller') }}">
                                 </div>
                                 <div class="col-md-2">
@@ -51,14 +64,18 @@
                                     <label class="form-label">Date To</label>
                                     <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
                                 </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">&nbsp;</label>
+                            </div>
+                            <div class="row g-3 mt-2">
+                                <div class="col-md-12">
                                     <div class="d-flex gap-2">
-                                        <button type="submit" class="btn btn-primary w-100">
+                                        <button type="submit" class="btn btn-primary">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></svg>
                                             Search
                                         </button>
-                                        <a href="{{ route('error-logs.index') }}" class="btn btn-link">Clear</a>
+                                        <a href="{{ route('error-logs.index') }}" class="btn btn-link">Clear Filters</a>
+                                        @if(request()->hasAny(['error_id', 'user_id', 'controller', 'date_from', 'date_to']))
+                                            <span class="badge bg-blue align-self-center ms-2">Active Filters</span>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -88,6 +105,7 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Date/Time</th>
+                                    <th>User</th>
                                     <th>Level</th>
                                     <th>Message</th>
                                     <th>IP Address</th>
@@ -96,11 +114,20 @@
                             </thead>
                             <tbody>
                                 @forelse($errorLogs as $log)
+                                @php
+                                    $context = json_decode($log->context, true) ?? [];
+                                    $userName = $context['user_name'] ?? 'Unknown';
+                                    $userId = $context['user_id'] ?? 'N/A';
+                                @endphp
                                 <tr>
                                     <td class="text-muted">{{ $log->id }}</td>
                                     <td>
                                         <span class="text-muted">{{ \Carbon\Carbon::parse($log->created_at)->format('d-M-Y') }}</span><br>
                                         <small class="text-muted">{{ \Carbon\Carbon::parse($log->created_at)->format('H:i:s') }}</small>
+                                    </td>
+                                    <td>
+                                        <strong>{{ $userName }}</strong><br>
+                                        <small class="text-muted">ID: {{ $userId }}</small>
                                     </td>
                                     <td>
                                         @if($log->level_name == 'ERROR')
@@ -112,7 +139,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <div class="text-truncate" style="max-width: 500px;">
+                                        <div class="text-truncate" style="max-width: 400px;">
                                             {{ $log->message }}
                                         </div>
                                         @if(preg_match('/ERROR_ID:(\d+)/', $log->message, $matches))
@@ -134,11 +161,18 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted py-4">
+                                    <td colspan="7" class="text-center text-muted py-4">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-lg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 8a3.5 3 0 0 1 3.5 -3h1a3.5 3 0 0 1 3.5 3a3 3 0 0 1 -2 3a3 4 0 0 0 -2 4" /><path d="M12 19l0 .01" /></svg>
-                                        <p>No error logs found.</p>
-                                        @if(request()->hasAny(['error_id', 'controller', 'date_from', 'date_to']))
-                                            <a href="{{ route('error-logs.index') }}" class="btn btn-primary btn-sm">Clear Search</a>
+                                        <p class="h3">No error logs found!</p>
+                                        <p class="text-muted">
+                                            @if(request()->hasAny(['error_id', 'user_id', 'controller', 'date_from', 'date_to']))
+                                                No errors match your search criteria.
+                                            @else
+                                                Great news! No errors have been logged yet.
+                                            @endif
+                                        </p>
+                                        @if(request()->hasAny(['error_id', 'user_id', 'controller', 'date_from', 'date_to']))
+                                            <a href="{{ route('error-logs.index') }}" class="btn btn-primary btn-sm">View All Errors</a>
                                         @endif
                                     </td>
                                 </tr>
