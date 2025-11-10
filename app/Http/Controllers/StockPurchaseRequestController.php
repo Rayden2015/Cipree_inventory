@@ -609,14 +609,19 @@ public function authoriser_remarks_update(Request $request, $id)
     try {
         $auth = Auth::id();
         $site_id = Auth::user()->site->id;
-        $department_id = Auth::user()->department->id;
+        $department_id = Auth::user()->department->id ?? null;
 
         if(Auth::user()->hasRole('Department Authoriser')) {
-            $spr_lists = StockPurchaseRequest::join('users', 'users.id', '=', 'stock_purchase_requests.user_id')
-                ->where('stock_purchase_requests.site_id', '=', $site_id)
-                ->latest('stock_purchase_requests.created_at') // Specify the table name here
-                ->select('stock_purchase_requests.*')
-                ->paginate(15);
+            if ($department_id === null) {
+                // User doesn't have a department assigned, return empty results
+                $spr_lists = StockPurchaseRequest::where('id', null)->paginate(15);
+            } else {
+                $spr_lists = StockPurchaseRequest::join('users', 'users.id', '=', 'stock_purchase_requests.user_id')
+                    ->where('stock_purchase_requests.site_id', '=', $site_id)
+                    ->latest('stock_purchase_requests.created_at') // Specify the table name here
+                    ->select('stock_purchase_requests.*')
+                    ->paginate(15);
+            }
 
             Log::info("StockPurchaseRequestController | spr_lists() ", [
                 'user_details' => Auth::user(),

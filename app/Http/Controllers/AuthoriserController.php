@@ -43,12 +43,18 @@ class AuthoriserController extends Controller
     
         // If the user is a 'Department Authoriser', load the second query
         if (Auth::user()->hasRole('Department Authoriser')) {
-            $department_id = Auth::user()->department->id;
-            $all_requests = Order::leftJoin('users', 'users.id', '=', 'orders.user_id')
-                ->where('orders.status', '=', 'Requested')
-                ->where('orders.site_id', '=', $site_id)
-                ->where('users.department_id', '=', $department_id)
-                ->get();
+            $department_id = Auth::user()->department->id ?? null;
+            
+            if ($department_id === null) {
+                // User doesn't have a department assigned, return empty results
+                $all_requests = collect([]);
+            } else {
+                $all_requests = Order::leftJoin('users', 'users.id', '=', 'orders.user_id')
+                    ->where('orders.status', '=', 'Requested')
+                    ->where('orders.site_id', '=', $site_id)
+                    ->where('users.department_id', '=', $department_id)
+                    ->get();
+            }
 
             return view('authoriser.index', compact('all_requests'));
         }

@@ -387,14 +387,19 @@ class PurchaseController extends Controller
     
         // Check if the user is a 'Department Authoriser'
         if (Auth::user()->hasRole('Department Authoriser')) {
-            $department_id = Auth::user()->department->id;
+            $department_id = Auth::user()->department->id ?? null;
     
-            // Query for department authoriser role
-            $purchase_lists = Porder::leftJoin('users', 'users.id', '=', 'porders.user_id')
-                ->where('users.department_id', '=', $department_id)
-                ->where('porders.site_id', '=', $site_id) // Compare site_id to the logged-in user's site
-                ->latest()
-                ->paginate(15);
+            if ($department_id === null) {
+                // User doesn't have a department assigned, return empty results
+                $purchase_lists = Porder::where('id', null)->paginate(15);
+            } else {
+                // Query for department authoriser role
+                $purchase_lists = Porder::leftJoin('users', 'users.id', '=', 'porders.user_id')
+                    ->where('users.department_id', '=', $department_id)
+                    ->where('porders.site_id', '=', $site_id) // Compare site_id to the logged-in user's site
+                    ->latest()
+                    ->paginate(15);
+            }
     
             return view('purchases.list', compact('purchase_lists'));
         } 

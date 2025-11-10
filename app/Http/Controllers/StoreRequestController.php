@@ -323,15 +323,21 @@ class StoreRequestController extends Controller
                 ->paginate(15);
         } elseif (Auth::user()->hasRole('Department Authoriser')) {
             // If the user is a Department Authoriser, filter by department
-            $department_id = Auth::user()->department->id;
-            $store_requests = Sorder::leftjoin('users', 'users.id', '=', 'sorders.user_id')
-                ->where('sorders.site_id', '=', $site_id)
-                ->where('users.department_id', '=', $department_id)
-                ->latest('sorders.created_at')
-                ->select('sorders.*')
-                ->paginate(15);
-                   // Return the view with store requests
-        return view('stores.index', compact('store_requests'));
+            $department_id = Auth::user()->department->id ?? null;
+            
+            if ($department_id === null) {
+                // User doesn't have a department assigned, return empty results
+                $store_requests = Sorder::where('id', null)->paginate(15);
+            } else {
+                $store_requests = Sorder::leftjoin('users', 'users.id', '=', 'sorders.user_id')
+                    ->where('sorders.site_id', '=', $site_id)
+                    ->where('users.department_id', '=', $department_id)
+                    ->latest('sorders.created_at')
+                    ->select('sorders.*')
+                    ->paginate(15);
+            }
+            // Return the view with store requests
+            return view('stores.index', compact('store_requests'));
         }
         
      

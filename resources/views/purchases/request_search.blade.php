@@ -145,7 +145,7 @@
                                                                     @if (Auth::user()->site->id != $order->site_id)
                                                                         <td>N/A</td>
                                                                     @else
-                                                                        <td><a href="{{ route('add.to.cart', $order->id) }}"
+                                                                        <td><a href="{{ route('add.to.cart', $order->inventory_item_id) }}"
                                                                                 class="btn btn-primary">Add</a></td>
                                                                     @endif
                                                                 
