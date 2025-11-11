@@ -186,11 +186,21 @@ class DashboardNavigationController extends Controller
             'message' => 'Fetching pending stock approvals.'
          ]);
          $site_id = Auth::user()->site->id;
+         $missingDepartment = false;
          if (Auth::user()->hasRole('Department Authoriser')) {
             $department_id = Auth::user()->department->id ?? null;
             
             if ($department_id === null) {
-               $pending_stock_approvals = Sorder::where('id', null)->paginate(15);
+               $missingDepartment = true;
+               Log::warning('Department Authoriser without department viewing pending stock approvals', [
+                  'user_id' => Auth::id(),
+                  'site_id' => $site_id
+               ]);
+               $pending_stock_approvals = Sorder::with(['request_by', 'enduser'])
+                  ->where('sorders.site_id', '=', $site_id)
+                  ->whereNull('sorders.approval_status')
+                  ->latest('sorders.created_at')
+                  ->paginate(15);
             } else {
                $pending_stock_approvals = Sorder::with(['request_by', 'enduser'])
                   ->leftJoin('users', 'users.id', '=', 'sorders.user_id')
@@ -201,14 +211,16 @@ class DashboardNavigationController extends Controller
                   ->select('sorders.*') // Select all columns from sorders
                   ->paginate(15);
             }
-      //   dd($pending_stock_approvals);
-         return view('homepages.pending_stock_approvals', compact('pending_stock_approvals'));
-         // dd($pending_stock_approvals);
+         return view('homepages.pending_stock_approvals', compact('pending_stock_approvals', 'missingDepartment'));
          }
 
-         $pending_stock_approvals = Sorder::where('site_id', '=', $site_id)->whereNull('approval_status')->latest()->paginate(15);
+         $pending_stock_approvals = Sorder::with(['request_by', 'enduser'])
+            ->where('site_id', '=', $site_id)
+            ->whereNull('approval_status')
+            ->latest()
+            ->paginate(15);
 
-         return view('homepages.pending_stock_approvals', compact('pending_stock_approvals'));
+         return view('homepages.pending_stock_approvals', compact('pending_stock_approvals', 'missingDepartment'));
       } catch (\Exception $e) {
          return $this->handleError($e, 'pending_stock_approvals()');
       }

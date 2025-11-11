@@ -49,6 +49,12 @@
             </div>
         @endif
 
+        @if (!empty($missingDepartment) && $missingDepartment)
+            <div class="alert alert-warning">
+                Your account is not linked to a department. Showing all pending stock approvals for {{ Auth::user()->site->name ?? 'this site' }}.
+            </div>
+        @endif
+
 
             <div class="card-body">
                 <table id="example1" class="table table-bordered table-striped">
