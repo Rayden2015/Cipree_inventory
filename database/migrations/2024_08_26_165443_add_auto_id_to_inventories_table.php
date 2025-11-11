@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('inventories', function (Blueprint $table) {
-            //
-            $table->bigIncrements('id')->first(); // Adds an auto-incrementing 'id' column
-        });
+        if (! Schema::hasColumn('inventories', 'id')) {
+            Schema::table('inventories', function (Blueprint $table) {
+                $table->bigIncrements('id')->first();
+            });
+        }
     }
 
     /**
@@ -22,8 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('inventories', function (Blueprint $table) {
-            $table->dropColumn('id');
-        });
+        if (Schema::hasColumn('inventories', 'id')) {
+            Schema::table('inventories', function (Blueprint $table) {
+                $table->dropColumn('id');
+            });
+        }
     }
 };

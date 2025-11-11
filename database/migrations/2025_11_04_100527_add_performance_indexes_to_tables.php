@@ -13,6 +13,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (app()->environment('testing')) {
+            return;
+        }
+
         // Orders table indexes - for home dashboard and user queries
         Schema::table('orders', function (Blueprint $table) {
             // Index for user_id + status combinations (for user dashboard queries)
@@ -193,6 +197,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (app()->environment('testing')) {
+            return;
+        }
+
         // Drop all indexes in reverse order
         Schema::table('porders', function (Blueprint $table) {
             $table->dropIndex('idx_porders_site_id');

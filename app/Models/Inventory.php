@@ -26,6 +26,11 @@ protected $attributes = [
         return $this->belongsTo(Supplier::class,'supplier_id');
     }
 
+    public function deliveredBy()
+    {
+        return $this->belongsTo(User::class, 'delivered_by');
+    }
+
     public function delivery(){
         return $this->belongsTo(User::class);
     }

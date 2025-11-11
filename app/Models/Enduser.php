@@ -16,6 +16,16 @@ class Enduser extends Model
         return $this->belongsTo(Site::class,'site_id');
     }
 
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    public function section()
+    {
+        return $this->belongsTo(Section::class, 'section_id');
+    }
+
     public function departmente(){
         return $this->belongsTo(Department::class,'department_id');
     }
