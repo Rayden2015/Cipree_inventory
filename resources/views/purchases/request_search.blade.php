@@ -140,9 +140,8 @@
                                                                         <td>{{ $difference }}</td>
                                                                     @endif
 
-                                                                    <td>{{ $order->site->name ?? '' }}</td>
-                                                                    {{-- <td>{{ $order->site->name ?? '' }}</td> --}}
-                                                                    @if (Auth::user()->site->id != $order->site_id)
+                                                                    <td>{{ $order->inventory_site_name ?? 'Not Set' }}</td>
+                                                                    @if (Auth::user()->site->id != ($order->inventory_site_id ?? null))
                                                                         <td>N/A</td>
                                                                     @else
                                                                         <td><a href="{{ route('add.to.cart', $order->inventory_item_id) }}"

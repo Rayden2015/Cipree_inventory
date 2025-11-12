@@ -86,14 +86,21 @@ class StoreRequestController extends Controller
                 // Fix N+1 query by eager loading site relationship and fixing WHERE clause grouping
                 $inventory = Item::with(['site', 'category', 'user'])
                     ->join('inventory_items', 'items.id', '=', 'inventory_items.item_id')
-                    ->where('inventory_items.site_id', '=', $site_id)
+                    ->leftJoin('sites', 'inventory_items.site_id', '=', 'sites.id')
                     ->where('inventory_items.quantity', '>', '0')
                     ->where(function($query) use ($request) {
                         $query->where('items.item_description', 'like', "%" . $request->search . "%")
                             ->orWhere('items.item_part_number', 'like', "%" . $request->search . "%")
                             ->orWhere('items.item_stock_code', 'like', "%" . $request->search . "%");
                     })
-                    ->select('items.*', 'inventory_items.quantity', 'inventory_items.id as inventory_item_id')
+                    ->select(
+                        'items.*',
+                        'inventory_items.quantity',
+                        'inventory_items.id as inventory_item_id',
+                        'inventory_items.site_id as inventory_site_id',
+                        'sites.name as inventory_site_name'
+                    )
+                    ->orderBy('inventory_items.site_id')
                     ->get();
 
                 Log::info('StoreRequestController | requester_search() | ', [
