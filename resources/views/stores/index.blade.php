@@ -43,6 +43,11 @@
                         Your account is not linked to a department. Showing all stock requests for {{ Auth::user()->site->name ?? 'this site' }}.
                     </div>
                 @endif
+                @if (!empty($missingSite) && $missingSite)
+                    <div class="alert alert-warning m-3">
+                        Your account is not linked to a site. Showing stock requests across all sites.
+                    </div>
+                @endif
 
                 <div class="card-body">
                     <table id="example1" class="table table-bordered table-striped">

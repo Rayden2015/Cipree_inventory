@@ -92,11 +92,11 @@
                             <tr>
                                 <td>{{ $in->id }}</td>
                                 <td>{{ date('d-m-Y (H:i)', strtotime($in->delivered_on)) }}</td>
-<!-- Delivery Reference Number -->
+<!-- SR Number -->
 <td>
-    @if ($in->sorder_id && $in->delivery_reference_number)
+    @if ($in->sorder_id)
         <a href="{{ route('sorders.store_list_view', ['id' => $in->sorder_id]) }}">
-            {{ $in->delivery_reference_number }}
+            {{ $in->request_number ?? $in->delivery_reference_number ?? 'Not Found' }}
         </a>
     @else
         Not Found

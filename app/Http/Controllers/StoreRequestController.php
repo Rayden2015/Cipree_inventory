@@ -323,6 +323,7 @@ class StoreRequestController extends Controller
         // }
 
         $missingDepartment = false;
+        $missingSite = false;
 
         if (Auth::user()->hasRole('Super Admin')) {
             // If the user is a Super Admin, get all store requests without department filtering
@@ -353,15 +354,25 @@ class StoreRequestController extends Controller
                     ->select('sorders.*')
                     ->paginate(15);
             }
-            return view('stores.index', compact('store_requests', 'missingDepartment'));
+            return view('stores.index', compact('store_requests', 'missingDepartment', 'missingSite'));
         } else {
-            $store_requests = Sorder::with(['request_by', 'enduser'])
-                ->where('site_id', '=', $site_id)
-                ->latest()
-                ->paginate(15);
+            if ($site_id === null) {
+                $missingSite = true;
+                Log::warning('User without site viewing store requests', [
+                    'user_id' => Auth::id()
+                ]);
+                $store_requests = Sorder::with(['request_by', 'enduser'])
+                    ->latest('created_at')
+                    ->paginate(15);
+            } else {
+                $store_requests = Sorder::with(['request_by', 'enduser'])
+                    ->where('site_id', '=', $site_id)
+                    ->latest('created_at')
+                    ->paginate(15);
+            }
         }
 
-        return view('stores.index', compact('store_requests', 'missingDepartment'));
+        return view('stores.index', compact('store_requests', 'missingDepartment', 'missingSite'));
     }
 
     public function store_list_view($id)
@@ -646,18 +657,36 @@ class StoreRequestController extends Controller
     public function store_officer_lists()
     {
         try {
-            $site_id = Auth::user()->site->id;
-            // Fix N+1 query by eager loading user relationships
-            $officer_lists = Sorder::with(['enduser', 'request_by', 'user'])
-                ->where('approval_status', '=', 'approved')
-                ->where('site_id', '=', $site_id)
-                ->latest('id')
-                ->paginate(15);
+            $site_id = Auth::user()->site->id ?? null;
+            $missingSite = false;
+            
+            if ($site_id === null) {
+                $missingSite = true;
+                Log::warning('Store Officer without site viewing store requests', [
+                    'user_id' => Auth::id(),
+                    'user_name' => Auth::user()->name,
+                    'url' => request()->fullUrl()
+                ]);
+                // Fallback to showing all approved store requests
+                $officer_lists = Sorder::with(['enduser', 'request_by', 'user'])
+                    ->where('approval_status', '=', 'Approved')
+                    ->latest('id')
+                    ->paginate(15);
+            } else {
+                // Fix N+1 query by eager loading user relationships
+                $officer_lists = Sorder::with(['enduser', 'request_by', 'user'])
+                    ->where('approval_status', '=', 'Approved')
+                    ->where('site_id', '=', $site_id)
+                    ->latest('id')
+                    ->paginate(15);
+            }
+            
             Log::info('StoreRequestController | store_officer_lists()', [
                 'user_details' => Auth::user(),
-                'result_count' => $officer_lists->total()
+                'result_count' => $officer_lists->total(),
+                'site_id' => $site_id
             ]);
-            return view('stores.officer_lists', compact('officer_lists'));
+            return view('stores.officer_lists', compact('officer_lists', 'missingSite'));
         } catch (\Exception $e) {
             return $this->handleError($e, 'store_officer_lists()');
         }
@@ -908,6 +937,7 @@ class StoreRequestController extends Controller
                     'sorder_parts.sub_total', 
                     'sorders.delivery_reference_number', 
                     'inventories.grn_number', 
+                    'sorders.request_number',
                     'sorders.enduser_id',
                     'sorders.delivered_on',
                     'inventory_items.location_id',
@@ -922,7 +952,10 @@ class StoreRequestController extends Controller
                     $subQuery->where('endusers.asset_staff_id', 'like', $searchTerm)
                         ->orWhere('items.item_description', 'like', $searchTerm)
                         ->orWhere('items.item_part_number', 'like', $searchTerm)
-                        ->orWhere('items.item_stock_code', 'like', $searchTerm);
+                        ->orWhere('items.item_stock_code', 'like', $searchTerm)
+                        ->orWhere('sorders.delivery_reference_number', 'like', $searchTerm)
+                        ->orWhere('sorders.request_number', 'like', $searchTerm)
+                        ->orWhere('inventories.grn_number', 'like', $searchTerm);
                 });
             }
     

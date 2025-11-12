@@ -105,7 +105,7 @@
                                 <!-- Clickable Delivery Reference Number -->
                                 <td>
                                     <a href="{{ route('sorders.store_list_view', $in->sorder->id) }}">
-                                        {{ $in->sorder->delivery_reference_number ?? '' }}
+                                        {{ $in->sorder->request_number ?? $in->sorder->delivery_reference_number ?? '' }}
                                     </a>
                                 </td>
             

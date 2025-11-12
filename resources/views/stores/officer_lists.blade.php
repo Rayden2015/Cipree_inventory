@@ -59,6 +59,12 @@
             </div>
         @endif
 
+        @if (!empty($missingSite) && $missingSite)
+            <div class="alert alert-warning m-3">
+                Your account is not linked to a site. Showing all approved stock requests.
+            </div>
+        @endif
+
             <div class="card-body">
                 <table id="example1" class="table table-bordered table-striped">
                     <thead>

@@ -383,8 +383,9 @@ class PurchaseController extends Controller
     public function purchase_list()
     {
         // Get the site ID from the authenticated user
-        $site_id = Auth::user()->site->id;
+        $site_id = Auth::user()->site->id ?? null;
         $missingDepartment = false;
+        $missingSite = false;
 
         // Check if the user is a 'Department Authoriser'
         if (Auth::user()->hasRole('Department Authoriser')) {
@@ -396,32 +397,64 @@ class PurchaseController extends Controller
                     'user_id' => Auth::id(),
                     'site_id' => $site_id
                 ]);
-                $purchase_lists = Porder::with(['supplier'])
-                    ->where('porders.site_id', '=', $site_id)
-                    ->where('porders.is_draft', '=', false)
-                    ->latest()
-                    ->paginate(15);
+                if ($site_id === null) {
+                    $missingSite = true;
+                    $purchase_lists = Porder::with(['supplier'])
+                        ->where('porders.is_draft', '=', false)
+                        ->latest('created_at')
+                        ->paginate(15);
+                } else {
+                    $purchase_lists = Porder::with(['supplier'])
+                        ->where('porders.site_id', '=', $site_id)
+                        ->where('porders.is_draft', '=', false)
+                        ->latest('created_at')
+                        ->paginate(15);
+                }
             } else {
                 // Query for department authoriser role
-                $purchase_lists = Porder::leftJoin('users', 'users.id', '=', 'porders.user_id')
-                    ->where('users.department_id', '=', $department_id)
-                    ->where('porders.site_id', '=', $site_id) // Compare site_id to the logged-in user's site
-                    ->latest()
-                    ->select('porders.*')
-                    ->paginate(15);
+                if ($site_id === null) {
+                    $missingSite = true;
+                    $purchase_lists = Porder::leftJoin('users', 'users.id', '=', 'porders.user_id')
+                        ->where('users.department_id', '=', $department_id)
+                        ->where('porders.is_draft', '=', false)
+                        ->latest('porders.created_at')
+                        ->select('porders.*')
+                        ->paginate(15);
+                } else {
+                    $purchase_lists = Porder::leftJoin('users', 'users.id', '=', 'porders.user_id')
+                        ->where('users.department_id', '=', $department_id)
+                        ->where('porders.site_id', '=', $site_id) // Compare site_id to the logged-in user's site
+                        ->where('porders.is_draft', '=', false)
+                        ->latest('porders.created_at')
+                        ->select('porders.*')
+                        ->paginate(15);
+                }
             }
 
-            return view('purchases.list', compact('purchase_lists', 'missingDepartment'));
+            return view('purchases.list', compact('purchase_lists', 'missingDepartment', 'missingSite'));
         } 
 
-        // Default query for authoriser role
-        $purchase_lists = Porder::with(['supplier'])
-            ->where('is_draft', '=', false) // Assuming you want to check for draft orders
-            ->where('site_id', '=', $site_id)
-            ->latest()
-            ->paginate(15);
+        if ($site_id === null) {
+            $missingSite = true;
+            Log::warning('User without site viewing purchase requests', [
+                'user_id' => Auth::id(),
+                'user_name' => Auth::user()->name,
+                'url' => request()->fullUrl()
+            ]);
+            $purchase_lists = Porder::with(['supplier'])
+                ->where('is_draft', '=', false)
+                ->latest('created_at')
+                ->paginate(15);
+        } else {
+            // Default query for authoriser role
+            $purchase_lists = Porder::with(['supplier'])
+                ->where('is_draft', '=', false) // Assuming you want to check for draft orders
+                ->where('site_id', '=', $site_id)
+                ->latest('created_at')
+                ->paginate(15);
+        }
 
-        return view('purchases.list', compact('purchase_lists', 'missingDepartment'));
+        return view('purchases.list', compact('purchase_lists', 'missingDepartment', 'missingSite'));
     }
     
     

@@ -904,7 +904,8 @@ class InventoryController extends Controller
                             ->orWhere('items.item_description', 'like', "%" . $request->search . "%")
                             ->orWhere('items.item_part_number', 'like', "%" . $request->search . "%")
                             ->orWhere('items.item_stock_code', 'like', "%" . $request->search . "%")
-                            ->orWhere('inventories.po_number', 'like', "%" . $request->search . "%");
+                            ->orWhere('inventories.po_number', 'like', "%" . $request->search . "%")
+                            ->orWhere('inventories.grn_number', 'like', "%" . $request->search . "%");
                     })
                     ->where('inventory_item_details.site_id', '=', $site_id)
                     ->orderBy('inventories.created_at', 'desc')

@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         if (! Schema::hasColumn('inventories', 'id')) {
-            Schema::table('inventories', function (Blueprint $table) {
+        Schema::table('inventories', function (Blueprint $table) {
                 $table->bigIncrements('id')->first();
-            });
+        });
         }
     }
 
@@ -24,9 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         if (Schema::hasColumn('inventories', 'id')) {
-            Schema::table('inventories', function (Blueprint $table) {
-                $table->dropColumn('id');
-            });
+        Schema::table('inventories', function (Blueprint $table) {
+            $table->dropColumn('id');
+        });
         }
     }
 };
