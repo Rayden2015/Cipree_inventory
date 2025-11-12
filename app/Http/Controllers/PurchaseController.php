@@ -384,33 +384,44 @@ class PurchaseController extends Controller
     {
         // Get the site ID from the authenticated user
         $site_id = Auth::user()->site->id;
-    
+        $missingDepartment = false;
+
         // Check if the user is a 'Department Authoriser'
         if (Auth::user()->hasRole('Department Authoriser')) {
             $department_id = Auth::user()->department->id ?? null;
-    
+
             if ($department_id === null) {
-                // User doesn't have a department assigned, return empty results
-                $purchase_lists = Porder::where('id', null)->paginate(15);
+                $missingDepartment = true;
+                Log::warning('Department Authoriser without department viewing purchase requests', [
+                    'user_id' => Auth::id(),
+                    'site_id' => $site_id
+                ]);
+                $purchase_lists = Porder::with(['supplier'])
+                    ->where('porders.site_id', '=', $site_id)
+                    ->where('porders.is_draft', '=', false)
+                    ->latest()
+                    ->paginate(15);
             } else {
                 // Query for department authoriser role
                 $purchase_lists = Porder::leftJoin('users', 'users.id', '=', 'porders.user_id')
                     ->where('users.department_id', '=', $department_id)
                     ->where('porders.site_id', '=', $site_id) // Compare site_id to the logged-in user's site
                     ->latest()
+                    ->select('porders.*')
                     ->paginate(15);
             }
-    
-            return view('purchases.list', compact('purchase_lists'));
+
+            return view('purchases.list', compact('purchase_lists', 'missingDepartment'));
         } 
-    
+
         // Default query for authoriser role
-        $purchase_lists = Porder::where('is_draft', '=', false) // Assuming you want to check for draft orders
+        $purchase_lists = Porder::with(['supplier'])
+            ->where('is_draft', '=', false) // Assuming you want to check for draft orders
             ->where('site_id', '=', $site_id)
             ->latest()
             ->paginate(15);
-    
-        return view('purchases.list', compact('purchase_lists'));
+
+        return view('purchases.list', compact('purchase_lists', 'missingDepartment'));
     }
     
     

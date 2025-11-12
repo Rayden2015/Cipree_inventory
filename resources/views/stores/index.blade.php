@@ -38,6 +38,11 @@
                     {{-- <h3 class="card-title">DataTable with default features</h3> --}}
                 </div>
                 <!-- /.card-header -->
+                @if (!empty($missingDepartment) && $missingDepartment)
+                    <div class="alert alert-warning m-3">
+                        Your account is not linked to a department. Showing all stock requests for {{ Auth::user()->site->name ?? 'this site' }}.
+                    </div>
+                @endif
 
                 <div class="card-body">
                     <table id="example1" class="table table-bordered table-striped">

@@ -315,19 +315,29 @@ class StoreRequestController extends Controller
         //         return view('stores.index', compact('store_requests'));
         // }
 
+        $missingDepartment = false;
+
         if (Auth::user()->hasRole('Super Admin')) {
             // If the user is a Super Admin, get all store requests without department filtering
             $store_requests = Sorder::leftjoin('users', 'users.id', '=', 'sorders.user_id')
                 ->where('sorders.site_id', '=', $site_id)
                 ->latest('sorders.created_at')
+                ->select('sorders.*')
                 ->paginate(15);
         } elseif (Auth::user()->hasRole('Department Authoriser')) {
             // If the user is a Department Authoriser, filter by department
             $department_id = Auth::user()->department->id ?? null;
             
             if ($department_id === null) {
-                // User doesn't have a department assigned, return empty results
-                $store_requests = Sorder::where('id', null)->paginate(15);
+                $missingDepartment = true;
+                Log::warning('Department Authoriser without department viewing store requests', [
+                    'user_id' => Auth::id(),
+                    'site_id' => $site_id
+                ]);
+                $store_requests = Sorder::with(['request_by', 'enduser'])
+                    ->where('site_id', '=', $site_id)
+                    ->latest('created_at')
+                    ->paginate(15);
             } else {
                 $store_requests = Sorder::leftjoin('users', 'users.id', '=', 'sorders.user_id')
                     ->where('sorders.site_id', '=', $site_id)
@@ -336,15 +346,15 @@ class StoreRequestController extends Controller
                     ->select('sorders.*')
                     ->paginate(15);
             }
-            // Return the view with store requests
-            return view('stores.index', compact('store_requests'));
+            return view('stores.index', compact('store_requests', 'missingDepartment'));
+        } else {
+            $store_requests = Sorder::with(['request_by', 'enduser'])
+                ->where('site_id', '=', $site_id)
+                ->latest()
+                ->paginate(15);
         }
-        
-     
-        
 
-        $store_requests = Sorder::where('site_id', '=', $site_id)->latest()->paginate(15);
-        return view('stores.index', compact('store_requests'));
+        return view('stores.index', compact('store_requests', 'missingDepartment'));
     }
 
     public function store_list_view($id)
