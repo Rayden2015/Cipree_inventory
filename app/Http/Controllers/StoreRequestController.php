@@ -308,30 +308,50 @@ class StoreRequestController extends Controller
         }
     }
 
-    public function store_lists()
+    public function store_lists(Request $request)
     {
-        $site_id = Auth::user()->site->id;
-      
-
-        // if (Auth::user()->hasRole('Department Authoriser')) {
-        //     $store_requests = Sorder::leftjoin('users', 'users.id', '=', 'sorders.user_id')
-        //         ->where('sorders.site_id', '=', $site_id)
-        //         ->where('users.department_id', '=', $department_id)
-        //         ->latest()
-        //         ->paginate(15);
-        //         return view('stores.index', compact('store_requests'));
-        // }
-
+        $site_id = Auth::user()->site->id ?? null;
         $missingDepartment = false;
         $missingSite = false;
 
+        // Build base query
+        $query = Sorder::query();
+
+        // Apply search filters if provided (single search parameter that searches all fields)
+        $hasSearch = $request->filled('search');
+        
+        if ($hasSearch) {
+            $searchTerm = '%' . $request->search . '%';
+            
+            $query->leftJoin('sorder_parts', 'sorders.id', '=', 'sorder_parts.sorder_id')
+                  ->leftJoin('items', 'sorder_parts.item_id', '=', 'items.id')
+                  ->leftJoin('endusers', 'sorders.enduser_id', '=', 'endusers.id')
+                  ->select('sorders.*')
+                  ->distinct();
+
+            // CRITICAL: Always filter by site_id in search to prevent cross-site data leakage
+            if ($site_id !== null) {
+                $query->where('sorders.site_id', '=', $site_id);
+                // Also filter sorder_parts by site_id to ensure data integrity
+                $query->where('sorder_parts.site_id', '=', $site_id);
+            }
+
+            // Search across all parameters: item number (stock code/part number), request number, and end user
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('items.item_stock_code', 'like', $searchTerm)
+                  ->orWhere('items.item_part_number', 'like', $searchTerm)
+                  ->orWhere('sorders.request_number', 'like', $searchTerm)
+                  ->orWhere('endusers.asset_staff_id', 'like', $searchTerm);
+            });
+        }
+
+        // Apply role-based filters - ALWAYS apply these regardless of search
         if (Auth::user()->hasRole('Super Admin')) {
             // If the user is a Super Admin, get all store requests without department filtering
-            $store_requests = Sorder::leftjoin('users', 'users.id', '=', 'sorders.user_id')
-                ->where('sorders.site_id', '=', $site_id)
-                ->latest('sorders.created_at')
-                ->select('sorders.*')
-                ->paginate(15);
+            // Site filter already applied in search, or apply here if no search
+            if (!$hasSearch && $site_id !== null) {
+                $query->where('sorders.site_id', '=', $site_id);
+            }
         } elseif (Auth::user()->hasRole('Department Authoriser')) {
             // If the user is a Department Authoriser, filter by department
             $department_id = Auth::user()->department->id ?? null;
@@ -342,35 +362,48 @@ class StoreRequestController extends Controller
                     'user_id' => Auth::id(),
                     'site_id' => $site_id
                 ]);
-                $store_requests = Sorder::with(['request_by', 'enduser'])
-                    ->where('site_id', '=', $site_id)
-                    ->latest('created_at')
-                    ->paginate(15);
+                // Site filter already applied in search, or apply here if no search
+                if (!$hasSearch && $site_id !== null) {
+                    $query->where('sorders.site_id', '=', $site_id);
+                }
             } else {
-                $store_requests = Sorder::leftjoin('users', 'users.id', '=', 'sorders.user_id')
-                    ->where('sorders.site_id', '=', $site_id)
-                    ->where('users.department_id', '=', $department_id)
-                    ->latest('sorders.created_at')
-                    ->select('sorders.*')
-                    ->paginate(15);
+                // Join users table for department filtering
+                // Note: If search already joined users, this will be ignored by Laravel
+                $query->leftJoin('users', 'users.id', '=', 'sorders.user_id')
+                      ->where('users.department_id', '=', $department_id);
+                
+                // Site filter already applied in search, or apply here if no search
+                if (!$hasSearch && $site_id !== null) {
+                    $query->where('sorders.site_id', '=', $site_id);
+                }
+                
+                if (!$hasSearch) {
+                    $query->select('sorders.*');
+                }
             }
-            return view('stores.index', compact('store_requests', 'missingDepartment', 'missingSite'));
         } else {
-            if ($site_id === null) {
-                $missingSite = true;
-                Log::warning('User without site viewing store requests', [
-                    'user_id' => Auth::id()
-                ]);
-                $store_requests = Sorder::with(['request_by', 'enduser'])
-                    ->latest('created_at')
-                    ->paginate(15);
-            } else {
-                $store_requests = Sorder::with(['request_by', 'enduser'])
-                    ->where('site_id', '=', $site_id)
-                    ->latest('created_at')
-                    ->paginate(15);
+            // Default role - apply site filter
+            // Site filter already applied in search, or apply here if no search
+            if (!$hasSearch) {
+                if ($site_id === null) {
+                    $missingSite = true;
+                    Log::warning('User without site viewing store requests', [
+                        'user_id' => Auth::id(),
+                        'user_name' => Auth::user()->name,
+                        'url' => request()->fullUrl()
+                    ]);
+                    // No site filter for users without site
+                } else {
+                    $query->where('sorders.site_id', '=', $site_id);
+                }
             }
         }
+
+        // Eager load relationships and paginate
+        $store_requests = $query->with(['request_by', 'enduser'])
+                                ->latest('sorders.created_at')
+                                ->paginate(15)
+                                ->appends($request->all());
 
         return view('stores.index', compact('store_requests', 'missingDepartment', 'missingSite'));
     }

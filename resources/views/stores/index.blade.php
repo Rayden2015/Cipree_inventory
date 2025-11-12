@@ -35,7 +35,20 @@
 
             <div class="card">
                 <div class="card-header">
-                    {{-- <h3 class="card-title">DataTable with default features</h3> --}}
+                    <h3 class="card-title">Store Requests</h3>
+                    <form action="{{ route('sorders.store_lists') }}" method="GET">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" 
+                                   placeholder="Search by Item Number, Request Reference Number, or End User" 
+                                   aria-describedby="basic-addon2" 
+                                   name="search"
+                                   value="{{ request('search') }}">
+                            <div class="input-group-append">
+                                <button class="btn btn-secondary" type="submit">Search</button>
+                                <a href="{{ route('sorders.store_lists') }}" class="btn btn-primary ml-2">Reset</a>
+                            </div>
+                        </div>
+                    </form>
                 </div>
                 <!-- /.card-header -->
                 @if (!empty($missingDepartment) && $missingDepartment)
