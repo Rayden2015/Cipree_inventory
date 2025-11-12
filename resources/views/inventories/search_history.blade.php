@@ -107,9 +107,13 @@
                                 <td>{{ $in->inv_amount ?? '' }}</td>
                                 <td>{{ $in->location->name ?? '' }}</td>                             
                                 <td>
-                                    <a href="{{ route('inventories.show', ['inventory' => $in->inventory_id]) }}">
-                                        {{ $in->grn_number ?? '' }}
-                                    </a>
+                                    @if (!empty($in->inventory_id))
+                                        <a href="{{ route('inventories.show', ['inventory' => $in->inventory_id]) }}">
+                                            {{ $in->grn_number ?? '' }}
+                                        </a>
+                                    @else
+                                        {{ $in->grn_number ?? 'Not Available' }}
+                                    @endif
                                 </td>
 
                             @empty

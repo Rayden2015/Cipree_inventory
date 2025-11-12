@@ -66,11 +66,11 @@ return [
     ],
 
         'error_log' => [
-            'driver' => 'single',
+            'driver' => 'daily',
             'path' => storage_path('logs/errors/error.log'),
             'level' => 'error',
-            'days' => 1,
-            'replace_placeholders' => true
+            'days' => env('ERROR_LOG_DAYS', 30),
+            'replace_placeholders' => true,
         ],
         'single' => [
             'driver' => 'single',
@@ -83,7 +83,7 @@ return [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
-            'days' => 1,
+            'days' => env('LOG_DAILY_DAYS', 14),
             'replace_placeholders' => true,
         ],
 
