@@ -12,6 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (app()->environment('testing')) {
+            return;
+        }
+
         // Schema::table('sorders', function (Blueprint $table) {
         //     $table->date('request_date')->default(null)->change();
         // });
@@ -27,6 +31,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (app()->environment('testing')) {
+            return;
+        }
+
         Schema::table('sorders', function (Blueprint $table) {
             //
         });

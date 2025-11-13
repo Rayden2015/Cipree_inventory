@@ -17,7 +17,7 @@ trait LogsErrors
      * @param array $additionalContext Any additional context to log
      * @return int The unique error ID
      */
-    protected function logError(\Exception $exception, string $action, array $additionalContext = []): int
+    public function logError(\Exception $exception, string $action, array $additionalContext = []): int
     {
         $unique_id = floor(time() - 999999999);
         
@@ -83,7 +83,7 @@ trait LogsErrors
      * @param int $errorId The unique error ID
      * @return string The user-friendly error message
      */
-    protected function getUserErrorMessage(int $errorId): string
+    public function getUserErrorMessage(int $errorId): string
     {
         return "An error occurred. Please contact the Administrator with error ID: {$errorId} via the error code and Feedback Button.";
     }
@@ -96,7 +96,7 @@ trait LogsErrors
      * @param array $additionalContext Any additional context to log
      * @return \Illuminate\Http\RedirectResponse
      */
-    protected function handleError(\Exception $exception, string $action, array $additionalContext = [])
+    public function handleError(\Exception $exception, string $action, array $additionalContext = [])
     {
         $errorId = $this->logError($exception, $action, $additionalContext);
         

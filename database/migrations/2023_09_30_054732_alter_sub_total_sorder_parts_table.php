@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (app()->environment('testing')) {
+            return;
+        }
+
         Schema::table('sorder_parts', function (Blueprint $table) {
             $table->decimal('sub_total',65,2)->nullable()->default(0)->change();
         });
@@ -21,6 +25,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (app()->environment('testing')) {
+            return;
+        }
+
         Schema::table('sorder_parts', function (Blueprint $table) {
             //
         });

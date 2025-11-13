@@ -270,6 +270,14 @@
                                     <tr>
                                         <th
                                             style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
+                                            Work Order #:</th>
+                                        <th
+                                            style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
+                                            {{ $sorder->work_order_number ?? 'N/A' }}</th>
+                                    </tr>
+                                    <tr>
+                                        <th
+                                            style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
                                             Request Date:</th>
                                         <th
                                             style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">

@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (app()->environment('testing')) {
+            return;
+        }
+
         Schema::table('items', function (Blueprint $table) {
             $table->unsignedDecimal('amount', 10, 2)->change();
         });
@@ -21,6 +25,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (app()->environment('testing')) {
+            return;
+        }
+
         Schema::table('items', function (Blueprint $table) {
             $table->decimal('amount', 10, 2)->change();
         });

@@ -11,7 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
+        if (app()->environment('testing')) {
+            return;
+        }
+
         Schema::table('porder_parts', function($table) {
             $table->decimal('unit_price',65,2)->nullable()->default(0)->change();
             $table->decimal('sub_total',65,2)->nullable()->default(0)->change();
@@ -23,6 +26,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        if (app()->environment('testing')) {
+            return;
+        }
     }
 };

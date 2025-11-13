@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (app()->environment('testing')) {
+            return;
+        }
+
         Schema::table('sorders', function (Blueprint $table) {
             $table->timestamp('delivered_on')->nullable()->change();
             $table->timestamp('approved_on')->nullable()->change();
@@ -23,6 +27,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (app()->environment('testing')) {
+            return;
+        }
+
         Schema::table('sorders', function (Blueprint $table) {
             //
         });

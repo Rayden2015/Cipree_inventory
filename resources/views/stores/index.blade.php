@@ -39,7 +39,7 @@
                     <form action="{{ route('sorders.store_lists') }}" method="GET">
                         <div class="input-group mb-3">
                             <input type="text" class="form-control" 
-                                   placeholder="Search by Item Number, Request Reference Number, or End User" 
+                                   placeholder="Search by Item Number, Request Reference Number, Work Order Number, or End User" 
                                    aria-describedby="basic-addon2" 
                                    name="search"
                                    value="{{ request('search') }}">
@@ -69,7 +69,8 @@
                                 <th>ID</th>
                                 <th>Requested By</th>
                                 <th>EndUser</th>
-                                <th>SOD</th>
+                                <th>SR Number</th>
+                                <th>Work Order #</th>
                                 <th>Requested Date</th>
                                 <th>Status</th>
                                 <th>Approval Status</th>
@@ -95,6 +96,7 @@
                                     <td>{{ $rq->request_by->name ?? '' }}</td>
                                     <td>{{ $rq->enduser->asset_staff_id ?? 'Not Set' }}</td>
                                     <td>{{ $rq->request_number ?? '' }}</td>
+                                    <td>{{ $rq->work_order_number ?? 'Not Set' }}</td>
 
 
                                     <td>{{ date('d-m-Y (H:i)', strtotime($rq->request_date)) }}</td>

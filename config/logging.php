@@ -66,7 +66,7 @@ return [
     ],
 
         'error_log' => [
-            'driver' => 'daily',
+            'driver' => env('APP_ENV') === 'testing' ? 'single' : 'daily',
             'path' => storage_path('logs/errors/error.log'),
             'level' => 'error',
             'days' => env('ERROR_LOG_DAYS', 30),

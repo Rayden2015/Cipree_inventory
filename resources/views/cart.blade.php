@@ -157,6 +157,18 @@
                                                             type="text" readonly class="form-control date-pick"
                                                             placeholder={{ $request_date }}>
                                                     </div>
+                                                    <div class="form-group col-md-4">
+                                                        <label for="work_order_number" class="col-form-label">Work Order Number <span class="text-muted">(Optional)</span></label>
+                                                        <input name="work_order_number"
+                                                            id="work_order_number"
+                                                            type="text"
+                                                            value="{{ old('work_order_number') }}"
+                                                            class="form-control"
+                                                            placeholder="Enter work order number">
+                                                        @error('work_order_number')
+                                                            <span class="text-danger small">{{ $message }}</span>
+                                                        @enderror
+                                                    </div>
                                                 </div>
 
                                             </div>

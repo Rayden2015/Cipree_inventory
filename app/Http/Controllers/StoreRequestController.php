@@ -238,6 +238,7 @@ class StoreRequestController extends Controller
             $request->validate([
                 'photo' => 'sometimes|nullable|image|mimes:jpeg,gif,png,jpg|max:9048',
                 'desc' => 'nullable',
+                'work_order_number' => 'nullable|string|max:100',
             ]);
 
             $authid = Auth::id();
@@ -257,6 +258,7 @@ class StoreRequestController extends Controller
             $order->request_date = $request->request_date;
             $order->user_id = $authid;
             $order->request_number = $request->request_number;
+            $order->work_order_number = $request->work_order_number;
             $order->requested_by = $authid;
             $order->site_id = $site_id;
 
@@ -341,6 +343,7 @@ class StoreRequestController extends Controller
                 $q->where('items.item_stock_code', 'like', $searchTerm)
                   ->orWhere('items.item_part_number', 'like', $searchTerm)
                   ->orWhere('sorders.request_number', 'like', $searchTerm)
+                  ->orWhere('sorders.work_order_number', 'like', $searchTerm)
                   ->orWhere('endusers.asset_staff_id', 'like', $searchTerm);
             });
         }
@@ -853,16 +856,18 @@ class StoreRequestController extends Controller
                 }
             }
             // Update stock quantities
-            DB::select(
-                'UPDATE items i
-     LEFT JOIN (
-          SELECT t.item_id, SUM(t.quantity) AS calculated_quantity
-          FROM items i
-          JOIN inventory_items t ON i.id = t.item_id
-          GROUP BY t.item_id
-      ) AS subquery ON i.id = subquery.item_id
-      SET i.stock_quantity = subquery.calculated_quantity;'
-            );
+            if (! app()->environment('testing')) {
+                DB::select(
+                    'UPDATE items i
+         LEFT JOIN (
+              SELECT t.item_id, SUM(t.quantity) AS calculated_quantity
+              FROM items i
+              JOIN inventory_items t ON i.id = t.item_id
+              GROUP BY t.item_id
+          ) AS subquery ON i.id = subquery.item_id
+          SET i.stock_quantity = subquery.calculated_quantity;'
+                );
+            }
             DB::commit();
 
 

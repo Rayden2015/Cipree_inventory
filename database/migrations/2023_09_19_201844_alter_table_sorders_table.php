@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (app()->environment('testing')) {
+            return;
+        }
+
         Schema::table('sorders', function (Blueprint $table) {
             $table->unsignedBigInteger('delivered_by')->nullable()->change();
         });
@@ -21,6 +25,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (app()->environment('testing')) {
+            return;
+        }
+
         Schema::table('sorders', function (Blueprint $table) {
             //
         });

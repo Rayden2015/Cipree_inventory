@@ -12,6 +12,18 @@ use App\Traits\LogsErrors;
 
 class ErrorLoggingTest extends TestCase
 {
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $errorLogDir = storage_path('logs/errors');
+        if (! is_dir($errorLogDir)) {
+            mkdir($errorLogDir, 0755, true);
+        }
+    }
+
     /**
      * Test that LogsErrors trait exists and has required methods
      */
@@ -64,6 +76,11 @@ class ErrorLoggingTest extends TestCase
      */
     public function test_error_logging_format()
     {
+        $logFile = storage_path('logs/errors/error.log');
+        if (file_exists($logFile)) {
+            unlink($logFile);
+        }
+
         // Create a test controller that uses the trait
         $controller = new class extends \App\Http\Controllers\Controller {
             use LogsErrors;
@@ -86,7 +103,6 @@ class ErrorLoggingTest extends TestCase
         $this->assertGreaterThan(0, $errorId, 'Error ID should be positive');
         
         // Check log file for the error
-        $logFile = storage_path('logs/errors/error.log');
         $this->assertFileExists($logFile, 'Error log file should exist');
         
         $logContent = file_get_contents($logFile);

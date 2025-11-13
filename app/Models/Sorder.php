@@ -19,7 +19,7 @@ class Sorder extends Model
         'depart_auth_approved_on',
         'depart_auth_denied_on',
     'type_of_purchase','enduser_id','status','intended_recipient','user_id','image','order_id','purchasing_order_number','delivery_reference_number','supplied_on','approved_on','approved_by','requested_by','requested_on',
-    'invoice_number','delivered_by','delivered_on','total','manual_remarks','site_id','updated_at'];
+    'invoice_number','delivered_by','delivered_on','total','manual_remarks','site_id','updated_at','work_order_number'];
 
 
     public function supplier(){

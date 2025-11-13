@@ -22,6 +22,7 @@ use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Traits\LogsErrors;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 
 class DashboardNavigationController extends Controller
@@ -662,26 +663,70 @@ class DashboardNavigationController extends Controller
       // dd($out_of_stock_items);
       return view('homepages.out_of_stock_view', compact('out_of_stock_view'));
    }
-   public function items_list_site()
+   public function items_list_site(Request $request)
    {
-      $site_id = Auth::user()->site->id;
-      // $items = InventoryItem::join('items','inventory_items.item_id','=','items.id')
-      // ->join('locations','locations.id','=','inventory_items.location_id')
-      // ->join('inventories','inventories.id','=','inventory_items.inventory_id')
-      // ->where('inventory_items.site_id','=',$site_id)
-      // ->where('inventory_items.quantity', '>', '0')->get();
-      // $items = Item::join('inventory_items', 'inventory_items.item_id', '=', 'items.id')
-      //    ->leftjoin('inventories', 'inventories.id', '=', 'inventory_items.inventory_id')
-      //    ->where('inventory_items.site_id', '=', $site_id)
-      //    ->where('items.stock_quantity', '>', 0)
-      //    ->select('items.*', 'inventory_items.*', 'inventories.trans_type')
-      //    ->get();
-      $items = Item::leftjoin('inventory_items', 'inventory_items.item_id', '=', 'items.id')
-      ->leftjoin('inventories', 'inventories.id', '=', 'inventory_items.inventory_id')
-      ->where('inventory_items.site_id', '=', $site_id)
-      ->where('items.stock_quantity', '>', 0)
-      ->select('items.*', 'inventory_items.*', 'inventories.trans_type')
-      ->get();
-      return view('homepages.items_list_site', compact('items'));
+      try {
+         $site_id = Auth::user()->site->id ?? null;
+         $site_name = Auth::user()->site->name ?? 'Unknown Site';
+         
+         if ($site_id === null) {
+            Log::warning('User without site viewing items list', [
+               'user_id' => Auth::id(),
+               'user_name' => Auth::user()->name,
+               'url' => request()->fullUrl()
+            ]);
+            $items = new LengthAwarePaginator([], 0, 15, 1, [
+               'path' => $request->url(),
+               'query' => $request->query(),
+            ]);
+            return view('homepages.items_list_site', compact('items', 'site_name'));
+         }
+         
+         // Build base query - CRITICAL: Filter by inventory_items.site_id to ensure only items at user's site
+         $query = Item::leftjoin('inventory_items', 'inventory_items.item_id', '=', 'items.id')
+            ->leftjoin('inventories', 'inventories.id', '=', 'inventory_items.inventory_id')
+            ->leftjoin('locations', 'inventory_items.location_id', '=', 'locations.id')
+            ->where('inventory_items.site_id', '=', $site_id) // CRITICAL: Only items at user's site
+            ->where('items.stock_quantity', '>', 0)
+            ->select(
+               'items.*', 
+               'inventory_items.id as inventory_item_id',
+               'inventory_items.quantity as inventory_quantity',
+               'inventory_items.amount as inventory_amount',
+               'inventory_items.unit_cost_exc_vat_gh',
+               'inventory_items.created_at as inventory_created_at',
+               'inventory_items.location_id',
+               'inventories.trans_type',
+               'locations.name as location_name'
+            );
+         
+         // Apply search filter if provided
+         if ($request->filled('search')) {
+            $searchTerm = '%' . $request->search . '%';
+            $query->where(function($q) use ($searchTerm) {
+               $q->where('items.item_description', 'like', $searchTerm)
+                 ->orWhere('items.item_part_number', 'like', $searchTerm)
+                 ->orWhere('items.item_stock_code', 'like', $searchTerm)
+                 ->orWhere('locations.name', 'like', $searchTerm)
+                 ->orWhere('inventories.trans_type', 'like', $searchTerm);
+            });
+         }
+         
+         $items = $query->orderBy('items.item_description')
+            ->paginate(20)
+            ->appends($request->all());
+            
+         Log::info('DashboardNavigationController | items_list_site()', [
+            'user_details' => Auth::user(),
+            'result_count' => $items->count(),
+            'site_id' => $site_id,
+            'site_name' => $site_name,
+            'has_search' => $request->filled('search')
+         ]);
+         
+         return view('homepages.items_list_site', compact('items', 'site_name'));
+      } catch (\Exception $e) {
+         return $this->handleError($e, 'items_list_site()');
+      }
    }
 }

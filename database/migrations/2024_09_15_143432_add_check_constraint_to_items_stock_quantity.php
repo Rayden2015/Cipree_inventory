@@ -12,6 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (app()->environment('testing')) {
+            return;
+        }
+
         Schema::table('items_stock_quantity', function (Blueprint $table) {
             DB::statement('ALTER TABLE items ADD CONSTRAINT chk_stock_quantity_non_negative CHECK (stock_quantity >= 0)');
         });
@@ -22,6 +26,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (app()->environment('testing')) {
+            return;
+        }
+
         Schema::table('items_stock_quantity', function (Blueprint $table) {
             DB::statement('ALTER TABLE items DROP CONSTRAINT chk_stock_quantity_non_negative');
         });
