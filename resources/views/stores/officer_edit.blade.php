@@ -7,7 +7,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>Stock Edit </title>
+        <title>Stock Requisition — Process</title>
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <link rel="stylesheet" href="https://cdn.bootcss.com/toastr.js/latest/css/toastr.min.css">
         {{--  --}}
@@ -51,7 +51,8 @@
 
         <div class="card">
 
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">Stock Requisition Processing</h2>
 
                 <a href="{{ route('stores.store_officer_lists') }}" class="btn btn-primary float-right">Back</a>
             </div>
@@ -85,7 +86,7 @@
                     @endif
                     <div class="card card-primary">
                         <div class="card-header">
-                            <h3 class="card-title">Process Supply</h3>
+                            <h3 class="card-title">Process Stock Requisition</h3>
                         </div>
 
                         <div class="card-body">
@@ -107,7 +108,7 @@
                                             <option value=""></option>
                                             @foreach ($endusers as $ed)
                                                 <option {{ $sorder->enduser_id == $ed->id ? 'selected' : '' }}
-                                                    value="{{ $ed->id }}">{{ $ed->asset_staff_id }}</option>
+                                                    value="{{ $ed->id }}">{{ $ed->asset_staff_id }} — {{ $ed->name_description ?? $ed->name ?? '' }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -137,15 +138,8 @@
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Supplied Date: </label>
-                                            @if ($sorder->delivered_on == null)
-                                                <input type="text" value="" readonly name="delivered_on"
-                                                    class="form-control">
-                                            @else
-                                                <input type="text"
-                                                    value="{{ date('d-m-Y (H:i)', strtotime($sorder->delivered_on ?? '.')) }}"
-                                                    readonly name="delivered_on" class="form-control">
-                                            @endif
-
+                                            <input type="text" value="{{ $sorder->delivered_on ? \Carbon\Carbon::parse($sorder->delivered_on)->format('d-m-Y (H:i)') : '--' }}"
+                                                readonly name="delivered_on" class="form-control">
                                         </div>
                                     </div>
                                 @endif
@@ -153,8 +147,8 @@
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Supplied To: </label>
-                                            <input type="text" value="{{ $sorder->supplied_to ?? '' }}"
-                                                name="supplied_to" required class="form-control">
+                                            <input type="text" value="{{ old('supplied_to', $sorder->supplied_to ?? '') }}"
+                                                name="supplied_to" required class="form-control" placeholder="Enter recipient/site">
                                         </div>
                                     </div>
                                 @endif
@@ -170,7 +164,7 @@
                             @if ($sorder->edited_at == '1')
                                 <div class="card-footer">
                                     {{-- <label for="" class="label label-primary float-left" style="width:30%; height:100%;">Transaction Completed</label> --}}
-                                    <button class="btn btn-success" disabled>Transaction Completed</button>
+                                    <span class="badge badge-success p-2">Transaction Completed</span>
                                 </div>
                             @break
 
@@ -182,14 +176,12 @@
                         @elseif ($ph->qty_supplied < -1)
                         @break;
                         <div class="card-footer">
-                            {{-- <button type="submit" class="btn btn-primary">Submit</button> --}}
-                            <label for="" style="font-size:15px;" class="label label-danger">Input Qty
-                                Supplied </label>
+                            <div class="alert alert-warning mb-0">Enter the quantity to be supplied before finalizing.</div>
                         </div>
                     @elseif($ph->qty_supplied > -1)
                         @if ($loop->last)
                             <div class="card-footer">
-                                <button type="submit" class="btn btn-success">Submit</button>
+                                <button type="submit" class="btn btn-success">Finalize Supply</button>
                                 {{-- <label for="">input qty field</label> --}}
                             </div>
                         @endif
@@ -212,7 +204,6 @@
                             <th>ID</th>
                             <th>Description</th>
                             <th>Part Number</th>
-                            <th>Stock Code</th>
                             <th>Location</th>
                             <th>Quantity</th>
                             <th>Quantity Supplied</th>
@@ -227,8 +218,7 @@
                             <tr>
                                 <td>{{ $ph->id }}</td>
                                 <td>{{ $ph->item_details->item_description ?? '' }}</td>
-                                <td>{{ $ph->item_details->item_part_number ?? '' }}</td>
-                                <td>{{ $ph->item_details->item_stock_code ?? '' }}</td>
+                                <td>{{ $ph->item_details->item_part_number ?? $ph->item_details->item_stock_code ?? '' }}</td>
                                 <td><input value="{{ old('location', $ph->item_parts->location->name ?? '') }}"
                                         style="width:120px;" type="text" name="location" readonly
                                         class="form-control"></td>
@@ -240,8 +230,8 @@
                                             type="text" name="quantity" class="form-control" readonly></td>
 
                                     <td><input value="{{ old('qty_supplied', $ph->qty_supplied) }}"
-                                            style="width:80px;" type="text" name="qty_supplied"
-                                            class="form-control"></td>
+                                            style="width:80px;" type="number" name="qty_supplied"
+                                            class="form-control" min="0" max="{{ $ph->quantity }}"></td>
                                     <td><input value="{{ old('remarks', $ph->remarks) }}" style="width:120px;"
                                             type="text" name="remarks" readonly class="form-control"></td>
                                     <td>{{ $ph->unit_price ?? '' }}</td>
@@ -267,7 +257,7 @@
             <label for="manual_remarks">Remarks</label> <br>
             <input type="text" name="manual_remarks" id="manual_remarks" style="width:30%"
                 class="form-control" value="{{ $sorder->manual_remarks }}"> <br>
-            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="submit" class="btn btn-success">Save</button>
         </form>
     </div>
     @endif

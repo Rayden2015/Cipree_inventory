@@ -496,7 +496,7 @@ class StoreRequestController extends Controller
     {
         try {
             $request->validate([
-                'qty_supplied' => 'gte:0',
+                'qty_supplied' => 'numeric|min:0',
             ]);
 
             $sorder = SorderPart::find($id);
@@ -510,40 +510,38 @@ class StoreRequestController extends Controller
             $quantity = InventoryItem::where('id', '=', $inventory_id)->value('quantity');
             $sorder_quantity =  SorderPart::where('id', '=', $id)->value('quantity');
 
-            if ($request->qty_supplied > $quantity || $request->qty_supplied > $sorder_quantity) {
+            $requestedQuantity = (float) ($sorder_quantity ?? 0);
+            $availableQuantity = is_null($quantity) ? null : (float) $quantity;
+            $suppliedQuantity = (float) $request->qty_supplied;
 
-                return back()->with('message', 'Quantity not available!');
-            } else {
-
-                $sorder->qty_supplied = $request->qty_supplied;
-                // $sorder->remarks = $request->remarks;
-                if ($sorder->qty_supplied >= $request->quantity) {
-                    $sorder->remarks = 'Fully Supplied';
-                } else if ($sorder->qty_supplied == '0') {
-                    $sorder->remarks = 'Not Supplied';
-                } else {
-                    $sorder->remarks = 'Partially Supplied';
-                }
-
-                $sorder->save();
-                Log::info('Quantity before', [
-                    'Edited_by' => $authid,
-                    'Details' => $request->all(),
-                ]);
-                if ($sorder->qty_supplied < 1) {
-                    $quantity = SorderPart::where('id', '=', $request->id)->value('qty_supplied');
-                    $unit_price = SorderPart::where('id', '=', $request->id)->value('unit_price');
-                    $sub_total = $quantity * $unit_price;
-                    SorderPart::where('id', $request->id)->update(['sub_total' => $sub_total]);
-                } else {
-                    $qty_supplied = SorderPart::where('id', '=', $request->id)->value('qty_supplied');
-                    $unit_price = SorderPart::where('id', '=', $request->id)->value('unit_price');
-                    $sub_total = $qty_supplied * $unit_price;
-                    SorderPart::where('id', $request->id)->update(['sub_total' => $sub_total]);
-                }
-
-                return redirect()->back();
+            if ($suppliedQuantity > $requestedQuantity) {
+                return back()->with('message', 'Quantity supplied cannot exceed the requested quantity.');
             }
+
+            if (! is_null($availableQuantity) && $suppliedQuantity > $availableQuantity) {
+                return back()->with('message', 'Quantity not available in stock.');
+            }
+
+            $sorder->qty_supplied = $suppliedQuantity;
+            // $sorder->remarks = $request->remarks;
+            if ($sorder->qty_supplied >= $requestedQuantity) {
+                $sorder->remarks = 'Fully Supplied';
+            } elseif ($sorder->qty_supplied == 0.0) {
+                $sorder->remarks = 'Not Supplied';
+            } else {
+                $sorder->remarks = 'Partially Supplied';
+            }
+
+            $sorder->save();
+            Log::info('Quantity before', [
+                'Edited_by' => $authid,
+                'Details' => $request->all(),
+            ]);
+            $unit_price = SorderPart::where('id', '=', $request->id)->value('unit_price');
+            $sub_total = $sorder->qty_supplied * ($unit_price ?? 0);
+            SorderPart::where('id', $request->id)->update(['sub_total' => $sub_total]);
+
+            return redirect()->back();
         } catch (\Exception $e) {
             return $this->handleError($e, 'sorder_update()');
         }
@@ -776,9 +774,33 @@ class StoreRequestController extends Controller
             'supplier_id' => 'nullable',
             'type_of_purchase' => 'nullable',
             'quantity' => 'gte:0', // Ensure quantity is not negative during validation
+            'supplied_to' => 'required|string|max:255',
         ]);
 
         $deliverynum = Sorder::where('id', '=', $id)->value('request_number');
+
+        if ($purchase->depart_auth_approval_status !== 'Approved' || $purchase->approval_status !== 'Approved') {
+            return redirect()->back()->withError('This request must be fully approved before it can be processed by Stores.');
+        }
+
+        $sorderPartsForValidation = SorderPart::with('item_details')->where('sorder_id', $id)->get();
+
+        if ($sorderPartsForValidation->isEmpty()) {
+            return redirect()->back()->withError('No request lines found to process.');
+        }
+
+        foreach ($sorderPartsForValidation as $part) {
+            $requestedQuantity = (float) ($part->quantity ?? 0);
+            $suppliedQuantity = (float) ($part->qty_supplied ?? 0);
+
+            if ($suppliedQuantity < 0) {
+                return redirect()->back()->withError('Quantity supplied cannot be negative for ' . ($part->item_details->item_description ?? 'an item') . '.');
+            }
+
+            if ($suppliedQuantity > $requestedQuantity) {
+                return redirect()->back()->withError('Quantity supplied (' . $suppliedQuantity . ') cannot exceed the requested quantity (' . $requestedQuantity . ') for ' . ($part->item_details->item_description ?? 'an item') . '.');
+            }
+        }
 
         try {
             DB::beginTransaction();

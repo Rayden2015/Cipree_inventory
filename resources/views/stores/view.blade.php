@@ -1,4 +1,5 @@
 @extends('layouts.admin')
+@section('title', 'Stock Requisition')
 @section('content')
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
@@ -79,7 +80,8 @@
                 width: 100%;
                 border-collapse: collapse;
                 border-spacing: 0;
-                margin-bottom: 20px
+                margin-bottom: 20px;
+                font-size: 14px;
             }
 
             .def td,
@@ -162,8 +164,13 @@
 
             @media print {
                 .invoice {
-                    font-size: 11px !important;
+                    font-size: 12px !important;
                     overflow: hidden !important
+                }
+
+                .invoice table td,
+                .invoice table th {
+                    font-size: 13px !important;
                 }
 
                 .invoice footer {
@@ -200,8 +207,9 @@
 
         <div class="invoice overflow-auto">
             {{-- print button --}}
-            <a href="#" id="printbtn" onclick="window.print()" class="float-left"> <img
-                    src="{{ asset('assets/images/icons/printer.png') }}" style="width:30px; height:30px;"></a>
+            <button type="button" id="printbtn" onclick="window.print()" class="btn btn-success btn-sm float-left">
+                <i class="fas fa-print"></i> Print
+            </button>
             {{-- end of print button --}}
             {{-- download button --}}
             {{-- <a href="{{ route('sorders.generatesorderPDF',$sorder->id) }}" id="backbtn" class="float-left" style="padding-left:10px;"><img
@@ -222,10 +230,17 @@
             <div style="min-width: 600px">
                 <header>
 
+                    @php
+                        $documentLogo = asset('assets/images/icons/company.png');
+                        if (!empty($company->image) && file_exists(public_path('images/company/' . $company->image))) {
+                            $documentLogo = asset('images/company/' . $company->image);
+                        }
+                    @endphp
+
                     <div class="row">
                         <div class="col">
                             <a target="_blank">
-                                <img src="{{ asset('images/company/' . $company->image) }}"
+                                <img src="{{ $documentLogo }}"
                                     style="height: 80px; width: 250px;" alt="company image" data-holder-rendered="true" />
                             </a>
                             <br>
@@ -281,7 +296,7 @@
                                             Request Date:</th>
                                         <th
                                             style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
-                                            {{ date('d-m-Y H:i:s', strtotime($sorder->request_date)) }}</th>
+                                            {{ $sorder->request_date ? \Carbon\Carbon::parse($sorder->request_date)->format('d-m-Y (H:i)') : '--' }}</th>
                                     </tr>
                                     <tr>
                                         <th
@@ -291,14 +306,20 @@
                                             style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
                                             {{ $sorder->request_by->name ?? ' ' }} </th>
                                     </tr>
-                                    {{-- <tr>
-                                        <th
-                                            style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
+                                    <tr>
+                                        <th style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
+                                            SR Status:</th>
+                                        <th style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
+                                            {{ $sorder->status ? ucfirst(strtolower($sorder->status)) : 'Pending' }}
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
                                             Supplied To:</th>
-                                        <th
-                                            style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
-                                            {{ $sorder->supplied_to ?? ' ' }}</th>
-                                    </tr> --}}
+                                        <th style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
+                                            {{ $sorder->supplied_to ?? '--' }}
+                                        </th>
+                                    </tr>
                                     <tr>
                                         <th
                                             style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
@@ -326,7 +347,7 @@
                                 </table>
 
                             </div>
-                            <div style="margin-right: 50px;">
+                            <div style="margin-right: 50px;" class="ml-auto text-right">
 
                                 <table style="width:450px; font-size:12px;">
                                     {{-- department approval status --}}
@@ -361,7 +382,7 @@
                                             </th>
                                             <th
                                                 style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
-                                                {{ $sorder->depart_auth_approved_on ?? '' }}
+                                                {{ $sorder->depart_auth_approved_on ? \Carbon\Carbon::parse($sorder->depart_auth_approved_on)->format('d-m-Y (H:i)') : '--' }}
                                             </th>
                                         </tr>
                                         {{-- end of department approved on --}}
@@ -387,7 +408,7 @@
                                             </th>
                                             <th
                                                 style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
-                                                {{ $sorder->depart_auth_denied_on ?? '' }}
+                                                {{ $sorder->depart_auth_denied_on ? \Carbon\Carbon::parse($sorder->depart_auth_denied_on)->format('d-m-Y (H:i)') : '--' }}
                                             </th>
                                         </tr>
                                         {{-- end of department denied on --}}
@@ -555,9 +576,9 @@
                     </table>
                     {{-- <label for="" class="float-right"><p style="padding-right: 10px;">Total (USD): </p>  {{ $sorder->total ?? '' }} </label> <br> --}}
                     <div style=" padding: 10px; width:40%;">
-                        <p style="font-weight: bold;">Supplied by:  {{ $sorder->user->name ?? ' ' }}</p>
-                        <p style="font-weight: bold;">Supplied On: {{ $sorder->delivered_on ?? ' ' }}</p>
-                        <p style="font-weight: bold;">Received in Good Condition by: {{ $sorder->supplied_to ?? ' ' }}</p>
+                        <p style="font-weight: bold;">Supplied by:  {{ $sorder->user->name ?? '--' }}</p>
+                        <p style="font-weight: bold;">Supplied On: {{ $sorder->delivered_on ? \Carbon\Carbon::parse($sorder->delivered_on)->format('d-m-Y (H:i)') : '--' }}</p>
+                        <p style="font-weight: bold;">Received in Good Condition by: {{ $sorder->supplied_to ?? '--' }}</p>
                         
                         <p style="font-weight: bold;">Signed by: ....................................</p> <br>
                     </div>
@@ -607,16 +628,12 @@
                     @endif
                     {{-- end of depart auth approval process --}}
                     {{-- process button or edit  --}}
-                    @if (
-                        (Auth::user()->hasRole('store_officer') &&
-                            $sorder->approval_status == 'Approved' &&
-                            $sorder->depart_auth_approval_status == 'Approved') ||
-                            (Auth::user()->hasRole('store_assistant') &&
-                                $sorder->approval_status == 'Approved' &&
-                                $sorder->depart_auth_approval_status == 'Approved'))
+                    @if ((Auth::user()->hasRole('store_officer') || Auth::user()->hasRole('store_assistant'))
+                        && $sorder->status !== 'Supplied'
+                        && $sorder->approval_status === 'Approved'
+                        && $sorder->depart_auth_approval_status === 'Approved')
                         <a href="{{ route('stores.store_officer_edit', $sorder->id) }}"
-                            class="btn btn-success float-right" style="padding-right:10px;" id="approvebtn">Process</a>
-                    @else
+                            class="btn btn-success float-right mt-3" id="process">Process</a>
                     @endif
                     {{-- end of process or edit button --}}
                 </main>

@@ -152,10 +152,15 @@ class EnduserController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'department_id' => 'required|exists:departments,id',
+        ]);
+
         try {
             $site_id = Auth::user()->site->id;
             Enduser::create([
                 'asset_staff_id' => $request->asset_staff_id,
+                'name' => $request->name_description ?? $request->asset_staff_id,
                 'name_description' => $request->name_description,
                 'department' => $request->department,
                 'section' => $request->section,
@@ -165,10 +170,11 @@ class EnduserController extends Controller
                 // 'bic' => $request->bic,
                 'manufacturer' => $request->manufacturer,
                 'designation' => $request->designation,
+                'status' => $request->status,
                 'section_id' => $request->section_id,
                 'department_id' => $request->department_id,
                 'site_id' => $site_id,
-                // 'enduser_category_id' => $request->enduser_category_id,
+                'enduser_category_id' => $request->enduser_category_id,
             ]);
             $authId = Auth::user()->name;
             Log::info(
@@ -180,7 +186,7 @@ class EnduserController extends Controller
             );
           
             return redirect()->route('endusers.index')->withSuccess('Successfully updated');
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
             Log::channel('error_log')->error('EndUserController | Store() Error ' . $unique_id ,[
                 'message' => $e->getMessage(),
@@ -197,14 +203,15 @@ class EnduserController extends Controller
 
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'asset_staff_id' => 'unique:endusers,asset_staff_id,' . $id, // Unique validation except for the current user
+            'department_id' => 'required|exists:departments,id',
+            // Add other validation rules as needed
+        ]);
+
         try {
             $enduser = Enduser::find($id);
 
-            $request->validate([
-                'asset_staff_id' => 'unique:endusers,asset_staff_id,' . $id, // Unique validation except for the current user
-                // Add other validation rules as needed
-            ]);
-            
             // Check if Enduser exists
             if (!$enduser) {
                 return redirect()->back()->withError(['Enduser not found']);
@@ -212,6 +219,7 @@ class EnduserController extends Controller
             
             // Update the Enduser fields
             $enduser->asset_staff_id = $request->input('asset_staff_id');
+            $enduser->name = $request->input('name_description') ?? $enduser->name;
             $enduser->name_description = $request->input('name_description');
             $enduser->department = $request->input('department');
             $enduser->section = $request->input('section');
@@ -229,7 +237,7 @@ class EnduserController extends Controller
             
             $enduser->department_id = $request->input('department_id');
             $enduser->section_id = $request->input('section_id');
-            $enduser->enduser_category_id = $request->input('enduser_category_id');
+            $enduser->enduser_category_id = $request->input('enduser_category_id', $enduser->enduser_category_id);
             
             // Save the changes
             $enduser->save();

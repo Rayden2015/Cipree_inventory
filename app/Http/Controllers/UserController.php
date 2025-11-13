@@ -97,7 +97,7 @@ class UserController extends Controller
                     'phone' => 'nullable|string|unique:users,phone',
                     'address' => 'nullable|string|max:500',
                     'image' => 'sometimes|nullable|image|mimes:jpeg,gif,png,jpg|max:10240', // 10MB
-                    'department_id' => 'nullable|integer|exists:departments,id',
+                    'department_id' => 'required|integer|exists:departments,id',
                     'section_id' => 'nullable|integer|exists:sections,id',
                     'status' => 'nullable|in:Active,Inactive',
                 ]);
@@ -371,7 +371,7 @@ class UserController extends Controller
                     'status' => 'nullable|string',
                     'role_id' => 'nullable|integer',
                     'site_id' => 'nullable|integer|exists:sites,id',
-                    'department_id' => 'nullable|integer|exists:departments,id',
+                    'department_id' => 'required|integer|exists:departments,id',
                     'section_id' => 'nullable|integer|exists:sections,id',
                 ]);
             } catch (\Illuminate\Validation\ValidationException $e) {

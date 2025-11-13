@@ -248,6 +248,7 @@
                                     <th style="width:20px;">Discount %</th>
 
                                     <th> Location</th>
+                                    <th>Last Updated By</th>
                                     <th>Edit</th>
 
                                 </tr>
@@ -316,6 +317,12 @@
                                                         @endforeach
                                                     </select>
 
+                                                </td>
+                                                <td class="align-middle">
+                                                    <strong>{{ optional($ph->lastUpdatedBy)->name ?? 'N/A' }}</strong>
+                                                    @if (! empty($ph->last_updated_at))
+                                                        <br><small class="text-muted">{{ optional($ph->last_updated_at)->format('d-M-Y H:i') }}</small>
+                                                    @endif
                                                 </td>
                                                 <td>
                                                     @if (Auth::user()->hasRole('store_officer'))

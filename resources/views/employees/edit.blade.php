@@ -127,13 +127,16 @@
                     <div class="form-group">
                         <label for="department">Department:</label>
                         <select data-placeholder="Choose..." name="department_id" id="department_id"
-                        class="select-search form-control">
-                        <option value=""></option>
+                        class="select-search form-control @error('department_id') is-invalid @enderror" required>
+                        <option value="" disabled {{ $employee->department_id ? '' : 'selected' }}>Please Select</option>
                         @foreach ($departments as $dt)
                             <option {{ $employee->department_id == $dt->id ? 'selected' : '' }}
                                 value="{{ $dt->id }}">{{ $dt->name }}</option>
                         @endforeach
                     </select>
+                    @if ($errors->has('department_id'))
+                        <span class="text-danger">{{ $errors->first('department_id') }}</span>
+                    @endif
                     </div>
                 </div>
 

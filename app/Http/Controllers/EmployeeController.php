@@ -35,6 +35,7 @@ class EmployeeController extends Controller
     {
         $request->validate([
             'email' => 'required|email|unique:employees',
+            'department_id' => 'required|exists:departments,id',
             // Add validation for other fields
         ]);
         
@@ -104,6 +105,7 @@ class EmployeeController extends Controller
     {
         $request->validate([
             'email' => 'required|email|unique:employees,email,' . $employee->id,
+            'department_id' => 'required|exists:departments,id',
             // Add validation for other fields
         ]);
     

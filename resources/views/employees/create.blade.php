@@ -133,14 +133,17 @@
                         <label for="department">Department:</label>
                         <select id="department_id" type="text" 
                         class="form-control @error('department_id') is-invalid @enderror"
-                        name="department_id" autocomplete="department_id" autofocus>
+                        name="department_id" autocomplete="department_id" autofocus required>
                         <option value="" selected hidden>Please Select</option>
 
                         @foreach ($departments as $dt)
-                            <option {{ old('dt') == $dt->id ? 'selected' : '' }}
+                            <option {{ old('department_id') == $dt->id ? 'selected' : '' }}
                                 value="{{ $dt->id }}">{{ $dt->name }}</option>
                         @endforeach
                     </select>
+                    @if ($errors->has('department_id'))
+                        <span class="text-danger">{{ $errors->first('department_id') }}</span>
+                    @endif
                     </div>
                 </div>
 

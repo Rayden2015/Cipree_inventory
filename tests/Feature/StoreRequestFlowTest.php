@@ -146,27 +146,9 @@ class StoreRequestFlowTest extends TestCase
         $this->assertEquals($inventoryItem->id, $sorderPart->inventory_id);
 
         $sorderPart->update([
-            'qty_supplied' => 2,
+            'qty_supplied' => 3, // intentionally higher than requested to validate oversupply protection
             'unit_price' => $inventoryItem->unit_cost_exc_vat_gh,
         ]);
-
-        $this->actingAs($departmentAuthoriser)
-            ->from(route('sorders.store_lists'))
-            ->get(route('stores.depart_auth_approved_status', $sorder->id))
-            ->assertStatus(302);
-
-        $sorder->refresh();
-        $this->assertEquals('Approved', $sorder->depart_auth_approval_status);
-        $this->assertEquals($departmentAuthoriser->id, $sorder->depart_auth_approved_by);
-
-        $this->actingAs($approver)
-            ->from(route('sorders.store_lists'))
-            ->get(route('stores.approved_status', $sorder->id))
-            ->assertStatus(302);
-
-        $sorder->refresh();
-        $this->assertEquals('Approved', $sorder->approval_status);
-        $this->assertEquals($approver->id, $sorder->approved_by);
 
         $storeOfficerPayload = [
             'tax' => 0,
@@ -178,6 +160,49 @@ class StoreRequestFlowTest extends TestCase
             'invoice_number' => 'INV-1001',
             'supplied_to' => 'Operations',
         ];
+
+        // Store officer cannot process before approvals are complete
+        $this->actingAs($storeOfficer)
+            ->from(route('stores.store_officer_edit', $sorder->id))
+            ->put(route('stores.store_officer_update', $sorder->id), $storeOfficerPayload)
+            ->assertStatus(302)
+            ->assertSessionHas('error', 'This request must be fully approved before it can be processed by Stores.');
+
+        $sorder->refresh();
+
+        // Department Authoriser approval
+        $this->actingAs($departmentAuthoriser)
+            ->from(route('sorders.store_lists'))
+            ->get(route('stores.depart_auth_approved_status', $sorder->id))
+            ->assertStatus(302);
+
+        $sorder->refresh();
+        $this->assertEquals('Approved', $sorder->depart_auth_approval_status);
+        $this->assertEquals($departmentAuthoriser->id, $sorder->depart_auth_approved_by);
+
+        // Final Authoriser approval
+        $this->actingAs($approver)
+            ->from(route('sorders.store_lists'))
+            ->get(route('stores.approved_status', $sorder->id))
+            ->assertStatus(302);
+
+        $sorder->refresh();
+        $this->assertEquals('Approved', $sorder->approval_status);
+        $this->assertEquals($approver->id, $sorder->approved_by);
+
+        // Oversupply (3 > 2) should be rejected even after approvals
+        $response = $this->actingAs($storeOfficer)
+            ->from(route('stores.store_officer_edit', $sorder->id))
+            ->put(route('stores.store_officer_update', $sorder->id), $storeOfficerPayload);
+
+        $response->assertStatus(302)
+            ->assertSessionHas('error', function ($message) {
+                return str_contains($message, 'Quantity supplied (3) cannot exceed the requested quantity (2)');
+            });
+
+        // Correct the quantity and process successfully
+        $sorderPart->refresh();
+        $sorderPart->update(['qty_supplied' => 2]);
 
         $this->actingAs($storeOfficer)
             ->from(route('stores.store_officer_edit', $sorder->id))

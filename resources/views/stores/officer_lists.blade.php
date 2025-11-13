@@ -72,6 +72,7 @@
                             <th>ID</th>
                             <th data-priority="1">Request Number</th>
                             <th>Requester</th>
+                            <th>Requested Date</th>
                             <th>Approval Status</th>
                             <th>Supply Status</th>
                             <th>Enduser</th>
@@ -88,6 +89,7 @@
                                 <td>{{ $order->id }}</td>
                                 <td>{{ $order->request_number ?? 'not set' }}</td>
                                 <td>{{ $order->request_by->name ?? '' }}</td>
+                                <td>{{ $order->request_date ? \Carbon\Carbon::parse($order->request_date)->format('d-m-Y (H:i)') : '--' }}</td>
                                 <td>{{ $order->approval_status ?? 'not set ' }}</td>
 
                                 <td>{{ $order->status ?? '' }}</td>

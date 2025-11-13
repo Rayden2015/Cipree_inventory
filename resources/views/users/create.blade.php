@@ -113,7 +113,7 @@
                                         <option value="" selected hidden>Please Select</option>
 
                                         @foreach ($sites as $st)
-                                            <option {{ old('st') == $st->id ? 'selected' : '' }}
+                                            <option {{ old('site_id') == $st->id ? 'selected' : '' }}
                                                 value="{{ $st->id }}">
                                                 {{ $st->name }}</option>
                                         @endforeach
@@ -133,11 +133,14 @@
                                         <option value="" selected hidden>Please Select</option>
 
                                         @foreach ($departments as $dp)
-                                            <option {{ old('dp') == $dp->id ? 'selected' : '' }}
+                                            <option {{ old('department_id') == $dp->id ? 'selected' : '' }}
                                                 value="{{ $dp->id }}">
                                                 {{ $dp->name }}</option>
                                         @endforeach
                                     </select>
+                                    @if ($errors->has('department_id'))
+                                        <span class="text-danger">{{ $errors->first('department_id') }}</span>
+                                    @endif
                                 </div>
                             </div>
 
@@ -153,7 +156,7 @@
                                         <option value="" selected hidden>Please Select</option>
 
                                         @foreach ($sections as $sct)
-                                            <option {{ old('sct') == $sct->id ? 'selected' : '' }}
+                                            <option {{ old('section_id') == $sct->id ? 'selected' : '' }}
                                                 value="{{ $sct->id }}">
                                                 {{ $sct->name }}</option>
                                         @endforeach

@@ -145,13 +145,16 @@
                                 class="col-md-4 col-form-label text-md-end text-start">Site Name</label>
                             <div class="col-md-6">
                                 <select data-placeholder="Choose..." name="site_id" id="site_id"
-                                    class="select-search form-control">
-                                    <option value=""></option>
+                                    class="select-search form-control @error('site_id') is-invalid @enderror" required>
+                                    <option value="" disabled {{ $user->site_id ? '' : 'selected' }}>Please Select</option>
                                     @foreach ($sites as $st)
                                         <option {{ $user->site_id == $st->id ? 'selected' : '' }}
                                             value="{{ $st->id }}">{{ $st->name }}</option>
                                     @endforeach
                                 </select>
+                                @if ($errors->has('site_id'))
+                                    <span class="text-danger">{{ $errors->first('site_id') }}</span>
+                                @endif
                             </div>
 
                         </div>
@@ -162,13 +165,16 @@
                                 class="col-md-4 col-form-label text-md-end text-start">Department</label>
                             <div class="col-md-6">
                                 <select data-placeholder="Choose..." name="department_id" id="department_id"
-                                    class="select-search form-control">
-                                    <option value=""></option>
+                                    class="select-search form-control @error('department_id') is-invalid @enderror" required>
+                                    <option value="" disabled {{ $user->department_id ? '' : 'selected' }}>Please Select</option>
                                     @foreach ($departments as $dp)
                                         <option {{ $user->department_id == $dp->id ? 'selected' : '' }}
                                             value="{{ $dp->id }}">{{ $dp->name }}</option>
                                     @endforeach
                                 </select>
+                                @if ($errors->has('department_id'))
+                                    <span class="text-danger">{{ $errors->first('department_id') }}</span>
+                                @endif
                             </div>
 
                         </div>
@@ -179,13 +185,16 @@
                                 class="col-md-4 col-form-label text-md-end text-start">Section</label>
                             <div class="col-md-6">
                                 <select data-placeholder="Choose..." name="section_id" id="section_id"
-                                    class="select-search form-control">
-                                    <option value=""></option>
+                                    class="select-search form-control @error('section_id') is-invalid @enderror">
+                                    <option value="">{{ __('Please Select') }}</option>
                                     @foreach ($sections as $sct)
                                         <option {{ $user->section_id == $sct->id ? 'selected' : '' }}
                                             value="{{ $sct->id }}">{{ $sct->name }}</option>
                                     @endforeach
                                 </select>
+                                @if ($errors->has('section_id'))
+                                    <span class="text-danger">{{ $errors->first('section_id') }}</span>
+                                @endif
                             </div>
 
                         </div>

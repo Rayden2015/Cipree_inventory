@@ -8,10 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class InventoryItem extends Model
 {
     use HasFactory;
+
+    protected $casts = [
+        'last_updated_at' => 'datetime',
+    ];
+
     protected $fillable = [
         'location_id', 'inventory_id', 'description', 'part_number', 'quantity', 'codes', 'uom', 'category_id',
         'unit_cost_exc_vat_gh', 'unit_cost_exc_vat_usd', 'total_value_gh', 'total_value_usd',
-        'srf', 'erf', 'ats', 'drq', 'remarks', 'amount', 'discount', 'enduser_id','stock_code','item_id','before_discount','site_id','updated_at'
+        'srf', 'erf', 'ats', 'drq', 'remarks', 'amount', 'discount', 'enduser_id','stock_code','item_id','before_discount','site_id','last_updated_by','last_updated_at','updated_at'
     ];
 
     public function inventory()
@@ -42,6 +47,11 @@ class InventoryItem extends Model
     public function site()
     {
         return $this->belongsTo(Site::class,'site_id');
+    }
+
+    public function lastUpdatedBy()
+    {
+        return $this->belongsTo(User::class, 'last_updated_by');
     }
 
 }

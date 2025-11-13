@@ -22,7 +22,7 @@
             <!-- Theme style -->
             <link rel="stylesheet" href="{{ asset('/assets/dist/css/adminlte.min.css') }}">
 
-            <title>Stock Lists</title>
+            <title>Stock Requisitions</title>
 
         </head>
 
@@ -75,100 +75,56 @@
                                 <th>Status</th>
                                 <th>Approval Status</th>
                                 <th>View</th>
-
-                                {{-- @if (Auth::user()->role->name == 'purchasing_officer' ||
-                                        Auth::user()->role->name == 'Super Authoriser' ||
-                                        Auth::user()->role->name == 'store_officer') --}}
-                                        @hasanyrole('purchasing_officer|Super Authoriser|store_officer')
-                                    <th>Edit</th>
-                                @endhasanyrole
-                                @if (Auth::user()->hasRole('purchasing_officer'))
-                                    <th>Delete</th>
-                                @endif
-                                {{-- <th>Export</th> --}}
-
+                                <th class="text-nowrap">Actions</th>
+                                <th>Delete</th>
                             </tr>
                         </thead>
+                        <tbody>
                         @forelse ($store_requests as $rq)
-                            <tbody>
-                                <tr>
-                                    <td>{{ $rq->id }}</td>
-                                    <td>{{ $rq->request_by->name ?? '' }}</td>
-                                    <td>{{ $rq->enduser->asset_staff_id ?? 'Not Set' }}</td>
-                                    <td>{{ $rq->request_number ?? '' }}</td>
-                                    <td>{{ $rq->work_order_number ?? 'Not Set' }}</td>
-
-
-                                    <td>{{ date('d-m-Y (H:i)', strtotime($rq->request_date)) }}</td>
-                                    <td>{{ $rq->status ?? '' }}</td>
-                                    <td>
-                                        {{-- @if ($rq->approval_status == '')
-                                            <a href="{{ route('stores.approved_status', $rq->id) }}"
-                                                class="btn btn-success">Approve</a>
-                                        @elseif ($rq->approval_status == 'Approved')
-                                            <a href="{{ route('stores.denied_status', $rq->id) }}"
-                                                class="btn btn-danger">Deny</a>
-                                        @elseif ($rq->approval_status == 'Denied')
-                                            <a href="{{ route('stores.approved_status', $rq->id) }}"
-                                                class="btn btn-success">Approve</a>
+                            <tr>
+                                <td>{{ $rq->id }}</td>
+                                <td>{{ $rq->request_by->name ?? '' }}</td>
+                                <td>{{ $rq->enduser->asset_staff_id ?? 'Not Set' }}</td>
+                                <td>{{ $rq->request_number ?? '' }}</td>
+                                <td>{{ $rq->work_order_number ?? 'Not Set' }}</td>
+                                <td>{{ date('d-m-Y (H:i)', strtotime($rq->request_date)) }}</td>
+                                <td>{{ $rq->status ?? '' }}</td>
+                                <td>{{ $rq->approval_status ?? 'Pending' }}</td>
+                                <td>
+                                    <a href="{{ route('sorders.store_list_view', $rq->id) }}"
+                                        class="btn btn-secondary btn-sm">View</a>
+                                </td>
+                                <td class="text-nowrap">
+                                    @if ($rq->status === 'Supplied')
+                                        <span class="badge badge-success">Processed</span>
+                                    @elseif ($rq->approval_status !== 'Approved' || $rq->depart_auth_approval_status !== 'Approved')
+                                        <span class="badge badge-warning">Awaiting Approval</span>
+                                    @else
+                                        @if (Auth::user()->hasRole('store_officer') || Auth::user()->hasRole('store_assistant'))
+                                            <a href="{{ route('sorders.store_list_view', $rq->id) }}#process" class="btn btn-outline-success btn-sm">Process</a>
                                         @else
-                                            <a href="{{ route('stores.denied_status', $rq->id) }}"
-                                                class="btn btn-danger">Deny</a>
-                                        @endif --}}
-                                        {{ $rq->approval_status ?? 'Pending' }}
-                                    </td>
-                                    <td>
-                                        <a href="{{ route('sorders.store_list_view', $rq->id) }}"
-                                            class="btn btn-secondary">View</a>
-
-                                    </td>
-
-{{-- 
-                                    @if (Auth::user()->role->name == 'purchasing_officer' ||
-                                            Auth::user()->role->name == 'admin' ||
-                                            Auth::user()->role->name == 'store_officer' ||
-                                            Auth::user()->role->name == 'Super Authoriser') --}}
-                                            @hasanyrole('purchasing_officer|Super Authoriser|store_officer')
-                                        <td>
-                                            @if($rq->status != 'Supplied')
-                                                
-                                           
-                                            <a href="{{ route('sorders.store_list_edit', $rq->id) }}"
-                                                class="btn btn-success">Edit</a>
-                                                @else
-                                                Transaction Completed
-                                                @endif
-
-                                        </td>
-                                    @endhasanyrole
-
-
-                                    {{-- @if (Auth::user()->role->name == 'purchasing_officer' || Auth::user()->role->name == 'admin') --}}
+                                            <a href="{{ route('sorders.store_list_edit', $rq->id) }}" class="btn btn-success btn-sm">Edit</a>
+                                        @endif
+                                    @endif
+                                </td>
+                                <td>
                                     @hasanyrole('purchasing_officer|Admin')
-                                        <td>
-
-                                            <form action="{{ route('purchases.purchase_destroy', $rq->id) }}"
-                                                method="post">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" onclick="return confirm('Are you sure?')"
-                                                    class="btn btn-danger">Delete</button>
-                                            </form>
-                                        </td>
+                                        <form action="{{ route('purchases.purchase_destroy', $rq->id) }}" method="post">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" onclick="return confirm('Are you sure?')"
+                                                class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    @else
+                                        <span class="text-muted">--</span>
                                     @endhasanyrole
-                                    {{-- <td>
-                                    <a href="{{ route('purchases.generatePurchaseOrderPDF', $rq->id) }}"
-                                        class="btn btn-primary">Export</a>
-
-                                </td> --}}
-
-                                @empty
-                                <tr>
-                                    <td class="text-center" colspan="12">Data Not Found!</td>
-                                </tr>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td class="text-center" colspan="11">Data Not Found!</td>
+                            </tr>
                         @endforelse
-
-                        </tr>
                         </tbody>
 
                     </table>
