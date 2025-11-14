@@ -170,6 +170,29 @@ class StoreRequestFlowTest extends TestCase
 
         $sorder->refresh();
 
+        // Supply chain approver cannot approve before the department
+        $this->actingAs($approver)
+            ->from(route('sorders.store_lists'))
+            ->get(route('stores.approved_status', $sorder->id))
+            ->assertStatus(302)
+            ->assertSessionHas('error', 'Department approval must be completed before Supply Chain can approve.');
+
+        $sorder->refresh();
+        $this->assertNull($sorder->approved_by);
+        $this->assertNull($sorder->approved_on);
+
+        // Supply chain approver cannot deny before the department
+        $this->actingAs($approver)
+            ->from(route('sorders.store_lists'))
+            ->get(route('stores.denied_status', $sorder->id))
+            ->assertStatus(302)
+            ->assertSessionHas('error', 'Department approval must be completed before Supply Chain can deny.');
+
+        $sorder->refresh();
+        $this->assertNotEquals('Denied', $sorder->approval_status);
+        $this->assertNull($sorder->approved_by);
+        $this->assertNull($sorder->approved_on);
+
         // Department Authoriser approval
         $this->actingAs($departmentAuthoriser)
             ->from(route('sorders.store_lists'))
@@ -179,6 +202,7 @@ class StoreRequestFlowTest extends TestCase
         $sorder->refresh();
         $this->assertEquals('Approved', $sorder->depart_auth_approval_status);
         $this->assertEquals($departmentAuthoriser->id, $sorder->depart_auth_approved_by);
+        $this->assertNotNull($sorder->depart_auth_approved_on);
 
         // Final Authoriser approval
         $this->actingAs($approver)
@@ -189,6 +213,7 @@ class StoreRequestFlowTest extends TestCase
         $sorder->refresh();
         $this->assertEquals('Approved', $sorder->approval_status);
         $this->assertEquals($approver->id, $sorder->approved_by);
+        $this->assertNotNull($sorder->approved_on);
 
         // Oversupply (3 > 2) should be rejected even after approvals
         $response = $this->actingAs($storeOfficer)
@@ -215,6 +240,7 @@ class StoreRequestFlowTest extends TestCase
 
         $this->assertEquals('Supplied', $sorder->status);
         $this->assertEquals($storeOfficer->id, $sorder->delivered_by);
+        $this->assertNotNull($sorder->delivered_on);
         $this->assertEquals('SR-1001', $sorder->delivery_reference_number);
         $this->assertEquals(8, $inventoryItem->quantity);
         $this->assertEquals($inventoryItem->unit_cost_exc_vat_gh * 8, $inventoryItem->amount);

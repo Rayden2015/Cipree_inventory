@@ -414,7 +414,14 @@ class StoreRequestController extends Controller
     public function store_list_view($id)
     {
         // Fix N+1 query by eager loading relationships
-        $sorder = Sorder::with(['enduser', 'request_by', 'user'])->find($id);
+        $sorder = Sorder::with([
+            'enduser',
+            'request_by',
+            'user',
+            'depart_auth_name',
+            'depart_auth_denied_name',
+            'approve_by',
+        ])->findOrFail($id);
         $company = Company::first();
         // Eager load item relationship to prevent N+1 queries
         $sorder_parts = SorderPart::with(['item', 'inventoryItem.location'])->where('sorder_id', '=', $id)->get();
@@ -610,7 +617,25 @@ class StoreRequestController extends Controller
             $authid = Auth::id();
             $date = Carbon::now()->toDateTimeString();
             $order = Sorder::find($id);
-            $order = Sorder::where('id', '=', $id)->update(['approval_status' => 'Approved', 'approved_by' => $authid, 'approved_on' => $date]);
+
+            if (! $order) {
+                return redirect()->back()->withError('Store requisition not found.');
+            }
+
+            if ($order->depart_auth_approval_status !== 'Approved') {
+                Log::warning('Supply Chain attempted to approve before department approval', [
+                    'sorder_id' => $id,
+                    'user_id' => Auth::id(),
+                    'depart_auth_status' => $order->depart_auth_approval_status,
+                ]);
+                return redirect()->back()->withError('Department approval must be completed before Supply Chain can approve.');
+            }
+
+            $order->update([
+                'approval_status' => 'Approved',
+                'approved_by' => $authid,
+                'approved_on' => $date,
+            ]);
             Log::info('StoreRequestController | approved_status', [
                 'user_details' => Auth::user(),
                 'request_payload' => $order
@@ -660,7 +685,25 @@ class StoreRequestController extends Controller
             $authid = Auth::id();
             $date = Carbon::now();
             $order = Sorder::find($id);
-            $order = Sorder::where('id', '=', $id)->update(['approval_status' => 'Denied', 'approved_by' => $authid, 'approved_on' => $date]);
+
+            if (! $order) {
+                return redirect()->back()->withError('Store requisition not found.');
+            }
+
+            if ($order->depart_auth_approval_status !== 'Approved') {
+                Log::warning('Supply Chain attempted to deny before department approval', [
+                    'sorder_id' => $id,
+                    'user_id' => Auth::id(),
+                    'depart_auth_status' => $order->depart_auth_approval_status,
+                ]);
+                return redirect()->back()->withError('Department approval must be completed before Supply Chain can deny.');
+            }
+
+            $order->update([
+                'approval_status' => 'Denied',
+                'approved_by' => $authid,
+                'approved_on' => $date,
+            ]);
             Log::info('StoreRequestController | denied_status', [
                 'user_details' => Auth::user(),
                 'request_payload' => $order
@@ -1279,7 +1322,14 @@ class StoreRequestController extends Controller
     {
         try {
             // Fix N+1 query by eager loading relationships
-            $sorder = Sorder::with(['enduser', 'request_by', 'user'])->find($id);
+            $sorder = Sorder::with([
+                'enduser',
+                'request_by',
+                'user',
+                'depart_auth_name',
+                'depart_auth_denied_name',
+                'approve_by',
+            ])->findOrFail($id);
             $company = Company::first();
             // Eager load item relationship to prevent N+1 queries
             $sorder_parts = SorderPart::with(['item', 'inventoryItem.location'])->where('sorder_id', '=', $id)->get();
@@ -1345,7 +1395,14 @@ class StoreRequestController extends Controller
 
     public function requester_store_list_view($id)
     {
-        $sorder = Sorder::find($id);
+        $sorder = Sorder::with([
+            'enduser',
+            'request_by',
+            'user',
+            'depart_auth_name',
+            'depart_auth_denied_name',
+            'approve_by',
+        ])->findOrFail($id);
         $company = Company::first();
         $sorder_parts = SorderPart::where('sorder_id', '=', $id)->get();
         // Calculate the total amount from sorder_parts

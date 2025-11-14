@@ -12,8 +12,8 @@ class Porder extends Model
         'part_id', 'description', 'quantity','make',
         'model','serial_number','tax','tax2','tax3',
         'unit_price','currency','supplier_id','comments',
-        'type_of_purchase','enduser_id','status','intended_recipient','user_id','image','order_id','purchasing_order_number','delivery_reference_number',
-        'invoice_number','work_order_ref','suppliers_reference','po_number','date_created','site_id','created_by','is_draft','notes','updated_at'
+        'type_of_purchase','enduser_id','status','approval_status','approved_by','approved_on','intended_recipient','user_id','image','order_id','purchasing_order_number','delivery_reference_number',
+        'invoice_number','work_order_ref','suppliers_reference','po_number','date_created','site_id','created_by','is_draft','notes','depart_auth_approval_status','depart_auth_approved_by','depart_auth_denied_by','depart_auth_approval_status_time','depart_auth_approved_on','depart_auth_denied_on','updated_at'
     ];
 
 

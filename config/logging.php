@@ -5,6 +5,12 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
 
+$stackChannels = ['daily', 'error_log'];
+
+if (env('APP_ENV') !== 'testing') {
+    $stackChannels[] = 'sentry_logs';
+}
+
 return [
 
     /*
@@ -54,8 +60,16 @@ return [
    'channels' => [
     'stack' => [
         'driver' => 'stack',
-        'channels' => ['daily', 'error_log'],
+        'channels' => $stackChannels,
         'ignore_exceptions' => false,
+        
+    ],
+
+    'sentry_logs' => [
+        'driver' => 'sentry',
+        // The minimum logging level at which this handler will be triggered
+        // Available levels: debug, info, notice, warning, error, critical, alert, emergency
+        'level' => env('LOG_LEVEL', 'info'), // defaults to `debug` if not set
     ],
 
     'update_inventory_item' => [

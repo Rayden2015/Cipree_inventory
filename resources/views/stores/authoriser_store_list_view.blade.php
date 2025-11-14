@@ -309,49 +309,84 @@
                                     <tr>
                                         <th
                                             style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
-                                            Approval Status:</th>
+                                            Department Approval Status:</th>
                                         <th
                                             style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
-                                            {{ $sorder->approval_status ?? 'Pending' }}</th>
+                                            {{ $sorder->depart_auth_approval_status ? ucfirst(strtolower($sorder->depart_auth_approval_status)) : 'Pending' }}</th>
                                     </tr>
                                     <tr>
                                         <th
                                             style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
-                                            Approved By:</th>
+                                            Department Authorised By:</th>
                                         <th
                                             style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
-                                            {{ $sorder->approve_by->name ?? '' }}</th>
+                                            {{ $sorder->depart_auth_name->name ?? '--' }}</th>
                                     </tr>
                                     <tr>
                                         <th
                                             style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
-                                            Approved On:</th>
-                                        @if ($sorder->approved_on !== null)
+                                            Department Approved On:</th>
+                                        <th
+                                            style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
+                                            {{ $sorder->depart_auth_approved_on ? \Carbon\Carbon::parse($sorder->depart_auth_approved_on)->format('d-m-Y (H:i)') : '--' }}</th>
+                                    </tr>
+                                    @if($sorder->depart_auth_approval_status === 'Denied')
+                                        <tr>
                                             <th
-                                                style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;background-color:white;">
-                                                {{ date('d-m-Y H:i:s', strtotime($sorder->approved_on ?? '')) }}</th>
-                                        @else
+                                                style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
+                                                Department Denied By:</th>
                                             <th
-                                                style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;background-color:white;">
-                                            </th>
-                                        @endif
+                                                style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
+                                                {{ $sorder->depart_auth_denied_name->name ?? '--' }}</th>
+                                        </tr>
+                                        <tr>
+                                            <th
+                                                style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
+                                                Department Denied On:</th>
+                                            <th
+                                                style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
+                                                {{ $sorder->depart_auth_denied_on ? \Carbon\Carbon::parse($sorder->depart_auth_denied_on)->format('d-m-Y (H:i)') : '--' }}</th>
+                                        </tr>
+                                    @endif
+                                    <tr>
+                                        <th
+                                            style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
+                                            Supply Chain Approval Status:</th>
+                                        <th
+                                            style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
+                                            {{ $sorder->approval_status ? ucfirst(strtolower($sorder->approval_status)) : 'Pending' }}</th>
                                     </tr>
                                     <tr>
                                         <th
                                             style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
-                                            Supplied By:</th>
+                                            Supply Chain Authorised By:</th>
                                         <th
                                             style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
-                                            {{ $sorder->user->name ?? ' ' }}</th>
+                                            {{ $sorder->approve_by->name ?? '--' }}</th>
                                     </tr>
-
                                     <tr>
                                         <th
                                             style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
-                                            Supplied On:</th>
+                                            Supply Chain Approved On:</th>
                                         <th
                                             style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
-                                            {{ $sorder->delivered_on ?? ' ' }}</th>
+                                            {{ $sorder->approved_on ? \Carbon\Carbon::parse($sorder->approved_on)->format('d-m-Y (H:i)') : '--' }}</th>
+                                    </tr>
+                                    <tr>
+                                        <th
+                                            style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
+                                            Stores Processed By:</th>
+                                        <th
+                                            style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
+                                            {{ $sorder->user->name ?? '--' }}</th>
+                                    </tr>
+                                    <tr>
+                                        <th
+                                            style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; font-weight:bold; background-color:white; color:blue;">
+                                            Stores Processed On:</th>
+                                        <th
+                                            style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
+                                            {{ $sorder->delivered_on ? \Carbon\Carbon::parse($sorder->delivered_on)->format('d-m-Y (H:i)') : '--' }}</th>
                                     </tr>
                                     <tr>
                                         <th
@@ -359,7 +394,7 @@
                                             SR Status:</th>
                                         <th
                                             style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white;">
-                                            {{ $sorder->status ?? ' ' }}</th>
+                                            {{ $sorder->status ?? '--' }}</th>
                                     </tr>
                                 </table>
                             </div>
