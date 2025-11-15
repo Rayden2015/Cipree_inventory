@@ -34,7 +34,7 @@
                 <div class="icon">
                     <i class="ion ion-person-add"></i>
                 </div>
-                <a href="{{ route('items.index') }}" class="small-box-footer">More info <i
+                <a href="{{ route('items_list_site') }}" class="small-box-footer">More info <i
                         class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>
@@ -104,25 +104,6 @@
                     <i class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>
-
-        <!-- ./col -->
-        <div class="col-lg-3 col-6">
-
-            <div style="background-color:#19AF9D" class="small-box" id="rcorners1">
-                <div class="inner">
-
-                    <h4 style="color: white; font-family: 'Segoe UI Light';">5 ex</h4>
-
-                    <p style="color: white; font-family: 'Segoe UI Light';">Re-Stock Approvals Pending</p>
-                </div>
-                <div class="icon">
-                    <i class="ion ion-stats-bars"></i>
-                </div>
-                <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-        </div>
-
-        <!-- ./col -->
 
         <!-- ./col -->
         <div class="col-lg-3 col-6">

@@ -40,8 +40,9 @@ class DashboardNavigationController extends Controller
             'user_details' => Auth::user(),
             'message' => 'Fetching pending PO approvals.'
          ]);
-         $site_id = Auth::user()->site->id;
-         if (Auth::user()->hasRole('Department Authoriser')) {
+        $site_id = Auth::user()->site->id;
+        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && ! Auth::user()->hasRole('Super Authoriser');
+        if ($isDepartmentOnly) {
             $department_id = Auth::user()->department->id ?? null;
 
             if ($department_id === null) {
@@ -68,8 +69,9 @@ class DashboardNavigationController extends Controller
             'user_details' => Auth::user(),
             'message' => 'Fetching approved requests.'
          ]);
-         $site_id = Auth::user()->site->id;
-         if (Auth::user()->hasRole('Department Authoriser')) {
+        $site_id = Auth::user()->site->id;
+        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && ! Auth::user()->hasRole('Super Authoriser');
+        if ($isDepartmentOnly) {
             $department_id = Auth::user()->department->id ?? null;
             
             if ($department_id === null) {
@@ -96,8 +98,9 @@ class DashboardNavigationController extends Controller
             'user_details' => Auth::user(),
             'message' => 'Fetching approved POs.'
          ]);
-         $site_id = Auth::user()->site->id;
-         if (Auth::user()->hasRole('Department Authoriser')) {
+        $site_id = Auth::user()->site->id;
+        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && ! Auth::user()->hasRole('Super Authoriser');
+        if ($isDepartmentOnly) {
             $department_id = Auth::user()->department->id ?? null;
             
             if ($department_id === null) {
@@ -125,7 +128,8 @@ class DashboardNavigationController extends Controller
             'message' => 'Fetching processed requests.'
          ]);
          $site_id = Auth::user()->site->id;
-         if (Auth::user()->hasRole('Department Authoriser')) {
+        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && ! Auth::user()->hasRole('Super Authoriser');
+        if ($isDepartmentOnly) {
             $department_id = Auth::user()->department->id ?? null;
             
             if ($department_id === null) {
@@ -153,7 +157,8 @@ class DashboardNavigationController extends Controller
             'message' => 'Fetching pending request approvals.'
          ]);
          $site_id = Auth::user()->site->id;
-         if (Auth::user()->hasRole('Department Authoriser')) {
+        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && ! Auth::user()->hasRole('Super Authoriser');
+        if ($isDepartmentOnly) {
             $department_id = Auth::user()->department->id ?? null;
             
             if ($department_id === null) {
@@ -188,7 +193,8 @@ class DashboardNavigationController extends Controller
          ]);
          $site_id = Auth::user()->site->id;
          $missingDepartment = false;
-         if (Auth::user()->hasRole('Department Authoriser')) {
+        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && ! Auth::user()->hasRole('Super Authoriser');
+        if ($isDepartmentOnly) {
             $department_id = Auth::user()->department->id ?? null;
             
             if ($department_id === null) {
@@ -236,7 +242,8 @@ class DashboardNavigationController extends Controller
             'message' => 'Fetching processed POs.'
          ]);
          $site_id = Auth::user()->site->id;
-         if (Auth::user()->hasRole('Department Authoriser')) {
+        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && ! Auth::user()->hasRole('Super Authoriser');
+        if ($isDepartmentOnly) {
             $department_id = Auth::user()->department->id ?? null;
             
             if ($department_id === null) {
@@ -282,12 +289,13 @@ class DashboardNavigationController extends Controller
          ]);
          $site_id = Auth::user()->site->id;
          // Fix N+1 query by eager loading enduser relationship
-         $sofficer_stock_request_pending = Sorder::with(['enduser', 'request_by', 'user'])
-            ->where('site_id', '=', $site_id)
-            ->where('status', '!=', 'Supplied')
-            ->where('status', '!=', 'Partially Supplied')
-            ->latest()
-            ->paginate(15);
+        $sofficer_stock_request_pending = Sorder::with(['enduser', 'request_by', 'user'])
+           ->where('site_id', '=', $site_id)
+           ->where('status', '!=', 'Supplied')
+           ->where('status', '!=', 'Partially Supplied')
+           ->where('approval_status', '=', 'Approved')
+           ->latest()
+           ->paginate(15);
 
          return view('homepages.sofficer_stock_request_pending', compact('sofficer_stock_request_pending'));
       } catch (\Exception $e) {
