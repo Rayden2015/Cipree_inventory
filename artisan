@@ -1,6 +1,24 @@
 #!/usr/bin/env php
 <?php
 
+// Suppress PHP 8.4 deprecation warnings from vendor packages
+// These warnings occur due to stricter nullable type requirements in PHP 8.4+
+// Note: For complete suppression, use: php -c php.ini artisan [command]
+// Or use the artisan-wrapper.sh script
+if (PHP_VERSION_ID >= 80400) {
+    // Suppress E_DEPRECATED from error reporting as early as possible
+    error_reporting(E_ALL & ~E_DEPRECATED);
+    
+    // Set error handler to catch any deprecation warnings
+    set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+        // Suppress deprecation warnings from all vendor packages
+        if ($errno === E_DEPRECATED && strpos($errfile, '/vendor/') !== false) {
+            return true; // Suppress the warning
+        }
+        return false; // Let other errors through
+    }, E_DEPRECATED);
+}
+
 define('LARAVEL_START', microtime(true));
 
 /*

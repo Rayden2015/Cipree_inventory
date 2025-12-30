@@ -1,5 +1,53 @@
 # Production Deployment Checklist
 
+## Critical: File Permissions (Fix 403 Errors)
+
+### After Deploying to Production
+
+**If you see 403 errors on CSS/JS/images, run the permission fix script:**
+
+```bash
+# On your cloud server, run as root or with sudo:
+sudo ./deploy-fix-permissions.sh www-data
+
+# Or specify your web server user:
+sudo ./deploy-fix-permissions.sh apache    # For CentOS/RHEL
+sudo ./deploy-fix-permissions.sh nginx      # For Nginx
+sudo ./deploy-fix-permissions.sh httpd      # For some systems
+```
+
+**Manual permission fix (if script doesn't work):**
+
+```bash
+# Set ownership (replace www-data with your web server user)
+sudo chown -R www-data:www-data /path/to/your/project
+
+# Set directory permissions
+sudo find /path/to/your/project -type d -exec chmod 755 {} \;
+
+# Set file permissions
+sudo find /path/to/your/project -type f -exec chmod 644 {} \;
+
+# Special permissions for storage and cache
+sudo chmod -R 775 storage bootstrap/cache
+sudo chown -R www-data:www-data storage bootstrap/cache
+
+# Public directory must be accessible
+sudo chmod -R 755 public
+```
+
+**Common web server users:**
+- **Debian/Ubuntu**: `www-data`
+- **CentOS/RHEL**: `apache` or `httpd`
+- **Nginx**: `nginx` or `www-data`
+- **Fedora**: `apache`
+
+**Verify permissions are correct:**
+```bash
+ls -la public/assets/plugins/  # Should show readable files
+ls -la storage/                 # Should show writable directories
+```
+
 ## Critical: Error Display Settings
 
 ### Before Deploying to Production

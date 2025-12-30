@@ -9,12 +9,27 @@
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
+    # Allow access to static assets (CSS, JS, images, fonts, etc.)
+    # This prevents 403 errors on static files
+    <FilesMatch "\.(css|js|jpg|jpeg|png|gif|ico|svg|woff|woff2|ttf|eot|map|json)$">
+        <IfModule mod_authz_core.c>
+            # Apache 2.4+
+            Require all granted
+        </IfModule>
+        <IfModule !mod_authz_core.c>
+            # Apache 2.2
+            Order allow,deny
+            Allow from all
+        </IfModule>
+    </FilesMatch>
+
     # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
     # Send Requests To Front Controller...
+    # Only rewrite if the file doesn't exist (allow static assets to be served directly)
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]

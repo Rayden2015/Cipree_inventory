@@ -7,6 +7,32 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## PHP 8.4 Compatibility
+
+This project runs on **PHP 8.4** (matching production). PHP 8.4 has stricter nullable type requirements that may cause deprecation warnings from Laravel 10 and vendor packages. These warnings are harmless and don't affect functionality.
+
+### Suppressing Deprecation Warnings
+
+To suppress these warnings, you have three options:
+
+1. **Use the wrapper script** (recommended):
+   ```bash
+   ./artisan-wrapper.sh serve
+   ./artisan-wrapper.sh migrate
+   ```
+
+2. **Use php.ini directly**:
+   ```bash
+   php -c php.ini artisan serve
+   ```
+
+3. **Create a shell alias** (add to `~/.zshrc`):
+   ```bash
+   alias artisan='php -c php.ini artisan'
+   ```
+
+The `php.ini` file in the project root suppresses deprecation warnings from vendor packages.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
