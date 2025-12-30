@@ -11,6 +11,19 @@
 |
 */
 
+// Suppress Carbon deprecation warnings from vendor package
+// This is a known issue with Carbon and PHP 8.1+ compatibility
+if (PHP_VERSION_ID >= 80100) {
+    set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+        // Suppress deprecation warnings only from Carbon package in vendor directory
+        if ($errno === E_DEPRECATED && strpos($errfile, '/vendor/nesbot/carbon/') !== false) {
+            return true; // Suppress the warning
+        }
+        // Let other errors through to default handler
+        return false;
+    }, E_DEPRECATED);
+}
+
 $app = new Illuminate\Foundation\Application(
     $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
 );

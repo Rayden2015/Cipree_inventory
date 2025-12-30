@@ -61,6 +61,31 @@
         @php $dashboard_included = true; @endphp
     @endif
 
+    @if (!$dashboard_included)
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1 class="m-0">Welcome to Cipree Inventory</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <section class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <p class="text-center">You don't have access to any dashboard yet. Please contact your administrator to assign appropriate permissions.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    @endif
+
     <script>
         setTimeout(function() {
             window.location.reload();

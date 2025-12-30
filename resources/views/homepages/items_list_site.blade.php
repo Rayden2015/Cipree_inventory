@@ -79,7 +79,10 @@
                             <th>Age (Days)</th>
                             <th>Location</th>
                             <th>Purchase Type</th>
+<<<<<<< HEAD
                             <th>Site</th>
+=======
+>>>>>>> 8af09c4 (Add login banner, fix production error display, and suppress Carbon deprecation warnings)
                         </tr>
                     </thead>
                     <tbody>
@@ -99,15 +102,23 @@
                                 </td>
                                 <td>{{ $item->location_name ?? 'Not Set' }}</td>
                                 <td>{{ $item->trans_type ?? 'N/A' }}</td>
+<<<<<<< HEAD
                                 <td><strong>{{ $site_name ?? Auth::user()->site->name ?? 'Unknown' }}</strong></td>
                             </tr>
                         @empty
                             <tr>
                                 <td class="text-center" colspan="9">No items found for this site!</td>
+=======
+                            </tr>
+                        @empty
+                            <tr>
+                                <td class="text-center" colspan="8">No items found for this site!</td>
+>>>>>>> 8af09c4 (Add login banner, fix production error display, and suppress Carbon deprecation warnings)
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
+<<<<<<< HEAD
                 <div class="d-flex justify-content-between align-items-center mt-3">
                     <div class="text-muted">
                         @if ($items->total() > 0)
@@ -120,6 +131,8 @@
                         {{ $items->links('pagination::bootstrap-4') }}
                     </div>
                 </div>
+=======
+>>>>>>> 8af09c4 (Add login banner, fix production error display, and suppress Carbon deprecation warnings)
             </div>
             <!-- /.card-body -->
         </div>

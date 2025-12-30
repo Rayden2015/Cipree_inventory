@@ -170,6 +170,9 @@
         <div class="content-wrapper">
             <!-- Content Header (Page header) -->
             @yield('content')
+            
+            <!-- Banner Modal -->
+            @include('partials.banner')
 
             <!-- Main content -->
             <section class="content" id="def">

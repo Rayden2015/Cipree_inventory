@@ -3,6 +3,39 @@
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
+// Production Safety: Ensure errors are never displayed in production
+// This prevents embarrassing error messages from being shown to users
+// Use $_ENV or getenv() instead of env() since Laravel hasn't bootstrapped yet
+$appEnv = $_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: 'production';
+$appDebug = isset($_ENV['APP_DEBUG']) ? filter_var($_ENV['APP_DEBUG'], FILTER_VALIDATE_BOOLEAN) : (filter_var(getenv('APP_DEBUG'), FILTER_VALIDATE_BOOLEAN) ?: false);
+$isProduction = ($appEnv === 'production') || !$appDebug;
+
+if ($isProduction) {
+    // In production, suppress all error display
+    ini_set('display_errors', '0');
+    ini_set('display_startup_errors', '0');
+    // Errors are still logged, just not displayed
+    error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
+} else {
+    // In development, suppress Carbon deprecation warnings from vendor package
+    // This is a known issue with Carbon and PHP 8.1+ compatibility
+    if (PHP_VERSION_ID >= 80100) {
+        // Temporarily suppress E_DEPRECATED from error reporting for display
+        $originalErrorReporting = error_reporting();
+        error_reporting($originalErrorReporting & ~E_DEPRECATED);
+        
+        // Set error handler to catch Carbon warnings specifically
+        set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+            // Suppress deprecation warnings only from Carbon package in vendor directory
+            if ($errno === E_DEPRECATED && strpos($errfile, '/vendor/nesbot/carbon/') !== false) {
+                return true; // Suppress the warning completely
+            }
+            // Let other errors through to default handler
+            return false;
+        }, E_DEPRECATED | E_STRICT);
+    }
+}
+
 define('LARAVEL_START', microtime(true));
 
 /*

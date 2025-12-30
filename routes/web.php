@@ -71,6 +71,10 @@ Route::resource('suppliers', SupplierController::class);
 Route::get('supplier_search', [SupplierController::class, 'supplier_search'])->name('supplier_search');
 Route::get('logout', [LoginController::class, 'logout'])->name('logout');
 
+// Banner routes
+Route::post('banner/dismiss/session', [HomeController::class, 'dismissBannerSession'])->name('banner.dismiss.session');
+Route::post('banner/dismiss/permanent', [HomeController::class, 'dismissBannerPermanent'])->name('banner.dismiss.permanent');
+
 //myaccount routes
 Route::get('myaccounts', [MyAccountController::class, 'index'])->name('myaccounts.index');
 Route::put('myaccounts/update/{id}', [MyAccountController::class, 'update'])->name('myaccounts.update');

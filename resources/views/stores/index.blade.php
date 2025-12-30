@@ -75,6 +75,7 @@
                                 <th>Status</th>
                                 <th>Approval Status</th>
                                 <th>View</th>
+<<<<<<< HEAD
                                 <th class="text-nowrap">Actions</th>
                                 <th>Delete</th>
                             </tr>
@@ -108,6 +109,30 @@
                                     @endif
                                 </td>
                                 <td>
+=======
+
+                                {{-- @if (Auth::user()->role->name == 'purchasing_officer' ||
+                                        Auth::user()->role->name == 'Super Authoriser' ||
+                                        Auth::user()->role->name == 'store_officer') --}}
+                                        @hasanyrole('purchasing_officer|Super Authoriser|store_officer|store_assistant')
+                                        <td class="text-nowrap">
+                                            @if ($rq->status === 'Supplied')
+                                                <span class="badge badge-success">Processed</span>
+                                            @elseif ($rq->approval_status !== 'Approved' || $rq->depart_auth_approval_status !== 'Approved')
+                                                <span class="badge badge-warning">Awaiting Approval</span>
+                                            @else
+                                                @if (Auth::user()->hasRole('store_officer') || Auth::user()->hasRole('store_assistant'))
+                                                    <a href="{{ route('sorders.store_list_view', $rq->id) }}#process" class="btn btn-outline-success btn-sm">Process</a>
+                                                @else
+                                                    <a href="{{ route('sorders.store_list_edit', $rq->id) }}" class="btn btn-success btn-sm">Edit</a>
+                                                @endif
+                                            @endif
+                                        </td>
+                                    @endhasanyrole
+
+
+                                    {{-- @if (Auth::user()->role->name == 'purchasing_officer' || Auth::user()->role->name == 'admin') --}}
+>>>>>>> 8af09c4 (Add login banner, fix production error display, and suppress Carbon deprecation warnings)
                                     @hasanyrole('purchasing_officer|Admin')
                                         <form action="{{ route('purchases.purchase_destroy', $rq->id) }}" method="post">
                                             @csrf

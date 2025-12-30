@@ -171,7 +171,7 @@ class PermissionSeeder extends Seeder
 
         // Looping and inserting permissions into the Permission table
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission]);
         }
     }
 }

@@ -13,23 +13,39 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        Role::create(['name' => 'Super Admin']);
-        $admin = Role::create(['name' => 'Admin']);
-        $productManager = Role::create(['name' => 'Product Manager']);
+        Role::firstOrCreate(['name' => 'Super Admin']);
+        $admin = Role::firstOrCreate(['name' => 'Admin']);
+        $productManager = Role::firstOrCreate(['name' => 'Product Manager']);
 
-        $admin->givePermissionTo([
-            'create-user',
+        // Only assign permissions if they don't already exist
+        $adminPermissions = [
+            'add-user',
             'edit-user',
             'delete-user',
-            'create-product',
-            'edit-product',
-            'delete-product'
-        ]);
+            'view-user',
+            'add-item',
+            'edit-item',
+            'delete-item',
+            'view-item'
+        ];
 
-        $productManager->givePermissionTo([
-            'create-product',
-            'edit-product',
-            'delete-product'
-        ]);
+        foreach ($adminPermissions as $permission) {
+            if (!$admin->hasPermissionTo($permission)) {
+                $admin->givePermissionTo($permission);
+            }
+        }
+
+        $productManagerPermissions = [
+            'add-item',
+            'edit-item',
+            'delete-item',
+            'view-item'
+        ];
+
+        foreach ($productManagerPermissions as $permission) {
+            if (!$productManager->hasPermissionTo($permission)) {
+                $productManager->givePermissionTo($permission);
+            }
+        }
     }
 }

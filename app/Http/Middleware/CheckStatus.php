@@ -20,6 +20,13 @@ class CheckStatus
      */
     public function handle($request, Closure $next)
     {
+        // Skip status check for login and logout routes to prevent redirect loops
+        $excludedRoutes = ['login', 'logout'];
+        if (in_array($request->route()?->getName(), $excludedRoutes) || 
+            in_array($request->path(), ['login', 'logout'])) {
+            return $next($request);
+        }
+        
         // Check if user is authenticated
         if (Auth::check()) {
             $user = Auth::user();
@@ -42,7 +49,7 @@ class CheckStatus
                 $request->session()->regenerateToken();
                 
                 // Redirect to login with error message
-                return redirect('/login')
+                return redirect()->route('login')
                     ->withErrors(['email' => 'Your account has been deactivated. Please contact the administrator.']);
             }
         }

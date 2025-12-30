@@ -28,4 +28,27 @@ class Handler extends ExceptionHandler
         });
     }
     
+    /**
+     * Render an exception into an HTTP response.
+     * 
+     * IMPORTANT: In production, never display error details to users.
+     * All errors are logged but only generic messages are shown.
+     */
+    public function render($request, Throwable $e)
+    {
+        // Filter Carbon deprecation warnings from output
+        if (PHP_VERSION_ID >= 80100 && $e instanceof \ErrorException) {
+            if ($e->getSeverity() === E_DEPRECATED && 
+                strpos($e->getFile(), '/vendor/nesbot/carbon/') !== false) {
+                // Don't render Carbon deprecation warnings
+                return response('', 200);
+            }
+        }
+        
+        // Let Laravel handle the rendering - it will respect APP_DEBUG setting
+        // In production (APP_DEBUG=false), it will show generic error pages
+        // In development (APP_DEBUG=true), it will show detailed errors
+        return parent::render($request, $e);
+    }
+    
 }

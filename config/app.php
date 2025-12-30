@@ -40,9 +40,12 @@ return [
     | stack traces will be shown on every error that occurs within your
     | application. If disabled, a simple generic error page is shown.
     |
+    | SECURITY: In production, this MUST be false. Never enable debug mode
+    | in production as it exposes sensitive information.
+    |
     */
 
-    'debug' => (bool) env('APP_DEBUG', false),
+    'debug' => (bool) (env('APP_ENV') === 'production' ? false : env('APP_DEBUG', false)),
 
     /*
     |--------------------------------------------------------------------------

@@ -41,9 +41,22 @@ public function __construct()
  *
  * @return \Illuminate\Contracts\Support\Renderable
  */
-public function index()
+public function index(Request $request)
 {
     try{
+    // Check if user has a site assigned
+    if (!Auth::user()->site) {
+        Log::error('HomeController | index() | User has no site assigned', [
+            'user_id' => Auth::user()->id,
+            'user_email' => Auth::user()->email
+        ]);
+        Toastr::error('Your account is not assigned to a site. Please contact the administrator.');
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect()->route('login')->withErrors(['email' => 'Your account is not assigned to a site. Please contact the administrator.']);
+    }
+    
     $site_id = Auth::user()->site->id;
     $authid = Auth::id();
 
@@ -329,12 +342,54 @@ if ($department_id === null) {
         'sofficer_stock_request_pending',
         'out_of_stock','reorder_level'
     ));
-}
+    }
 catch (\Exception $e) {
     $unique_id = floor(time() - 999999999);
     Log::channel('error_log')->error('HomeController | Index() Error ' . $unique_id . ': ' . $e->getMessage());
-   
+    Log::channel('error_log')->error('HomeController | Index() Error Stack: ' . $e->getTraceAsString());
+    
+    Toastr::error('An error occurred while loading the dashboard. Please try again or contact support.');
+    // Don't redirect back to avoid loops - show error on home page instead
+    return view('home', [
+        'error' => 'An error occurred while loading the dashboard. Error ID: ' . $unique_id,
+        'all_requests' => 0,
+        'all_initiates' => 0,
+        'all_approves' => 0,
+        'all_orders' => 0,
+        'all_delivers' => 0,
+        'store_officer_requests' => 0,
+        'total_no_of_parts' => 0,
+    ]);
 }
 
+}
+
+/**
+ * Dismiss banner for this session only
+ */
+public function dismissBannerSession(Request $request)
+{
+    $request->session()->put('banner_dismissed', true);
+    $request->session()->forget('show_banner_on_login');
+    return response()->json(['success' => true]);
+}
+
+/**
+ * Permanently dismiss banner
+ */
+public function dismissBannerPermanent(Request $request)
+{
+    try {
+        $user = Auth::user();
+        $user->banner_dismissed_at = now();
+        $user->save();
+        
+        $request->session()->put('banner_dismissed', true);
+        
+        return response()->json(['success' => true]);
+    } catch (\Exception $e) {
+        Log::error('HomeController | dismissBannerPermanent() Error: ' . $e->getMessage());
+        return response()->json(['success' => false, 'message' => 'Failed to dismiss banner'], 500);
+    }
 }
 }

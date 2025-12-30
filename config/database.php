@@ -58,9 +58,17 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
+            'options' => extension_loaded('pdo_mysql') ? (function() {
+                $sslCaValue = env('MYSQL_ATTR_SSL_CA');
+                if (!$sslCaValue) {
+                    return [];
+                }
+                // Use new constant for PHP 8.5+, fallback to old constant for compatibility
+                $sslCaKey = (PHP_VERSION_ID >= 80500 && class_exists(\Pdo\Mysql::class)) 
+                    ? \Pdo\Mysql::ATTR_SSL_CA 
+                    : PDO::MYSQL_ATTR_SSL_CA;
+                return [$sslCaKey => $sslCaValue];
+            })() : [],
         ],
 
         'pgsql' => [

@@ -51,6 +51,7 @@ class User extends Authenticatable
         'last_successful_login',
         'last_failed_login',
         'failed_login_attempts',
+        'banner_dismissed_at',
         'updated_at'
     ];
 

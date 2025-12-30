@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\User;
+use App\Models\Site;
 use Illuminate\Support\Facades\Hash;
 
 class SuperAdminSeeder extends Seeder
@@ -14,14 +15,27 @@ class SuperAdminSeeder extends Seeder
      */
     public function run(): void
     {
-        // Creating Super Admin User
-        $superAdmin = User::create([
-            'name' => 'Javed Ur Rehman', 
-            'email' => 'superadmin@gmail.com',
-            'password' => Hash::make('secret'),
-            'site_id'=>1,
-        ]);
-        $superAdmin->assignRole('Super Admin');
+        // Ensure a default site exists, create if it doesn't
+        $site = Site::firstOrCreate(
+            ['name' => 'Default Site'],
+            ['site_code' => 'DEFAULT']
+        );
+
+        // Creating Super Admin User (only if doesn't exist)
+        $superAdmin = User::firstOrCreate(
+            ['email' => 'superadmin@gmail.com'],
+            [
+                'name' => 'Javed Ur Rehman', 
+                'password' => Hash::make('secret'),
+                'site_id' => $site->id,
+                'status' => 'Active',
+            ]
+        );
+        
+        // Assign role if not already assigned
+        if (!$superAdmin->hasRole('Super Admin')) {
+            $superAdmin->assignRole('Super Admin');
+        }
 
         // Creating Admin User
         // $admin = User::create([
