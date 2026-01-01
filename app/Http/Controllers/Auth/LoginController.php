@@ -205,9 +205,11 @@ class LoginController extends Controller
     
     $this->logUserActivity($user->id, 'Login', $request->url(), $request->userAgent());
     
-    // Set flag to show banner on first page load after login
-    $request->session()->put('show_banner_on_login', true);
-    $request->session()->forget('banner_dismissed');
+    // Set flag to show banner on first page load after login (only if banner is enabled)
+    if (config('banner.enabled', true)) {
+        $request->session()->put('show_banner_on_login', true);
+        $request->session()->forget('banner_dismissed');
+    }
     
     return redirect()->intended($this->redirectPath());
   }

@@ -1,27 +1,38 @@
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
-        Options -MultiViews -Indexes
+        Options -MultiViews -Indexes +FollowSymLinks
     </IfModule>
 
     RewriteEngine On
 
-    # Handle Authorization Header
-    RewriteCond %{HTTP:Authorization} .
-    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+    # CRITICAL: Allow access to all static files and directories
+    # This must come before any deny rules
+    <IfModule mod_authz_core.c>
+        # Apache 2.4+ - Allow all access to public directory
+        <DirectoryMatch "^.*$">
+            Require all granted
+        </DirectoryMatch>
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        # Apache 2.2 - Allow all access
+        Order allow,deny
+        Allow from all
+    </IfModule>
 
-    # Allow access to static assets (CSS, JS, images, fonts, etc.)
-    # This prevents 403 errors on static files
-    <FilesMatch "\.(css|js|jpg|jpeg|png|gif|ico|svg|woff|woff2|ttf|eot|map|json)$">
+    # Explicitly allow static file types
+    <FilesMatch "\.(css|js|jpg|jpeg|png|gif|ico|svg|woff|woff2|ttf|eot|map|json|pdf|zip|txt|xml|html)$">
         <IfModule mod_authz_core.c>
-            # Apache 2.4+
             Require all granted
         </IfModule>
         <IfModule !mod_authz_core.c>
-            # Apache 2.2
             Order allow,deny
             Allow from all
         </IfModule>
     </FilesMatch>
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
     # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d
@@ -29,8 +40,19 @@
     RewriteRule ^ %1 [L,R=301]
 
     # Send Requests To Front Controller...
-    # Only rewrite if the file doesn't exist (allow static assets to be served directly)
+    # IMPORTANT: Only rewrite if the file doesn't exist (allows static assets to be served directly)
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
+</IfModule>
+
+# Fallback: If mod_rewrite is not available, still allow file access
+<IfModule !mod_rewrite.c>
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Allow from all
+    </IfModule>
 </IfModule>

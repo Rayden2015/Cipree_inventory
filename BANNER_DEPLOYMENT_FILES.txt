@@ -1,0 +1,36 @@
+FILES TO UPLOAD FOR CONFIGURABLE BANNER
+========================================
+
+1. NEW FILE - Configuration
+   config/banner.php
+   (This is a new file - must be uploaded)
+
+2. UPDATED FILE - Banner View
+   resources/views/partials/banner.blade.php
+   (Updated with configurable logic and non-dismissible support)
+
+3. UPDATED FILE - Login Controller
+   app/Http/Controllers/Auth/LoginController.php
+   (Lines 208-212 updated - checks if banner is enabled before setting session flag)
+
+4. ENVIRONMENT VARIABLES - Add to .env
+   Add these to your production .env file:
+   
+   BANNER_ENABLED=true
+   BANNER_DISABLE_DATE=2026-01-01
+   BANNER_DISMISSIBLE=false
+
+AFTER UPLOADING:
+================
+1. Clear config cache:
+   php artisan config:clear
+   php artisan config:cache
+
+2. Clear view cache:
+   php artisan view:clear
+
+3. Test:
+   - Log out and log back in
+   - Banner should appear and be non-dismissible
+   - Date should show: January 1, 2026
+

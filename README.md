@@ -33,6 +33,59 @@ To suppress these warnings, you have three options:
 
 The `php.ini` file in the project root suppresses deprecation warnings from vendor packages.
 
+## Documentation
+
+### Banner Configuration
+
+See `docs/BANNER_CONFIGURATION.md` for complete banner configuration guide. The banner system is configurable via `.env` settings:
+- `BANNER_ENABLED` - Enable/disable banner
+- `BANNER_DISABLE_DATE` - Service disable date (format: Y-m-d)
+- `BANNER_DISMISSIBLE` - Whether users can dismiss the banner
+
+### Common Issues & Solutions
+
+#### 403 Errors on Static Assets (CSS/JS/Images)
+
+**Most Common Cause:** Document root not pointing to `public/` directory.
+
+**Quick Fix:**
+- **cPanel (no sudo):** Run `./fix-permissions-cpanel.sh` or set permissions via File Manager (755 for dirs, 644 for files)
+- **VPS/Server:** Run `sudo ./deploy-fix-permissions.sh www-data`
+- **Verify:** Ensure document root points to `public/` directory (not project root)
+- **Check:** `public/.htaccess` exists and has correct permissions
+
+**Files to check:** `public/.htaccess`, web server configuration, file permissions on `public/` directory
+
+#### "Page Expired" (419) Error After Login
+
+**Cause:** CSRF token mismatch due to session/cookie configuration in production.
+
+**Quick Fix:**
+1. Update `.env`:
+   ```env
+   APP_URL=https://your-domain.com
+   SESSION_SECURE_COOKIE=true
+   SESSION_DOMAIN=null
+   ```
+2. Fix `app/Http/Middleware/TrustProxies.php` - set `protected $proxies = '*';`
+3. Clear config cache: `php artisan config:clear && php artisan config:cache`
+
+**Files involved:** `.env`, `app/Http/Middleware/TrustProxies.php`, `config/session.php`
+
+#### Deployment Checklist
+
+**Before deploying to production:**
+- Set `APP_ENV=production` and `APP_DEBUG=false` in `.env`
+- Verify `APP_URL` matches your domain exactly
+- Set correct file permissions (755 for dirs, 644 for files)
+- Ensure document root points to `public/` directory
+- Test error handling (errors should be logged, not displayed)
+- Clear and cache config: `php artisan config:cache`
+
+**Permission scripts available:**
+- `deploy-fix-permissions.sh` - For VPS/servers with sudo
+- `fix-permissions-cpanel.sh` - For cPanel (no sudo required)
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

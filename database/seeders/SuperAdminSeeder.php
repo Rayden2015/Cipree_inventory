@@ -25,7 +25,7 @@ class SuperAdminSeeder extends Seeder
         $superAdmin = User::firstOrCreate(
             ['email' => 'superadmin@gmail.com'],
             [
-                'name' => 'Javed Ur Rehman', 
+                'name' => 'Infinixel Admin', 
                 'password' => Hash::make('secret'),
                 'site_id' => $site->id,
                 'status' => 'Active',
