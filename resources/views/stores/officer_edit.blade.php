@@ -108,7 +108,7 @@
                                             <option value=""></option>
                                             @foreach ($endusers as $ed)
                                                 <option {{ $sorder->enduser_id == $ed->id ? 'selected' : '' }}
-                                                    value="{{ $ed->id }}">{{ $ed->asset_staff_id }} — {{ $ed->name_description ?? $ed->name ?? '' }}</option>
+                                                    value="{{ $ed->id }}">{{ $ed->asset_staff_id }} — {{ $ed->name_description ?? '' }}</option>
                                             @endforeach
                                         </select>
                                     </div>

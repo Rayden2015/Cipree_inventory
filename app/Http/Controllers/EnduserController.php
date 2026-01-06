@@ -46,9 +46,10 @@ class EnduserController extends Controller
             
             $site_id = Auth::user()->site->id;
             
-            // Fix N+1 query by eager loading department relationship
-            $endusers = Enduser::with(['department', 'section'])
-                ->where('site_id','=',$site_id)
+            // Fix N+1 query by eager loading department and section relationships
+            // Use 'departmente' and 'sectione' to match the view expectations
+            $endusers = Enduser::with(['departmente', 'sectione'])
+                ->where('site_id', '=', $site_id)
                 ->latest()
                 ->paginate(15);
             
@@ -65,22 +66,39 @@ class EnduserController extends Controller
 
     public function search(Request $request)
     {
-        $site_id = Auth::user()->site->id;
-        $query = $request->input('query');
-        $endusers = Enduser::join('departments', 'endusers.department_id', '=', 'departments.id')
-            ->select('endusers.*') // Select all fields from the endusers table
-            ->where('endusers.asset_staff_id', 'like', '%' . $query . '%')
-        
-            ->orWhere('endusers.model', 'like', '%' . $query . '%')
-            ->orWhere('departments.name', 'like', '%' . $query . '%')
-            ->orWhere('endusers.serial_number', 'like', '%' . $query . '%')
-            ->orWhere('endusers.name_description', 'like', '%' . $query . '%')
-            ->where('endusers.site_id','=',$site_id)
-            // ->where('departments.site_id','=',$site_id)
-            ->paginate(15);
-            $endusercategories = Enduser::where('site_id','=',$site_id)->groupBy('type')->pluck('type');
-        return view('endusers.index', compact('endusers','endusercategories'));
-        
+        try {
+            if (!Auth::user()->site) {
+                return redirect()->back()
+                    ->withError('Your account is not assigned to a site. Please contact the administrator.');
+            }
+            
+            $site_id = Auth::user()->site->id;
+            $query = $request->input('query');
+            
+            // Fix: Group where clauses properly to avoid SQL logic issues
+            // Use eager loading to match view expectations
+            $endusers = Enduser::with(['departmente', 'sectione'])
+                ->where('site_id', '=', $site_id)
+                ->where(function($q) use ($query) {
+                    $q->where('asset_staff_id', 'like', '%' . $query . '%')
+                      ->orWhere('model', 'like', '%' . $query . '%')
+                      ->orWhere('serial_number', 'like', '%' . $query . '%')
+                      ->orWhere('name_description', 'like', '%' . $query . '%')
+                      ->orWhereHas('departmente', function($q) use ($query) {
+                          $q->where('name', 'like', '%' . $query . '%');
+                      });
+                })
+                ->latest()
+                ->paginate(15);
+                
+            $endusercategories = Enduser::where('site_id', '=', $site_id)
+                ->groupBy('type')
+                ->pluck('type');
+                
+            return view('endusers.index', compact('endusers', 'endusercategories'));
+        } catch (\Exception $e) {
+            return $this->handleError($e, 'search()');
+        }
     }
 
     public function show($id){
@@ -90,26 +108,37 @@ class EnduserController extends Controller
     
     public function endusersort(Request $request)
     {
-        $site_id = Auth::user()->site->id;
-        $enduserCategoryId = $request->input('enduser_category_id');
+        try {
+            if (!Auth::user()->site) {
+                return redirect()->back()
+                    ->withError('Your account is not assigned to a site. Please contact the administrator.');
+            }
+            
+            $site_id = Auth::user()->site->id;
+            $enduserCategoryId = $request->input('enduser_category_id');
 
-    if ($enduserCategoryId === 'all') {
-        $endusers = Enduser::where('site_id','=',$site_id)->latest()->paginate(15);
-    } else {
-        $endusers = Enduser::join('departments', 'endusers.department_id', '=', 'departments.id')
-        ->where('endusers.site_id','=',$site_id)
-        ->where('departments.site_id','=',$site_id)
-            ->select('endusers.*')
-            ->when($enduserCategoryId, function ($query) use ($enduserCategoryId) {
-                return $query->where('endusers.type', $enduserCategoryId);
-            })
-            ->paginate(15);
-    }
+            // Use eager loading to match view expectations
+            if ($enduserCategoryId === 'all' || empty($enduserCategoryId)) {
+                $endusers = Enduser::with(['departmente', 'sectione'])
+                    ->where('site_id', '=', $site_id)
+                    ->latest()
+                    ->paginate(15);
+            } else {
+                $endusers = Enduser::with(['departmente', 'sectione'])
+                    ->where('site_id', '=', $site_id)
+                    ->where('type', '=', $enduserCategoryId)
+                    ->latest()
+                    ->paginate(15);
+            }
 
-    $endusercategories = Enduser::where('site_id')->groupBy('type')->pluck('type');
+            $endusercategories = Enduser::where('site_id', '=', $site_id)
+                ->groupBy('type')
+                ->pluck('type');
 
-    return view('endusers.index', compact('endusers','endusercategories'));
-        
+            return view('endusers.index', compact('endusers', 'endusercategories'));
+        } catch (\Exception $e) {
+            return $this->handleError($e, 'endusersort()');
+        }
     }
 
     public function create()
@@ -152,53 +181,74 @@ class EnduserController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'department_id' => 'required|exists:departments,id',
-        ]);
-
         try {
+            // Validate required fields
+            $request->validate([
+                'department_id' => 'required|exists:departments,id',
+                'type' => 'required|string',
+                'name_description' => 'required|string',
+            ]);
+
+            // Check if user has a site assigned
+            if (!Auth::user()->site) {
+                Log::error('EnduserController | store() | User has no site assigned', [
+                    'user_id' => Auth::user()->id,
+                    'user_email' => Auth::user()->email
+                ]);
+                return redirect()->back()
+                    ->withInput()
+                    ->withError('Your account is not assigned to a site. Please contact the administrator.');
+            }
+
             $site_id = Auth::user()->site->id;
-            Enduser::create([
+            
+            // Create the enduser
+            // Note: 'name' column doesn't exist in production, only 'name_description'
+            $enduser = Enduser::create([
                 'asset_staff_id' => $request->asset_staff_id,
-                'name' => $request->name_description ?? $request->asset_staff_id,
                 'name_description' => $request->name_description,
                 'department' => $request->department,
                 'section' => $request->section,
                 'model' => $request->model,
                 'serial_number' => $request->serial_number,
                 'type' => $request->type,
-                // 'bic' => $request->bic,
                 'manufacturer' => $request->manufacturer,
                 'designation' => $request->designation,
-                'status' => $request->status,
+                'status' => $request->status ?? 'Active',
                 'section_id' => $request->section_id,
                 'department_id' => $request->department_id,
                 'site_id' => $site_id,
                 'enduser_category_id' => $request->enduser_category_id,
             ]);
-            $authId = Auth::user()->name;
+
             Log::info(
-                'EnduserController| store() |  Added an Enduser',
+                'EnduserController| store() | Added an Enduser',
                 [
                     'user_details' => Auth::user(),
+                    'enduser_id' => $enduser->id,
                     'response_payload' => $request->all(),
                 ]
             );
           
-            return redirect()->route('endusers.index')->withSuccess('Successfully updated');
+            return redirect()->route('endusers.index')->withSuccess('Enduser created successfully');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Return validation errors
+            return redirect()->back()
+                ->withInput()
+                ->withErrors($e->errors());
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('EndUserController | Store() Error ' . $unique_id ,[
+            Log::channel('error_log')->error('EndUserController | Store() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
-                'stack_trace' => $e->getTraceAsString()
+                'stack_trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
-       
+            // Redirect back with the error message
+            return redirect()->back()
+                ->withInput()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
     public function update(Request $request, $id)
@@ -218,8 +268,8 @@ class EnduserController extends Controller
             }
             
             // Update the Enduser fields
+            // Note: 'name' column doesn't exist in production, only 'name_description'
             $enduser->asset_staff_id = $request->input('asset_staff_id');
-            $enduser->name = $request->input('name_description') ?? $enduser->name;
             $enduser->name_description = $request->input('name_description');
             $enduser->department = $request->input('department');
             $enduser->section = $request->input('section');

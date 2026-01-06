@@ -302,7 +302,7 @@ font-size: 18px;
                                         Enduser:</th>
                                     <th
                                         style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black; background-color:white; text-align:left;padding-left:20px;">
-                                        {{ $inventory->enduser->name ?? 'not set' }}</th>
+                                        {{ $inventory->enduser->name_description ?? 'not set' }}</th>
                                 </tr>
                                 <tr>
                                     <th
