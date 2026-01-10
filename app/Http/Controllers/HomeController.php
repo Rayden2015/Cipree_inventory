@@ -175,7 +175,24 @@ public function index(Request $request)
 
     $new_approvals = Notification::where('site_id', '=', $site_id)->where('read_at', '=', '0')->count();
     $pending_po_approvals = Porder::where('site_id', '=', $site_id)->whereNull('approval_status')->count();
-    $pending_request_approvals = Order::where('site_id', '=', $site_id)->whereNull('approval_status')->count();
+    
+    // Check if user is a Department Authoriser (but not Super Authoriser) and filter by department
+    $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && !Auth::user()->hasRole('Super Authoriser');
+    if ($isDepartmentOnly) {
+        $department_id = Auth::user()->department->id ?? null;
+        if ($department_id === null) {
+            $pending_request_approvals = 0;
+        } else {
+            $pending_request_approvals = Order::leftJoin('users', 'users.id', '=', 'orders.user_id')
+                ->where('orders.site_id', '=', $site_id)
+                ->whereNull('orders.approval_status')
+                ->where('users.department_id', '=', $department_id)
+                ->count();
+        }
+    } else {
+        $pending_request_approvals = Order::where('site_id', '=', $site_id)->whereNull('approval_status')->count();
+    }
+    
     $pending_stock_approvals = Sorder::where('site_id', '=', $site_id)->whereNull('approval_status')->count();
     $approved_pos =  Porder::where('site_id', '=', $site_id)->where('approval_status', '=', 'Approved')->count();
     $approved_request =  Order::where('site_id', '=', $site_id)->where('approval_status', '=', 'Approved')->count();

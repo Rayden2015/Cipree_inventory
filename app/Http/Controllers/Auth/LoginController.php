@@ -55,27 +55,25 @@ class LoginController extends Controller
 
   protected function credentials(Request $request)
   {
-    // Fix: Always check status for both phone and email login
+    // Note: Status is already checked before this method is called in login()
+    // So we don't need to include it in credentials array
     $credentials = [];
     
     if (is_numeric($request->get('email'))) {
       // Phone login
       $credentials = [
         'phone' => $request->get('email'), 
-        'password' => $request->get('password'), 
-        'status' => 'Active'
+        'password' => $request->get('password')
       ];
     } elseif (filter_var($request->get('email'), FILTER_VALIDATE_EMAIL)) {
-      // Email login - NOW checks status
+      // Email login
       $credentials = [
         'email' => $request->get('email'), 
-        'password' => $request->get('password'), 
-        'status' => 'Active'
+        'password' => $request->get('password')
       ];
     } else {
       // Fallback
       $credentials = $request->only($this->username(), 'password');
-      $credentials['status'] = 'Active';
     }
     
     Log::info('LoginController | credentials() | Credentials prepared', [

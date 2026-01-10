@@ -24,5 +24,14 @@ class AuthServiceProvider extends ServiceProvider
         Gate::before(function ($user, $ability) {
             return $user->hasRole('Super Admin') ? true : null;
         });
+
+        // Define dashboard access gates based on roles
+        Gate::define('super-authoriser-dashboard', function ($user) {
+            return $user->hasRole('Super Authoriser');
+        });
+
+        Gate::define('department-authoriser-dashboard', function ($user) {
+            return $user->hasRole('Department Authoriser');
+        });
     }
 }
