@@ -11,12 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('end_users_categories', function (Blueprint $table) {
+        if (!Schema::hasTable('end_users_categories')) {
+            Schema::create('end_users_categories', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('description')->nullable();
             $table->timestamps();
-        });
+            });
+        }
     }
 
     /**

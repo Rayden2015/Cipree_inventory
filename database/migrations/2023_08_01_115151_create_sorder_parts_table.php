@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sorder_parts', function (Blueprint $table) {
+        if (!Schema::hasTable('sorder_parts')) {
+            Schema::create('sorder_parts', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('sorder_id');
             $table->unsignedBigInteger('inventory_id')->nullable();
@@ -35,7 +36,8 @@ return new class extends Migration
 
             $table->foreign('sorder_id')->references('id')->on('sorders')->onDelete('cascade');
             $table->foreign('inventory_id')->references('id')->on('inventories');
-        });
+            });
+        }
     }
 
     /**

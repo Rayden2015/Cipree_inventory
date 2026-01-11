@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('levies', function (Blueprint $table) {
+        if (!Schema::hasTable('levies')) {
+            Schema::create('levies', function (Blueprint $table) {
             $table->id();
             $table->string('description');
             $table->decimal('rate')->nullable();
             $table->string('others')->nullable();
             $table->timestamps();
-        });
+            });
+        }
     }
 
     /**

@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('total_taxes', function (Blueprint $table) {
+        if (!Schema::hasTable('total_taxes')) {
+            Schema::create('total_taxes', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('tax_id');
             $table->decimal('sub_total',15,2)->nullable();
@@ -22,7 +23,8 @@ return new class extends Migration
 
             $table->foreign('tax_id')->references('id')->on('taxes');
             $table->foreign('modified_by')->references('id')->on('users');
-        });
+            });
+        }
     }
 
     /**

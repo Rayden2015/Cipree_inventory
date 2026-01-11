@@ -13,7 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('purchases', function (Blueprint $table) {
+        if (!Schema::hasTable('purchases')) {
+            Schema::create('purchases', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('part_id'); //order
             $table->string('description');
@@ -40,7 +41,8 @@ return new class extends Migration
             $table->foreign('supplier_id')->references('id')->on('suppliers');
             $table->foreign('enduser_id')->references('id')->on('endusers');
             $table->foreign('user_id')->references('id')->on('users');
-        });
+            });
+        }
     }
 
     /**

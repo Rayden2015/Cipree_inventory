@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('employees', function (Blueprint $table) {
+        if (!Schema::hasTable('employees')) {
+            Schema::create('employees', function (Blueprint $table) {
             $table->id();
             $table->string('fname')->nullable();
             $table->string('oname')->nullable();
@@ -53,7 +54,8 @@ return new class extends Migration
             $table->foreign('site_id')->references('id')->on('sites');
             $table->foreign('edited_by')->references('id')->on('users');
             $table->foreign('department_id')->references('id')->on('departments');
-        });
+            });
+        }
     }
 
     /**

@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('stock_purchase_requests', function (Blueprint $table) {
+        if (!Schema::hasTable('stock_purchase_requests')) {
+            Schema::create('stock_purchase_requests', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('inventory_id')->nullable();
             $table->unsignedBigInteger('order_id')->nullable();
@@ -50,7 +51,8 @@ return new class extends Migration
             // $table->foreign('delivered_by')->references('id')->on('users');
             $table->foreign('approved_by')->references('id')->on('users');
             // $table->unsignedBigInteger('inventory_id')->nullable();
-        });
+            });
+        }
     }
 
     /**

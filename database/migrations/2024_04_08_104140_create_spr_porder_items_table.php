@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('spr_porder_items', function (Blueprint $table) {
+        if (!Schema::hasTable('spr_porder_items')) {
+            Schema::create('spr_porder_items', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('spr_id');
             $table->unsignedBigInteger('order_id');
@@ -45,7 +46,8 @@ return new class extends Migration
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
             $table->foreign('sorder_id')->references('id')->on('orders')->onDelete('cascade');
             $table->foreign('inventory_id')->references('id')->on('inventories');
-        });
+            });
+        }
     }
 
     /**

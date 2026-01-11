@@ -8,7 +8,8 @@ class CreateInventoryTable extends Migration
 {
     public function up()
     {
-        Schema::create('inventory', function (Blueprint $table) {
+        if (!Schema::hasTable('inventory')) {
+            Schema::create('inventory', function (Blueprint $table) {
             $table->id();
             $table->string('location');
             $table->string('codes');
@@ -34,7 +35,8 @@ class CreateInventoryTable extends Migration
             $table->string('po_number');
             $table->string('designation2');
             $table->timestamps();
-        });
+            });
+        }
     }
 
     public function down()

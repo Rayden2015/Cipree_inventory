@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('logins', function (Blueprint $table) {
+        if (!Schema::hasTable('logins')) {
+            Schema::create('logins', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable();
             $table->integer('attempt')->nullable();
             $table->foreign('user_id')->references('id')->on('users');
             $table->timestamps();
-        });
+            });
+        }
     }
 
     /**

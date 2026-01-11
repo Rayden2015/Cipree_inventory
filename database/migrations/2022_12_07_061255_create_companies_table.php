@@ -13,7 +13,8 @@ class CreateCompaniesTable extends Migration
      */
     public function up()
     {
-        Schema::create('companies', function (Blueprint $table) {
+        if (!Schema::hasTable('companies')) {
+            Schema::create('companies', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('address');
@@ -24,7 +25,8 @@ class CreateCompaniesTable extends Migration
             $table->string('website')->nullable();
             $table->string('image')->nuallable();
             $table->timestamps();
-        });
+            });
+        }
     }
 
     /**

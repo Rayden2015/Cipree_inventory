@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('inventories', function (Blueprint $table) {
+        if (!Schema::hasTable('inventories')) {
+            Schema::create('inventories', function (Blueprint $table) {
             $table->id();
             $table->string('waybill')->nullable();
             $table->unsignedBigInteger('enduser_id')->nullable();
@@ -29,7 +30,8 @@ return new class extends Migration
             $table->foreign('supplier_id')->references('id')->on('suppliers');
             $table->foreign('enduser_id')->references('id')->on('endusers');
             $table->foreign('user_id')->references('id')->on('users');
-        });
+            });
+        }
     }
 
     /**

@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('parts', function (Blueprint $table) {
+        if (!Schema::hasTable('parts')) {
+            Schema::create('parts', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('supplier_id');
             $table->string('name');
@@ -25,7 +26,8 @@ return new class extends Migration
             $table->foreign('site_id')->references('id')->on('sites');
             $table->foreign('location_id')->references('id')->on('locations');
 
-        });
+            });
+        }
     }
 
     /**

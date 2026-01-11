@@ -11,20 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tenants', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('slug')->unique();
-            $table->string('domain')->nullable()->unique();
-            $table->enum('status', ['Active', 'Inactive', 'Suspended'])->default('Active');
-            $table->json('settings')->nullable(); // For storing tenant-specific settings
-            $table->text('description')->nullable();
-            $table->string('contact_email')->nullable();
-            $table->string('contact_phone')->nullable();
-            $table->string('contact_name')->nullable();
-            $table->timestamp('trial_ends_at')->nullable();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('tenants')) {
+            Schema::create('tenants', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->string('slug')->unique();
+                $table->string('domain')->nullable()->unique();
+                $table->enum('status', ['Active', 'Inactive', 'Suspended'])->default('Active');
+                $table->json('settings')->nullable(); // For storing tenant-specific settings
+                $table->text('description')->nullable();
+                $table->string('contact_email')->nullable();
+                $table->string('contact_phone')->nullable();
+                $table->string('contact_name')->nullable();
+                $table->timestamp('trial_ends_at')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**

@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('inventory_items', function (Blueprint $table) {
+        if (!Schema::hasTable('inventory_items')) {
+            Schema::create('inventory_items', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('inventory_id');
             $table->unsignedBigInteger('location_id')->nullable();
@@ -37,7 +38,8 @@ return new class extends Migration
             $table->foreign('location_id')->references('id')->on('locations');
             $table->foreign('inventory_id')->references('id')->on('inventories');
             $table->foreign('category_id')->references('id')->on('categories');
-        });
+            });
+        }
     }
 
     /**

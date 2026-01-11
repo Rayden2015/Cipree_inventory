@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('items', function (Blueprint $table) {
+        if (!Schema::hasTable('items')) {
+            Schema::create('items', function (Blueprint $table) {
             $table->id();
             $table->string('item_description')->nullable();
             $table->string('item_uom')->nullable();
@@ -24,7 +25,8 @@ return new class extends Migration
             $table->foreign('item_category_id')->references('id')->on('categories');
             $table->foreign('added_by')->references('id')->on('users');
             $table->foreign('modified_by')->references('id')->on('users');
-        });
+            });
+        }
     }
 
     /**

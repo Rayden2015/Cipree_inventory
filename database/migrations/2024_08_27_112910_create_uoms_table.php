@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('uoms', function (Blueprint $table) {
+        if (!Schema::hasTable('uoms')) {
+            Schema::create('uoms', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('symbol', 10)->nullable(); // Symbol of the unit (e.g., m, kg)
@@ -21,7 +22,8 @@ return new class extends Migration
             $table->boolean('is_default')->default(false)->nullable(); // Indicates if this is the default unit
             $table->boolean('base_unit')->default(false)->nullable(); // Specifies if this is the base unit for the measurement type
             $table->timestamps();
-        });
+            });
+        }
     }
 
     /**

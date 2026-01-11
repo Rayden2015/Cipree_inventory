@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
+        if (!Schema::hasTable('orders')) {
+            Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('part_id')->nullable();
             $table->decimal('tax')->nullable();
@@ -32,7 +33,8 @@ return new class extends Migration
             $table->foreign('enduser_id')->references('id')->on('endusers');
             $table->foreign('user_id')->references('id')->on('users');
 
-        });
+            });
+        }
     }
 
     /**

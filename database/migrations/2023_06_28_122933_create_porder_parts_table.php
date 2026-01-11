@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('porder_parts', function (Blueprint $table) {
+        if (!Schema::hasTable('porder_parts')) {
+            Schema::create('porder_parts', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('order_id');
             $table->unsignedBigInteger('part_id')->default(0)->nullable();
@@ -32,7 +33,8 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
-        });
+            });
+        }
     }
 
     /**

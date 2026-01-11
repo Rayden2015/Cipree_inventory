@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up()
 {
-    Schema::create('update_inventory_item', function (Blueprint $table) {
+    if (!Schema::hasTable('update_inventory_item')) {
+        Schema::create('update_inventory_item', function (Blueprint $table) {
         $table->id();
         $table->unsignedBigInteger('user_id');
         $table->text('before_InventoryItemDetail_edit')->nullable();
@@ -19,7 +20,8 @@ return new class extends Migration
         $table->decimal('new_amount', 15, 2);
         $table->timestamp('updated_at')->useCurrent();
         $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-    });
+        });
+    }
 }
 
 public function down()

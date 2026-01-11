@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('error_logs', function (Blueprint $table) {
+        if (!Schema::hasTable('error_logs')) {
+            Schema::create('error_logs', function (Blueprint $table) {
             $table->bigIncrements('id');
             // Below is what are included in logger
             // you will know what it means later 
@@ -28,7 +29,8 @@ return new class extends Migration
             $table->string('user_agent')->nullable();
          
             $table->timestamps();
-        });
+            });
+        }
     }
 
     /**

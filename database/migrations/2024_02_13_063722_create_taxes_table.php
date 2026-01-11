@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('taxes', function (Blueprint $table) {
+        if (!Schema::hasTable('taxes')) {
+            Schema::create('taxes', function (Blueprint $table) {
             $table->id();
             $table->string('description');
             $table->decimal('rate')->nullable();
             $table->string('others')->nullable();
             $table->timestamps();
-        });
+            });
+        }
     }
 
     /**

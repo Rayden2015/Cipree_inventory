@@ -53,6 +53,7 @@ class LoginController extends Controller
     $this->middleware('guest')->except('logout');
   }
 
+
   protected function credentials(Request $request)
   {
     // Note: Status is already checked before this method is called in login()

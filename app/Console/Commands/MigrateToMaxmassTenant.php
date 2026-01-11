@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class MigrateToMaxmassTenant extends Command
@@ -68,6 +69,15 @@ class MigrateToMaxmassTenant extends Command
     {
         $this->info('🚀 Starting migration to Maxmass tenant...');
         $this->newLine();
+
+        // Check if migrations have been run (tenant_id columns exist)
+        $migrationsRun = $this->checkMigrationsRun();
+        if (!$migrationsRun) {
+            $this->error('❌ Multi-tenancy migrations have not been run yet!');
+            $this->error('   Please run: php artisan migrate');
+            $this->error('   Then run this command again.');
+            return Command::FAILURE;
+        }
 
         // Check if data already has tenant_id
         if (!$this->option('force')) {
@@ -150,27 +160,54 @@ class MigrateToMaxmassTenant extends Command
     }
 
     /**
+     * Check if migrations have been run (tenant_id columns exist)
+     */
+    protected function checkMigrationsRun(): bool
+    {
+        // Check if tenants table exists
+        if (!Schema::hasTable('tenants')) {
+            return false;
+        }
+
+        // Check if tenant_id columns exist in key tables
+        $keyTables = ['users', 'sites'];
+        foreach ($keyTables as $table) {
+            if (Schema::hasTable($table) && !Schema::hasColumn($table, 'tenant_id')) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Check if any data already has tenant_id assigned
      */
     protected function checkExistingTenantData(): bool
     {
-        // Check users
-        if (User::whereNotNull('tenant_id')->exists()) {
-            $this->warn('   Found users with tenant_id');
-            return true;
-        }
-
-        // Check sites
-        if (Site::whereNotNull('tenant_id')->exists()) {
-            $this->warn('   Found sites with tenant_id');
-            return true;
-        }
-
-        // Check a few key tables
-        foreach (['orders', 'items', 'inventories'] as $table) {
-            if (DB::table($table)->whereNotNull('tenant_id')->exists()) {
-                $this->warn("   Found {$table} records with tenant_id");
+        // Check users table - only if column exists
+        if (Schema::hasColumn('users', 'tenant_id')) {
+            if (User::whereNotNull('tenant_id')->exists()) {
+                $this->warn('   Found users with tenant_id');
                 return true;
+            }
+        }
+
+        // Check sites table - only if column exists
+        if (Schema::hasColumn('sites', 'tenant_id')) {
+            if (Site::whereNotNull('tenant_id')->exists()) {
+                $this->warn('   Found sites with tenant_id');
+                return true;
+            }
+        }
+
+        // Check a few key tables - only if column exists
+        foreach (['orders', 'items', 'inventories'] as $table) {
+            if (Schema::hasTable($table) && Schema::hasColumn($table, 'tenant_id')) {
+                if (DB::table($table)->whereNotNull('tenant_id')->exists()) {
+                    $this->warn("   Found {$table} records with tenant_id");
+                    return true;
+                }
             }
         }
 
@@ -203,16 +240,27 @@ class MigrateToMaxmassTenant extends Command
      */
     protected function createHeadOfficeSite(Tenant $tenant): Site
     {
-        $site = Site::where('name', 'Head Office')
-            ->where('tenant_id', $tenant->id)
-            ->first();
+        $query = Site::where('name', 'Head Office');
+        
+        // Only filter by tenant_id if the column exists
+        if (Schema::hasColumn('sites', 'tenant_id')) {
+            $query->where('tenant_id', $tenant->id);
+        }
+        
+        $site = $query->first();
 
         if (!$site) {
-            $site = Site::create([
+            $siteData = [
                 'name' => 'Head Office',
                 'site_code' => 'HO-MAX',
-                'tenant_id' => $tenant->id,
-            ]);
+            ];
+            
+            // Only add tenant_id if column exists
+            if (Schema::hasColumn('sites', 'tenant_id')) {
+                $siteData['tenant_id'] = $tenant->id;
+            }
+            
+            $site = Site::create($siteData);
         }
 
         return $site;
@@ -223,6 +271,12 @@ class MigrateToMaxmassTenant extends Command
      */
     protected function updateSites(Tenant $tenant): int
     {
+        // Check if tenant_id column exists
+        if (!Schema::hasColumn('sites', 'tenant_id')) {
+            $this->warn('   ⚠️  tenant_id column does not exist in sites table. Run migrations first.');
+            return 0;
+        }
+
         return Site::whereNull('tenant_id')
             ->update(['tenant_id' => $tenant->id]);
     }
@@ -232,6 +286,12 @@ class MigrateToMaxmassTenant extends Command
      */
     protected function updateUsers(Tenant $tenant, Site $headOfficeSite): int
     {
+        // Check if tenant_id column exists
+        if (!Schema::hasColumn('users', 'tenant_id')) {
+            $this->warn('   ⚠️  tenant_id column does not exist in users table. Run migrations first.');
+            return 0;
+        }
+
         $updated = 0;
 
         // Update users without tenant_id
@@ -247,14 +307,14 @@ class MigrateToMaxmassTenant extends Command
             // Otherwise, assign to Head Office
             if ($user->site_id) {
                 $userSite = Site::find($user->site_id);
-                if ($userSite && $userSite->tenant_id) {
+                if ($userSite && Schema::hasColumn('sites', 'tenant_id') && $userSite->tenant_id) {
                     // Site already has tenant_id, use that
                     $user->tenant_id = $userSite->tenant_id;
                 } else {
                     // Site doesn't have tenant_id yet, assign user to Maxmass and keep their site
                     $user->tenant_id = $tenant->id;
-                    // Ensure the site also belongs to Maxmass
-                    if ($userSite) {
+                    // Ensure the site also belongs to Maxmass (if column exists)
+                    if ($userSite && Schema::hasColumn('sites', 'tenant_id')) {
                         $userSite->tenant_id = $tenant->id;
                         $userSite->save();
                     }

@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('endusers', function (Blueprint $table) {
+        if (!Schema::hasTable('endusers')) {
+            Schema::create('endusers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('type');
@@ -24,7 +25,8 @@ return new class extends Migration
 
 
             $table->timestamps();
-        });
+            });
+        }
     }
 
     /**
