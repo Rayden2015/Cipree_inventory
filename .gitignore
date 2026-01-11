@@ -21,3 +21,7 @@ yarn-error.log
 !/storage/app/public
 !/storage/logs
 storage/logs/errors/error.log
+
+# Archive files
+Archive.zip
+*.zip
