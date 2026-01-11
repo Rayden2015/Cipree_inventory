@@ -38,6 +38,7 @@ class User extends Authenticatable
         'role_id',
         'status',
         'staff_id',
+        'tenant_id',
         'site_id',
         'add_admin',
         'add_site_admin',
@@ -93,5 +94,51 @@ class User extends Authenticatable
     public function department()
     {
         return $this->belongsTo(Department::class, 'department_id');
+    }
+    
+    /**
+     * Get the tenant that owns the user
+     */
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class, 'tenant_id');
+    }
+
+    /**
+     * Get the current tenant for the user (from tenant_id or site->tenant_id)
+     */
+    public function getCurrentTenant()
+    {
+        // First, check direct tenant_id
+        if ($this->tenant_id) {
+            return $this->tenant ?: Tenant::find($this->tenant_id);
+        }
+        
+        // If no direct tenant_id, try to get from site
+        if ($this->site_id) {
+            // Load site relationship if not already loaded
+            $site = $this->site ?: Site::find($this->site_id);
+            if ($site && $site->tenant_id) {
+                return $site->tenant ?: Tenant::find($site->tenant_id);
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Check if user is a Super Admin (can access all tenants)
+     */
+    public function isSuperAdmin()
+    {
+        return $this->hasRole('Super Admin');
+    }
+
+    /**
+     * Check if user is a Tenant Admin
+     */
+    public function isTenantAdmin()
+    {
+        return $this->hasRole('Tenant Admin');
     }
 }

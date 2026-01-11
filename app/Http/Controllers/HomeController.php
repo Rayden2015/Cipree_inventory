@@ -44,11 +44,39 @@ public function __construct()
 public function index(Request $request)
 {
     try{
-    // Check if user has a site assigned
-    if (!Auth::user()->site) {
+    // Get tenant context (set by TenantContext middleware)
+    $tenantId = session('current_tenant_id');
+    $user = Auth::user();
+    
+    // Super Admin can access all tenants (or specific tenant via query param)
+    if ($user->isSuperAdmin() && $request->has('tenant_id')) {
+        $tenantId = $request->get('tenant_id');
+        session(['current_tenant_id' => $tenantId]);
+    }
+    
+    // For non-Super Admins, get tenant from user
+    if (!$tenantId && !$user->isSuperAdmin()) {
+        $tenant = $user->getCurrentTenant();
+        if (!$tenant) {
+            Log::error('HomeController | index() | User has no tenant assigned', [
+                'user_id' => $user->id,
+                'user_email' => $user->email
+            ]);
+            Toastr::error('Your account is not assigned to a tenant. Please contact the administrator.');
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect()->route('login')->withErrors(['email' => 'Your account is not assigned to a tenant. Please contact the administrator.']);
+        }
+        $tenantId = $tenant->id;
+        session(['current_tenant_id' => $tenantId]);
+    }
+    
+    // Check if user has a site assigned (for non-Super Admin, non-Tenant Admin users)
+    if (!$user->isSuperAdmin() && !$user->isTenantAdmin() && !$user->site) {
         Log::error('HomeController | index() | User has no site assigned', [
-            'user_id' => Auth::user()->id,
-            'user_email' => Auth::user()->email
+            'user_id' => $user->id,
+            'user_email' => $user->email
         ]);
         Toastr::error('Your account is not assigned to a site. Please contact the administrator.');
         Auth::logout();
@@ -57,14 +85,23 @@ public function index(Request $request)
         return redirect()->route('login')->withErrors(['email' => 'Your account is not assigned to a site. Please contact the administrator.']);
     }
     
-    $site_id = Auth::user()->site->id;
+    $site_id = $user->site->id ?? null;
     $authid = Auth::id();
 
     // store officer dashboard
-    $all_requests = Order::where('site_id', '=', $site_id)
-        ->where('status', '=', 'Requested')
-        ->where('approval_status', '=', 'Approved')
-        ->count();
+    // Filter by tenant_id if set, and site_id if available (for non-Super Admin)
+    $all_requestsQuery = Order::where('status', '=', 'Requested')
+        ->where('approval_status', '=', 'Approved');
+    
+    if ($tenantId) {
+        $all_requestsQuery->where('tenant_id', '=', $tenantId);
+    }
+    
+    if ($site_id && !$user->isSuperAdmin()) {
+        $all_requestsQuery->where('site_id', '=', $site_id);
+    }
+    
+    $all_requests = $all_requestsQuery->count();
 
     $all_initiates = Order::where('site_id', '=', $site_id)
         ->where('status', '=', 'Initiated')

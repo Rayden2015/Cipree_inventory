@@ -39,7 +39,12 @@ class NotificationController extends Controller
     public static function getNotificationCount()
     {
         try {
-            $site_id = Auth::user()->site->id;
+            $user = Auth::user();
+            if (!$user || !$user->site) {
+                return 0; // Return 0 if user has no site
+            }
+            
+            $site_id = $user->site->id;
             $notificationCount = Notification::where('site_id', '=',$site_id)->where('read_at', '=', '0')->count();
             // Log::info('NotificationController | getNotificationCount', [
             //     'user_details' => Auth::user(),
@@ -49,24 +54,26 @@ class NotificationController extends Controller
             return $notificationCount;
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('NotificationController | getNotification() Error ' . $unique_id,[
+            Log::channel('error_log')->error('NotificationController | getNotificationCount() Error ' . $unique_id,[
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-   
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
-        
+            // Return 0 instead of redirect in static method (can't redirect from view)
+            return 0;
+        }
     }
 
     public static function getNotification()
     {
         try {
-            $site_id = Auth::user()->site->id;
+            $user = Auth::user();
+            if (!$user || !$user->site) {
+                // Return empty collection if user has no site - use empty query result
+                return Notification::where('id', '<', 0)->paginate(8); // Returns empty paginator
+            }
+            
+            $site_id = $user->site->id;
             $notification = Notification::where('read_at', '=', '0')->where('site_id','=', $site_id)->latest()->paginate(8);
             // Log::info('NotificationController | getNotification', [
             //     'user_details' => Auth::user(),
@@ -81,10 +88,8 @@ class NotificationController extends Controller
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
+            // Return empty paginator instead of redirect in static method (can't redirect from view)
+            return Notification::where('id', '<', 0)->paginate(8); // Returns empty paginator
+        }
     }
 }

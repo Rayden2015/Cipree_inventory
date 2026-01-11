@@ -634,7 +634,11 @@ class UserController extends Controller
             // ]);
             return $first_name;
         } catch (\Throwable $e) {
-            $errorId = $this->logError($e, 'username()');
+            // Can't use $this in static method, use Log directly
+            Log::error('UserController | username() | Error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return 'User';  // Fallback name
         }
 
@@ -650,7 +654,11 @@ class UserController extends Controller
             // ]);
             return $logo;
         } catch (\Throwable $e) {
-            $errorId = $this->logError($e, 'logo()');
+            // Can't use $this in static method, use Log directly
+            Log::error('UserController | logo() | Error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return null;  // Fallback logo
         }
 

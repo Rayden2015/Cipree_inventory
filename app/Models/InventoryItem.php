@@ -16,7 +16,7 @@ class InventoryItem extends Model
     protected $fillable = [
         'location_id', 'inventory_id', 'description', 'part_number', 'quantity', 'codes', 'uom', 'category_id',
         'unit_cost_exc_vat_gh', 'unit_cost_exc_vat_usd', 'total_value_gh', 'total_value_usd',
-        'srf', 'erf', 'ats', 'drq', 'remarks', 'amount', 'discount', 'enduser_id','stock_code','item_id','before_discount','site_id','last_updated_by','last_updated_at','updated_at'
+        'srf', 'erf', 'ats', 'drq', 'remarks', 'amount', 'discount', 'enduser_id','stock_code','item_id','before_discount','tenant_id','site_id','last_updated_by','last_updated_at','updated_at'
     ];
 
     public function inventory()
@@ -52,6 +52,11 @@ class InventoryItem extends Model
     public function lastUpdatedBy()
     {
         return $this->belongsTo(User::class, 'last_updated_by');
+    }
+
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class, 'tenant_id');
     }
 
 }

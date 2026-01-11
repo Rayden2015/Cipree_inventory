@@ -8,7 +8,27 @@ use Illuminate\Database\Eloquent\Model;
 class Site extends Model
 {
     use HasFactory;
+    
     protected $fillable = [
-        'name','site_code','updated_at'
+        'name',
+        'site_code',
+        'tenant_id',
+        'updated_at'
     ];
+
+    /**
+     * Get the tenant that owns the site
+     */
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class, 'tenant_id');
+    }
+
+    /**
+     * Get all users for this site
+     */
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 }

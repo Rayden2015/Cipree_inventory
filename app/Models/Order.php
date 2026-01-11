@@ -9,7 +9,7 @@ class Order extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'tax', 'tax2', 'tax3', 'currency', 'supplier_id', 'type_of_purchase', 'enduser_id', 'status', 'image', 'user_id', 'request_number', 'request_date', 'approval_status', 'work_order_ref', 'approved_by', 'approved_on', 'site_id','updated_at','depart_auth_approval_status',
+        'tax', 'tax2', 'tax3', 'currency', 'supplier_id', 'type_of_purchase', 'enduser_id', 'status', 'image', 'user_id', 'request_number', 'request_date', 'approval_status', 'work_order_ref', 'approved_by', 'approved_on', 'tenant_id', 'site_id','updated_at','depart_auth_approval_status',
         'depart_auth_approved_by',
         'depart_auth_denied_by',
         'depart_auth_approval_status_time',
@@ -58,5 +58,10 @@ class Order extends Model
 {
     return $this->belongsTo(User::class, 'user_id');
 }
+
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class, 'tenant_id');
+    }
 
 }

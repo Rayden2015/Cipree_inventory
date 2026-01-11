@@ -200,11 +200,14 @@ class EnduserController extends Controller
                     ->withError('Your account is not assigned to a site. Please contact the administrator.');
             }
 
-            $site_id = Auth::user()->site->id;
+            $user = Auth::user();
+            $site_id = $user->site->id;
+            $tenant_id = $user->getCurrentTenant()?->id ?? $user->site->tenant_id ?? null;
             
             // Create the enduser
-            // Note: 'name' column doesn't exist in production, only 'name_description'
+            // Note: 'name' field is required by database schema, use name_description value
             $enduser = Enduser::create([
+                'name' => $request->name ?? $request->name_description, // Required by schema
                 'asset_staff_id' => $request->asset_staff_id,
                 'name_description' => $request->name_description,
                 'department' => $request->department,
@@ -218,6 +221,7 @@ class EnduserController extends Controller
                 'section_id' => $request->section_id,
                 'department_id' => $request->department_id,
                 'site_id' => $site_id,
+                'tenant_id' => $tenant_id,
                 'enduser_category_id' => $request->enduser_category_id,
             ]);
 
@@ -268,8 +272,9 @@ class EnduserController extends Controller
             }
             
             // Update the Enduser fields
-            // Note: 'name' column doesn't exist in production, only 'name_description'
+            // Note: 'name' field is required by database schema (even if not used in production)
             $enduser->asset_staff_id = $request->input('asset_staff_id');
+            $enduser->name = $request->input('name') ?? $request->input('name_description') ?? $enduser->name;
             $enduser->name_description = $request->input('name_description');
             $enduser->department = $request->input('department');
             $enduser->section = $request->input('section');

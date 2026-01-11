@@ -360,7 +360,6 @@ class StoreRequestController extends Controller
             $department_id = Auth::user()->department->id ?? null;
             
             if ($department_id === null) {
-<<<<<<< HEAD
                 $missingDepartment = true;
                 Log::warning('Department Authoriser without department viewing store requests', [
                     'user_id' => Auth::id(),
@@ -401,20 +400,6 @@ class StoreRequestController extends Controller
                     $query->where('sorders.site_id', '=', $site_id);
                 }
             }
-=======
-                // User doesn't have a department assigned, return empty results
-                $store_requests = Sorder::where('id', null)->paginate(15);
-            } else {
-                $store_requests = Sorder::leftjoin('users', 'users.id', '=', 'sorders.user_id')
-                    ->where('sorders.site_id', '=', $site_id)
-                    ->where('users.department_id', '=', $department_id)
-                    ->latest('sorders.created_at')
-                    ->select('sorders.*')
-                    ->paginate(15);
-            }
-            // Return the view with store requests
-            return view('stores.index', compact('store_requests'));
->>>>>>> 8af09c4 (Add login banner, fix production error display, and suppress Carbon deprecation warnings)
         }
 
         // Eager load relationships and paginate

@@ -9,7 +9,7 @@ class Enduser extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'asset_staff_id','name_description','department','section','model','serial_number','manufacturer', 'type','designation','status','site_id','department_id','section_id','enduser_category_id'
+        'name', 'asset_staff_id','name_description','department','section','model','serial_number','manufacturer', 'type','designation','status','site_id','department_id','section_id','enduser_category_id','tenant_id'
     ];
 
     public function site(){

@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Section;
 use App\Models\Enduser;
 use App\Models\Department;
+use App\Models\Tenant;
 use App\Models\EndUsersCategory;
 use Illuminate\Support\Str;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -24,6 +25,7 @@ class EnduserControllerTest extends TestCase
     protected Section $section;
     protected EndUsersCategory $category;
     protected User $admin;
+    protected Tenant $tenant;
 
     protected function setUp(): void
     {
@@ -31,7 +33,14 @@ class EnduserControllerTest extends TestCase
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        $this->site = Site::create([
+        // Create tenant first
+        $this->tenant = Tenant::factory()->create([
+            'name' => 'Test Tenant',
+            'status' => 'Active',
+        ]);
+
+        // Create site with tenant
+        $this->site = Site::factory()->forTenant($this->tenant)->create([
             'name' => 'Site One',
             'site_code' => 'S1',
         ]);
@@ -40,22 +49,26 @@ class EnduserControllerTest extends TestCase
             'name' => 'Logistics',
             'description' => 'Logistics Department',
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
         ]);
 
         $this->section = Section::create([
             'name' => 'Logistics Section',
             'description' => 'Section Description',
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
         ]);
 
         $this->category = EndUsersCategory::create([
             'name' => 'Equipment',
             'description' => 'Default equipment category',
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
         ]);
 
         $this->admin = User::factory()->create([
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
             'department_id' => $this->department->id,
             'status' => 'Active',
         ]);
@@ -85,6 +98,7 @@ class EnduserControllerTest extends TestCase
     {
         $payload = [
             'asset_staff_id' => 'ASSET-101',
+            'name' => 'Handheld Radio',
             'name_description' => 'Handheld Radio',
             'type' => 'Equipment',
             'department' => 'Logistics',
@@ -154,6 +168,7 @@ class EnduserControllerTest extends TestCase
             'name' => 'IT',
             'description' => 'IT Department',
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
         ]);
 
         $response = $this->actingAs($this->admin)->put(route('endusers.update', $enduser->id), [

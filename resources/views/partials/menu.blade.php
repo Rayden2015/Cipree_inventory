@@ -43,6 +43,32 @@
                         </p>
                     </a>
                 </li>
+                {{-- Tenant Management (Super Admin only) --}}
+                @if(Auth::user()->isSuperAdmin())
+                <li class="nav-item {{ request()->routeIs('tenants.*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->routeIs('tenants.*') ? 'active' : '' }}" style="{{ request()->routeIs('tenants.*') ? 'background-color: #0e6258' : '' }}">
+                        <i class="nav-icon fas fa-building"></i>
+                        <p>
+                            Tenant Management
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('tenants.index') }}" class="nav-link {{ request()->routeIs('tenants.index', 'tenants.create', 'tenants.store') ? 'active' : '' }}" style="{{ request()->routeIs('tenants.index', 'tenants.create', 'tenants.store') ? 'background-color: #0e6258' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>All Tenants</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('tenants.create') }}" class="nav-link {{ request()->routeIs('tenants.create') ? 'active' : '' }}" style="{{ request()->routeIs('tenants.create') ? 'background-color: #0e6258' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Create Tenant</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                @endif
                 <li class="nav-item">
 
                     {{-- company tab --}}

@@ -40,14 +40,9 @@ class DashboardNavigationController extends Controller
             'user_details' => Auth::user(),
             'message' => 'Fetching pending PO approvals.'
          ]);
-<<<<<<< HEAD
         $site_id = Auth::user()->site->id;
-        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && ! Auth::user()->hasRole('Super Authoriser');
+        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && !Auth::user()->hasRole('Super Authoriser');
         if ($isDepartmentOnly) {
-=======
-         $site_id = Auth::user()->site->id;
-         if (Auth::user()->hasRole('Department Authoriser')) {
->>>>>>> 8af09c4 (Add login banner, fix production error display, and suppress Carbon deprecation warnings)
             $department_id = Auth::user()->department->id ?? null;
 
             if ($department_id === null) {
@@ -74,14 +69,9 @@ class DashboardNavigationController extends Controller
             'user_details' => Auth::user(),
             'message' => 'Fetching approved requests.'
          ]);
-<<<<<<< HEAD
         $site_id = Auth::user()->site->id;
-        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && ! Auth::user()->hasRole('Super Authoriser');
+        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && !Auth::user()->hasRole('Super Authoriser');
         if ($isDepartmentOnly) {
-=======
-         $site_id = Auth::user()->site->id;
-         if (Auth::user()->hasRole('Department Authoriser')) {
->>>>>>> 8af09c4 (Add login banner, fix production error display, and suppress Carbon deprecation warnings)
             $department_id = Auth::user()->department->id ?? null;
             
             if ($department_id === null) {
@@ -108,14 +98,9 @@ class DashboardNavigationController extends Controller
             'user_details' => Auth::user(),
             'message' => 'Fetching approved POs.'
          ]);
-<<<<<<< HEAD
         $site_id = Auth::user()->site->id;
-        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && ! Auth::user()->hasRole('Super Authoriser');
+        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && !Auth::user()->hasRole('Super Authoriser');
         if ($isDepartmentOnly) {
-=======
-         $site_id = Auth::user()->site->id;
-         if (Auth::user()->hasRole('Department Authoriser')) {
->>>>>>> 8af09c4 (Add login banner, fix production error display, and suppress Carbon deprecation warnings)
             $department_id = Auth::user()->department->id ?? null;
             
             if ($department_id === null) {
@@ -143,12 +128,8 @@ class DashboardNavigationController extends Controller
             'message' => 'Fetching processed requests.'
          ]);
          $site_id = Auth::user()->site->id;
-<<<<<<< HEAD
-        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && ! Auth::user()->hasRole('Super Authoriser');
+        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && !Auth::user()->hasRole('Super Authoriser');
         if ($isDepartmentOnly) {
-=======
-         if (Auth::user()->hasRole('Department Authoriser')) {
->>>>>>> 8af09c4 (Add login banner, fix production error display, and suppress Carbon deprecation warnings)
             $department_id = Auth::user()->department->id ?? null;
             
             if ($department_id === null) {
@@ -176,12 +157,8 @@ class DashboardNavigationController extends Controller
             'message' => 'Fetching pending request approvals.'
          ]);
          $site_id = Auth::user()->site->id;
-<<<<<<< HEAD
-        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && ! Auth::user()->hasRole('Super Authoriser');
+        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && !Auth::user()->hasRole('Super Authoriser');
         if ($isDepartmentOnly) {
-=======
-         if (Auth::user()->hasRole('Department Authoriser')) {
->>>>>>> 8af09c4 (Add login banner, fix production error display, and suppress Carbon deprecation warnings)
             $department_id = Auth::user()->department->id ?? null;
             
             if ($department_id === null) {
@@ -215,9 +192,8 @@ class DashboardNavigationController extends Controller
             'message' => 'Fetching pending stock approvals.'
          ]);
          $site_id = Auth::user()->site->id;
-<<<<<<< HEAD
          $missingDepartment = false;
-        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && ! Auth::user()->hasRole('Super Authoriser');
+        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && !Auth::user()->hasRole('Super Authoriser');
         if ($isDepartmentOnly) {
             $department_id = Auth::user()->department->id ?? null;
             
@@ -234,15 +210,6 @@ class DashboardNavigationController extends Controller
                   ->paginate(15);
             } else {
                $pending_stock_approvals = Sorder::with(['request_by', 'enduser'])
-=======
-         if (Auth::user()->hasRole('Department Authoriser')) {
-            $department_id = Auth::user()->department->id ?? null;
-            
-            if ($department_id === null) {
-               $pending_stock_approvals = Sorder::where('id', null)->paginate(15);
-            } else {
-               $pending_stock_approvals = Sorder::with(['request_by', 'enduser'])
->>>>>>> 8af09c4 (Add login banner, fix production error display, and suppress Carbon deprecation warnings)
                   ->leftJoin('users', 'users.id', '=', 'sorders.user_id')
                   ->where('sorders.site_id', '=', $site_id)
                   ->where('users.department_id', '=', $department_id)
@@ -251,13 +218,7 @@ class DashboardNavigationController extends Controller
                   ->select('sorders.*') // Select all columns from sorders
                   ->paginate(15);
             }
-<<<<<<< HEAD
-         return view('homepages.pending_stock_approvals', compact('pending_stock_approvals', 'missingDepartment'));
-=======
-      //   dd($pending_stock_approvals);
-         return view('homepages.pending_stock_approvals', compact('pending_stock_approvals'));
-         // dd($pending_stock_approvals);
->>>>>>> 8af09c4 (Add login banner, fix production error display, and suppress Carbon deprecation warnings)
+            return view('homepages.pending_stock_approvals', compact('pending_stock_approvals', 'missingDepartment'));
          }
 
          $pending_stock_approvals = Sorder::with(['request_by', 'enduser'])
@@ -266,7 +227,7 @@ class DashboardNavigationController extends Controller
             ->latest()
             ->paginate(15);
 
-         return view('homepages.pending_stock_approvals', compact('pending_stock_approvals', 'missingDepartment'));
+         return view('homepages.pending_stock_approvals', compact('pending_stock_approvals'));
       } catch (\Exception $e) {
          return $this->handleError($e, 'pending_stock_approvals()');
       }
@@ -281,12 +242,8 @@ class DashboardNavigationController extends Controller
             'message' => 'Fetching processed POs.'
          ]);
          $site_id = Auth::user()->site->id;
-<<<<<<< HEAD
-        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && ! Auth::user()->hasRole('Super Authoriser');
+        $isDepartmentOnly = Auth::user()->hasRole('Department Authoriser') && !Auth::user()->hasRole('Super Authoriser');
         if ($isDepartmentOnly) {
-=======
-         if (Auth::user()->hasRole('Department Authoriser')) {
->>>>>>> 8af09c4 (Add login banner, fix production error display, and suppress Carbon deprecation warnings)
             $department_id = Auth::user()->department->id ?? null;
             
             if ($department_id === null) {

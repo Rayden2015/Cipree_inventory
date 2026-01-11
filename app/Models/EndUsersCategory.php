@@ -10,7 +10,7 @@ class EndUsersCategory extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name','description','site_id','updated_at'
+        'name','description','site_id','tenant_id','updated_at'
     ];
 
 }

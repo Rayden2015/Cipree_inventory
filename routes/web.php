@@ -354,6 +354,43 @@ Auth::routes();
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
+// Multi-tenancy routes - Super Admin only
+Route::middleware(['auth'])->group(function () {
+    // Tenant management (Super Admin only)
+    Route::prefix('tenants')->name('tenants.')->group(function () {
+        Route::get('/', [App\Http\Controllers\TenantController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\TenantController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\TenantController::class, 'store'])->name('store');
+        Route::get('/{id}', [App\Http\Controllers\TenantController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [App\Http\Controllers\TenantController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [App\Http\Controllers\TenantController::class, 'update'])->name('update');
+        Route::delete('/{id}', [App\Http\Controllers\TenantController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}/create-admin', [App\Http\Controllers\TenantController::class, 'createTenantAdmin'])->name('create-admin');
+        Route::post('/{id}/create-admin', [App\Http\Controllers\TenantController::class, 'storeTenantAdmin'])->name('store-admin');
+    });
+
+    // Tenant Admin routes
+    Route::prefix('tenant-admin')->name('tenant-admin.')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\TenantAdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/settings', [App\Http\Controllers\TenantAdminController::class, 'settings'])->name('settings');
+        Route::put('/settings', [App\Http\Controllers\TenantAdminController::class, 'updateSettings'])->name('update-settings');
+        
+        // Site management
+        Route::prefix('sites')->name('sites.')->group(function () {
+            Route::get('/', [App\Http\Controllers\TenantAdminController::class, 'sites'])->name('index');
+            Route::get('/create', [App\Http\Controllers\TenantAdminController::class, 'createSite'])->name('create');
+            Route::post('/', [App\Http\Controllers\TenantAdminController::class, 'storeSite'])->name('store');
+        });
+        
+        // User management
+        Route::prefix('users')->name('users.')->group(function () {
+            Route::get('/', [App\Http\Controllers\TenantAdminController::class, 'users'])->name('index');
+            Route::get('/create', [App\Http\Controllers\TenantAdminController::class, 'createUser'])->name('create');
+            Route::post('/', [App\Http\Controllers\TenantAdminController::class, 'storeUser'])->name('store');
+        });
+    });
+});
+
 Route::resources([
     'roles' => RoleController::class,
     'users' => UserController::class,

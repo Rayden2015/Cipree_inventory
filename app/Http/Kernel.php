@@ -38,6 +38,7 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\SessionTimeout::class,
             \App\Http\Middleware\CheckStatus::class, // Check user status on every request
+            \App\Http\Middleware\TenantContext::class, // Set tenant context for multi-tenancy
         ],
 
         'api' => [
@@ -70,5 +71,6 @@ class Kernel extends HttpKernel
         'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
         'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         'check.status' => \App\Http\Middleware\CheckStatus::class, // Alias for manual application
+        'tenant' => \App\Http\Middleware\TenantContext::class, // Tenant context middleware alias
     ];
 }

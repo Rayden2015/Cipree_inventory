@@ -35,4 +35,30 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * Indicate that the user is a Super Admin (no tenant_id or site_id).
+     */
+    public function superAdmin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'tenant_id' => null,
+            'site_id' => null,
+            'status' => 'Active',
+        ]);
+    }
+
+    /**
+     * Indicate that the user is a Tenant Admin (has tenant_id, no site_id).
+     */
+    public function tenantAdmin(): static
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'tenant_id' => \App\Models\Tenant::factory(),
+                'site_id' => null,
+                'status' => 'Active',
+            ];
+        });
+    }
 }

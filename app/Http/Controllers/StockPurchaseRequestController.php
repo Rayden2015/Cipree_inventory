@@ -616,19 +616,11 @@ public function authoriser_remarks_update(Request $request, $id)
                 // User doesn't have a department assigned, return empty results
                 $spr_lists = StockPurchaseRequest::where('id', null)->paginate(15);
             } else {
-<<<<<<< HEAD
-            $spr_lists = StockPurchaseRequest::join('users', 'users.id', '=', 'stock_purchase_requests.user_id')
-                ->where('stock_purchase_requests.site_id', '=', $site_id)
-                ->latest('stock_purchase_requests.created_at') // Specify the table name here
-                ->select('stock_purchase_requests.*')
-                ->paginate(15);
-=======
                 $spr_lists = StockPurchaseRequest::join('users', 'users.id', '=', 'stock_purchase_requests.user_id')
                     ->where('stock_purchase_requests.site_id', '=', $site_id)
                     ->latest('stock_purchase_requests.created_at') // Specify the table name here
                     ->select('stock_purchase_requests.*')
                     ->paginate(15);
->>>>>>> 8af09c4 (Add login banner, fix production error display, and suppress Carbon deprecation warnings)
             }
 
             Log::info("StockPurchaseRequestController | spr_lists() ", [

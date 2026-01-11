@@ -11,6 +11,7 @@ use App\Models\Section;
 use App\Models\Supplier;
 use App\Models\Location;
 use App\Models\Department;
+use App\Models\Tenant;
 use App\Models\EndUsersCategory;
 use App\Models\Inventory;
 use App\Models\InventoryItem;
@@ -30,6 +31,7 @@ class InventoryControllerTest extends TestCase
     protected Location $location;
     protected Item $item;
     protected Enduser $enduser;
+    protected Tenant $tenant;
 
     protected function setUp(): void
     {
@@ -37,7 +39,14 @@ class InventoryControllerTest extends TestCase
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        $this->site = Site::create([
+        // Create tenant first
+        $this->tenant = Tenant::factory()->create([
+            'name' => 'Test Tenant',
+            'status' => 'Active',
+        ]);
+
+        // Create site with tenant
+        $this->site = Site::factory()->forTenant($this->tenant)->create([
             'name' => 'Primary',
             'site_code' => 'PRIM',
         ]);
@@ -46,16 +55,19 @@ class InventoryControllerTest extends TestCase
             'name' => 'Operations',
             'description' => 'Operations Department',
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
         ]);
 
         $this->section = Section::create([
             'name' => 'Ops Section',
             'description' => 'Main Section',
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
         ]);
 
         $this->user = User::factory()->create([
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
             'department_id' => $this->department->id,
             'status' => 'Active',
         ]);
@@ -66,16 +78,19 @@ class InventoryControllerTest extends TestCase
             'email' => 'supplier@example.com',
             'address' => '123 Supply Street',
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
         ]);
 
         $this->location = Location::create([
             'name' => 'Main Warehouse',
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
         ]);
 
         $category = EndUsersCategory::create([
             'name' => 'Staff',
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
         ]);
 
         $this->enduser = Enduser::create([
@@ -91,6 +106,7 @@ class InventoryControllerTest extends TestCase
             'designation' => 'Officer',
             'status' => 'Active',
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
             'department_id' => $this->department->id,
             'section_id' => $this->section->id,
             'enduser_category_id' => $category->id,
@@ -101,6 +117,7 @@ class InventoryControllerTest extends TestCase
             'item_stock_code' => 'LP-01',
             'item_part_number' => 'PART-01',
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
             'amount' => 100,
             'stock_quantity' => 0,
         ]);

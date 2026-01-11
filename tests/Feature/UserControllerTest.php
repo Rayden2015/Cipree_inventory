@@ -7,6 +7,7 @@ use App\Models\Site;
 use App\Models\User;
 use App\Models\Section;
 use App\Models\Department;
+use App\Models\Tenant;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\WelcomeMail;
@@ -22,6 +23,7 @@ class UserControllerTest extends TestCase
     protected Site $site;
     protected Department $department;
     protected Section $section;
+    protected Tenant $tenant;
 
     protected function setUp(): void
     {
@@ -29,7 +31,14 @@ class UserControllerTest extends TestCase
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        $this->site = Site::create([
+        // Create tenant first
+        $this->tenant = Tenant::factory()->create([
+            'name' => 'Test Tenant',
+            'status' => 'Active',
+        ]);
+
+        // Create site with tenant
+        $this->site = Site::factory()->forTenant($this->tenant)->create([
             'name' => 'Main Site',
             'site_code' => 'MS',
         ]);
@@ -38,12 +47,14 @@ class UserControllerTest extends TestCase
             'name' => 'Operations',
             'description' => 'Ops Department',
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
         ]);
 
         $this->section = Section::create([
             'name' => 'Section A',
             'description' => 'Section Description',
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
         ]);
     }
 
@@ -100,6 +111,7 @@ class UserControllerTest extends TestCase
         $target = User::factory()->create([
             'email' => 'target@example.com',
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
             'department_id' => $this->department->id,
             'status' => 'Active',
         ]);
@@ -126,6 +138,7 @@ class UserControllerTest extends TestCase
             'email' => 'update-me@example.com',
             'department_id' => $this->department->id,
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
             'status' => 'Active',
         ]);
 
@@ -133,6 +146,7 @@ class UserControllerTest extends TestCase
             'name' => 'Finance',
             'description' => 'Finance Department',
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
         ]);
 
         $response = $this->actingAs($admin)->put(route('users.update', $target->id), [
@@ -154,6 +168,7 @@ class UserControllerTest extends TestCase
     {
         $user = User::factory()->create([
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
             'department_id' => $this->department->id,
             'status' => 'Active',
         ]);
