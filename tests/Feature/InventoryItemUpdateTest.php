@@ -34,7 +34,12 @@ class InventoryItemUpdateTest extends TestCase
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        $this->site = Site::create([
+        $this->tenant = \App\Models\Tenant::factory()->create([
+            'name' => 'Test Tenant',
+            'status' => 'Active',
+        ]);
+        
+        $this->site = Site::factory()->forTenant($this->tenant)->create([
             'name' => 'Primary',
             'site_code' => 'PRIM',
         ]);
@@ -43,6 +48,7 @@ class InventoryItemUpdateTest extends TestCase
             'name' => 'Warehouse',
             'description' => 'Warehouse Department',
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
         ]);
 
         $this->supplier = Supplier::create([
@@ -51,11 +57,18 @@ class InventoryItemUpdateTest extends TestCase
             'email' => 'supplier@example.com',
             'address' => '123 Street',
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
         ]);
 
         $this->location = Location::create([
             'name' => 'Main Store',
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
+        ]);
+
+        $category = \App\Models\Category::factory()->create([
+            'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
         ]);
 
         $this->item = Item::create([
@@ -63,12 +76,15 @@ class InventoryItemUpdateTest extends TestCase
             'item_stock_code' => 'CODE-1',
             'item_part_number' => 'PART-1',
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
+            'item_category_id' => $category->id,
             'amount' => 100,
             'stock_quantity' => 10,
         ]);
 
         $this->user = User::factory()->create([
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
             'department_id' => $this->department->id,
             'status' => 'Active',
         ]);

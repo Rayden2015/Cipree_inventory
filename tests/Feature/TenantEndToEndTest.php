@@ -73,7 +73,11 @@ class TenantEndToEndTest extends TestCase
         $this->assertNotNull($tenantAdmin);
         $this->assertTrue($tenantAdmin->hasRole('Tenant Admin'));
         $this->assertEquals($tenant->id, $tenantAdmin->tenant_id);
-        $this->assertNull($tenantAdmin->site_id);
+        
+        // Tenant admin is assigned to the default "Head Office" site
+        $defaultSite = Site::where('tenant_id', $tenant->id)->where('name', 'Head Office')->first();
+        $this->assertNotNull($defaultSite);
+        $this->assertEquals($defaultSite->id, $tenantAdmin->site_id);
 
         // Step 2: Tenant Admin logs in and creates a site
         $this->actingAs($tenantAdmin);

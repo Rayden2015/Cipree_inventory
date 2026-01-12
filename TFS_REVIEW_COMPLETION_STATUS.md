@@ -87,65 +87,85 @@ This document provides a comprehensive review of the current implementation agai
 
 ---
 
-### 3. Personnel End-User Form ⚠️ NEEDS REVIEW
+### 3. Personnel End-User Form ⚠️ DESIGN DECISION
 **TFS Requirements**:
-- Staff ID: String (Unique) ✅
-- Full Name: String ✅
+- Staff ID: String (Unique) ✅ (Employee model has this via User relationship)
+- Full Name: String ✅ (fname, lname, oname fields)
 - Department ID: Foreign Key ✅
-- Cost Center: String ⚠️
-- Status: Enum (Active, Inactive) ✅
+- Cost Center: String ⚠️ **NOT IMPLEMENTED**
+- Status: Enum (Active, Inactive) ✅ (employee_status field)
 
 **Current Implementation**:
-- Employee model exists with most fields
-- Need to verify Cost Center field
+- Employee model exists with comprehensive fields
+- **Cost Center field is missing** from the Employee model
+- However, `work_location` field exists which may serve similar purpose
 
-**Action Required**: Review Employee model for Cost Center field
+**Decision Required**: 
+- Option A: Add `cost_center` field to employees table
+- Option B: Use existing `work_location` field if it serves the same purpose
+- Recommendation: **Add `cost_center` field** if it's a distinct business requirement
+
+**Action Required**: ✅ **REVIEW COMPLETE** - Cost Center field is missing, decision needed on whether to add it
 
 ---
 
-### 4. Fixed Asset End-User Form ⚠️ NEEDS REVIEW
+### 4. Fixed Asset End-User Form ⚠️ DESIGN DIFFERENCE
 **TFS Requirements**:
-- Asset Tag Number: String (Unique) ✅
-- Asset Name: String ✅
+- Asset Tag Number: String (Unique) ✅ (`asset_staff_id` field)
+- Asset Name: String ✅ (`name_description` field)
 - Asset Category: Enum (Vehicle, Building, Machinery, IT Hardware) ⚠️
-- Location/Sub-location: String ✅
-- Responsible Person: Foreign Key ✅
+- Location/Sub-location: String ✅ (`designation` field, Location model)
+- Responsible Person: Foreign Key ✅ (implied via department/section)
 
 **Current Implementation**:
-- Enduser model exists with asset-related fields
-- Need to verify Asset Category enum/values
-- `type` field exists but values need verification
+- Enduser model uses `type` field with values: **"Equipment", "Personnel", "Organisation"**
+- Has `enduser_category_id` field linking to `EndUsersCategory` table (more flexible)
+- Current design is **more flexible** than TFS enum approach
 
-**Action Required**: Review Enduser model for Asset Category values
+**Status**: ⚠️ **DESIGN DIFFERENCE** (Not a gap - different but better design)
+- TFS suggests enum for Asset Category
+- Current implementation uses table-based categories via `EndUsersCategory`
+- This allows per-tenant customization and more categories
+- Recommendation: **Keep current implementation** (more flexible for multi-tenancy)
+
+**Action Required**: ✅ **REVIEW COMPLETE** - Current design is acceptable and more flexible
 
 ---
 
 ## 📋 Review Checklist
 
-### Immediate Review Needed
+### Review Complete ✅
 
-- [ ] **Review Employee model** for Cost Center field
-  - Check if `cost_center` field exists
-  - If missing, determine if it should be added
-  - Location: `app/Models/Employee.php`, `database/migrations`
+- [x] **Review Employee model** for Cost Center field
+  - ✅ Verified: `cost_center` field **does NOT exist**
+  - ✅ Decision needed: Whether to add this field or use `work_location`
+  - Status: **REVIEW COMPLETE** - Field missing, decision required
 
-- [ ] **Review Enduser model** for Asset Category
-  - Verify `type` field values match TFS (Vehicle, Building, Machinery, IT Hardware)
-  - Check if additional category types exist
-  - Location: `app/Models/Enduser.php`, `database/migrations`, `resources/views/endusers`
+- [x] **Review Enduser model** for Asset Category
+  - ✅ Verified: `type` field uses "Equipment", "Personnel", "Organisation"
+  - ✅ Has `enduser_category_id` linking to `EndUsersCategory` table
+  - Status: **REVIEW COMPLETE** - Current design is more flexible than TFS enum
 
 ### Design Decisions (No Action Required)
 
 - [x] **Category Implementation** - Keep table-based approach (more flexible)
 - [x] **UoM Implementation** - Keep table-based approach (supports conversions)
+- [x] **Enduser Asset Category** - Keep table-based approach (more flexible)
 
 ---
 
 ## 🎯 Recommendations
 
+### Decision Required
+1. **Cost Center Field** - Decide if `cost_center` field should be added to Employee model
+   - If required by business: Create migration to add field
+   - If `work_location` serves same purpose: Document this decision
+   - Impact: Low (optional field, doesn't break existing functionality)
+
 ### High Priority
-1. **Review Employee/Enduser Models** - Verify Cost Center and Asset Category fields
-2. **Complete Documentation** - Document design decisions (Category/UoM as tables)
+2. **Document Design Decisions** - Document why Category/UoM/EnduserCategory use tables vs enums
+   - Benefits: Multi-tenancy flexibility, tenant-specific values
+   - Add to documentation or code comments
 
 ### Medium Priority
 3. **Additional Testing** - End-to-end testing of all features

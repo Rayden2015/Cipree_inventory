@@ -6,7 +6,7 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
-use App\Models\{User, Site, Department, Enduser, EndUsersCategory, Supplier, Item, Inventory, InventoryItem, Sorder, SorderPart};
+use App\Models\{User, Site, Department, Enduser, EndUsersCategory, Supplier, Item, Inventory, InventoryItem, Sorder, SorderPart, Tenant};
 use Carbon\Carbon;
 
 class StoreRequestFlowTest extends TestCase
@@ -30,10 +30,12 @@ class StoreRequestFlowTest extends TestCase
             'name' => 'Operations',
             'description' => 'Ops Department',
             'site_id' => $site->id,
+            'tenant_id' => $tenant->id,
         ]);
 
         $requester = User::factory()->create([
             'site_id' => $site->id,
+            'tenant_id' => $tenant->id,
             'department_id' => $department->id,
             'status' => 'Active',
         ]);
