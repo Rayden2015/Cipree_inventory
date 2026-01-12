@@ -99,6 +99,7 @@ Route::get('/export-items-per-site', [ItemController::class, 'exportItemsPerSite
 Route::resource('parts', PartsController::class);
 Route::get('ajax-autocomplete-search', [PartsController::class, 'selectSearch']);
 Route::get('ajax-autocomplete-site', [PartsController::class, 'selectSite']);
+Route::get('ajax-autocomplete-part-location', [PartsController::class, 'selectLocation']);
 
 // department controller
 Route::resource('departmentslist', DepartmentController::class);

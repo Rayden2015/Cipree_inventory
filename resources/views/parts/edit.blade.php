@@ -1,229 +1,203 @@
 @extends('layouts.admin')
+
 @section('content')
-    <!DOCTYPE html>
-    <html lang="en">
-
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>Document</title>
-        <link rel="stylesheet" href="http://cdn.bootcss.com/toastr.js/latest/css/toastr.min.css">
-        <link rel="stylesheet"
-            href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0-alpha1/css/bootstrap.min.css">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        {{-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" /> --}}
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
-
-        <link rel="stylesheet" href="{{ asset('/css/select2.min.css') }}">
-        <style>
-            h2 {
-                color: white;
-            }
-            .select2-selection__rendered {
-            line-height: 31px !important;
-        }
-
-        .select2-container .select2-selection--single {
-            height: 35px !important;
-        }
-
-        .select2-selection__arrow {
-            height: 34px !important;
-        }
-        </style>
-    </head>
-
-    <body>
-        <div>
-
-            <br>
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0"><i class="fas fa-cogs"></i> Edit Part</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('parts.index') }}">Parts</a></li>
+                    <li class="breadcrumb-item active">Edit Part</li>
+                </ol>
+            </div>
         </div>
+    </div>
+</div>
 
-        <div class="card">
-
+<section class="content">
+    <div class="container-fluid">
+        <div class="card card-primary card-outline">
             <div class="card-header">
-
-                <a href="{{ route('parts.index') }}" class="btn btn-primary float-right">Back</a>
+                <h3 class="card-title"><i class="fas fa-edit mr-1"></i> Edit Part</h3>
+                <div class="card-tools">
+                    <a href="{{ route('parts.index') }}" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-arrow-left mr-1"></i> Back
+                    </a>
+                </div>
             </div>
 
             <div class="card-body">
+                @if (session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ session('success') }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                @endif
 
-                <form action="{{ route('parts.update',$part->id) }}" method="POST" enctype="multipart/form-data">
+                @if (session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ session('error') }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                @endif
+
+                <form action="{{ route('parts.update', $part->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
-@method('PUT')
+                    @method('PUT')
+
                     @if ($errors->any())
                         <div class="alert alert-danger">
                             <strong>Whoops!</strong> There were some problems with your input.<br><br>
-                            <ul>
+                            <ul class="mb-0">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
                         </div>
                     @endif
-                    <div class="card card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">Edit Part</h3>
-                        </div>
-                        <!-- /.card-header -->
-                        <!-- form start -->
 
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Supplier: </label>
-                                        <select data-placeholder="Choose..."  name="supplier_id" id="supplier_id" class="select-search form-control">
-                                            <option value=""></option>
-                                            @foreach($suppliers as $sp)
-                                                <option {{  ($part->supplier_id  == $sp->id ? 'selected' : '') }} value="{{ $sp->id }}">{{ $sp->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Name: </label>
-                                        <input type="text" value="{{ $part->name }}" name="name" class="form-control"
-                                            >
-                                    </div>
-                                </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="name">Part Name <span class="text-danger">*</span></label>
+                                <input type="text" 
+                                       class="form-control @error('name') is-invalid @enderror" 
+                                       id="name" 
+                                       name="name" 
+                                       value="{{ old('name', $part->name) }}" 
+                                       required
+                                       placeholder="Enter part name">
+                                @error('name')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
                             </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Site: </label>
-                                        <select data-placeholder="Choose..."  name="site_id" id="site_id" class="livesearch2 form-control">
-                                            <option value=""></option>
-                                            @foreach($sites as $st)
-                                                <option {{  ($part->site_id  == $st->id ? 'selected' : '') }} value="{{ $st->id }}">{{ $st->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Site: </label>
-                                        <select data-placeholder="Choose..."  name="location_id" id="location_id" class="livesearch3 form-control">
-                                            <option value=""></option>
-                                            @foreach($locations as $lc)
-                                                <option {{  ($part->location_id  == $lc->id ? 'selected' : '') }} value="{{ $lc->id }}">{{ $st->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Quantity: </label>
-                                        <input type="text" value="{{ $part->quantity }}" name="quantity" class="form-control"
-                                            >
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Description: </label>
-                                        <input type="text" value="{{ $part->description }}" name="description" class="form-control"
-                                            >
-                                    </div>
-                                </div>
-                            </div>
-
-
                         </div>
-                        <!-- /.card-body -->
 
-                        <div class="card-footer">
-                            <button type="submit" class="btn btn-primary">Submit</button>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="supplier_id">Supplier</label>
+                                <select class="form-control @error('supplier_id') is-invalid @enderror" 
+                                        name="supplier_id" 
+                                        id="supplier_id">
+                                    <option value="">Select Supplier</option>
+                                    @foreach($suppliers as $supplier)
+                                        <option value="{{ $supplier->id }}" {{ old('supplier_id', $part->supplier_id) == $supplier->id ? 'selected' : '' }}>
+                                            {{ $supplier->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('supplier_id')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
                         </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="site_id">Site <span class="text-danger">*</span></label>
+                                <select class="form-control @error('site_id') is-invalid @enderror" 
+                                        name="site_id" 
+                                        id="site_id" 
+                                        required>
+                                    <option value="">Select Site</option>
+                                    @foreach($sites as $site)
+                                        <option value="{{ $site->id }}" {{ old('site_id', $part->site_id) == $site->id ? 'selected' : '' }}>
+                                            {{ $site->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('site_id')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="location_id">Location</label>
+                                <select class="form-control @error('location_id') is-invalid @enderror" 
+                                        name="location_id" 
+                                        id="location_id">
+                                    <option value="">Select Location</option>
+                                    @foreach($locations as $location)
+                                        <option value="{{ $location->id }}" {{ old('location_id', $part->location_id) == $location->id ? 'selected' : '' }}>
+                                            {{ $location->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('location_id')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="quantity">Quantity</label>
+                                <input type="number" 
+                                       class="form-control @error('quantity') is-invalid @enderror" 
+                                       id="quantity" 
+                                       name="quantity" 
+                                       value="{{ old('quantity', $part->quantity ?? 0) }}" 
+                                       min="0"
+                                       placeholder="Enter quantity">
+                                @error('quantity')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="description">Description</label>
+                                <input type="text" 
+                                       class="form-control @error('description') is-invalid @enderror" 
+                                       id="description" 
+                                       name="description" 
+                                       value="{{ old('description', $part->description) }}" 
+                                       placeholder="Enter description">
+                                @error('description')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save mr-1"></i> Update Part
+                        </button>
+                        <a href="{{ route('parts.index') }}" class="btn btn-secondary">
+                            <i class="fas fa-times mr-1"></i> Cancel
+                        </a>
+                    </div>
                 </form>
             </div>
-
         </div>
-
-        </div>
-    </body>
-    <script type="text/javascript">
-        $('.livesearch').select2({
-            placeholder: 'Select Supplier',
-            ajax: {
-                url: '/ajax-autocomplete-search',
-                dataType: 'json',
-                delay: 250,
-                processResults: function(data) {
-                    return {
-                        results: $.map(data, function(item) {
-                            return {
-                                text: item.name,
-                                id: item.id
-                            }
-                        })
-                    };
-                },
-                cache: true
-            }
-        });
-    </script>
-     <script type="text/javascript">
-        $('.livesearch2').select2({
-            placeholder: 'Select Site',
-            ajax: {
-                url: '/ajax-autocomplete-site',
-                dataType: 'json',
-                delay: 250,
-                processResults: function(data) {
-                    return {
-                        results: $.map(data, function(item) {
-                            return {
-                                text: item.name,
-                                id: item.id
-                            }
-                        })
-                    };
-                },
-                cache: true
-            }
-        });
-    </script>
-    <script type="text/javascript">
-        $('.livesearch3').select2({
-            placeholder: 'Select Location',
-            ajax: {
-                url: '/ajax-autocomplete-location',
-                dataType: 'json',
-                delay: 250,
-                processResults: function(data) {
-                    return {
-                        results: $.map(data, function(item) {
-                            return {
-                                text: item.name,
-                                id: item.id
-                            }
-                        })
-                    };
-                },
-                cache: true
-            }
-        });
-    </script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
-        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"
-        integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-        <script src="http://cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
-        <script src="http://cdn.bootcss.com/toastr.js/latest/js/toastr.min.js"></script>
-        {!! Toastr::message() !!}
-
-    </html>
+    </div>
+</section>
 @endsection
