@@ -62,11 +62,11 @@ class Tenant extends Model
     }
 
     /**
-     * Get tenant admin users (users directly assigned to tenant)
+     * Get tenant admin users (users with Tenant Admin role for this tenant)
      */
     public function tenantAdmins()
     {
-        return $this->users()->whereNull('site_id')->whereHas('roles', function ($query) {
+        return $this->users()->whereHas('roles', function ($query) {
             $query->where('name', 'Tenant Admin');
         });
     }
