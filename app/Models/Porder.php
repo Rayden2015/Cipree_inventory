@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TenantScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Porder extends Model
 {
-    use HasFactory;
+    use HasFactory, TenantScope;
     protected $fillable = [
         'part_id', 'description', 'quantity','make',
         'model','serial_number','tax','tax2','tax3',
@@ -40,6 +41,15 @@ class Porder extends Model
     public function tenant()
     {
         return $this->belongsTo(Tenant::class, 'tenant_id');
+    }
+
+    /**
+     * Boot the model
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        static::bootTenantScope();
     }
 }
 

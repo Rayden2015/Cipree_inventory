@@ -32,6 +32,9 @@
                 @can('add-item')
                     <p>
                         <a href="{{ route('items.create') }}" class="btn btn-primary mr-3 my-3">Add</a>
+                        <a href="{{ route('items.import.form') }}" class="btn btn-success mr-3 my-3">
+                            <i class="fas fa-upload"></i> Bulk Import
+                        </a>
                     </p>
               @endcan
             </div>

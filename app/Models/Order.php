@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TenantScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
-    use HasFactory;
+    use HasFactory, TenantScope;
     protected $fillable = [
         'tax', 'tax2', 'tax3', 'currency', 'supplier_id', 'type_of_purchase', 'enduser_id', 'status', 'image', 'user_id', 'request_number', 'request_date', 'approval_status', 'work_order_ref', 'approved_by', 'approved_on', 'tenant_id', 'site_id','updated_at','depart_auth_approval_status',
         'depart_auth_approved_by',
@@ -64,4 +65,12 @@ class Order extends Model
         return $this->belongsTo(Tenant::class, 'tenant_id');
     }
 
+    /**
+     * Boot the model
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        static::bootTenantScope();
+    }
 }

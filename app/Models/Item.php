@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TenantScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Item extends Model
 {
-    use HasFactory;
+    use HasFactory, TenantScope;
    
     protected $fillable = [
-        'item_description','item_uom','item_category_id','item_stock_code','item_part_number','added_by','modified_by','reorder_level','stock_quantity','amount','new_category','site_id','uom_id','updated_at'
+        'item_description','item_uom','item_category_id','item_stock_code','item_part_number','added_by','modified_by','reorder_level','max_stock_level','lead_time_days','valuation_method','stock_quantity','amount','new_category','site_id','tenant_id','uom_id','updated_at'
     ];
 
     public function category(){
@@ -44,5 +45,22 @@ class Item extends Model
     public function inventoryItems()
     {
         return $this->hasMany(InventoryItem::class); // Adjust if necessary
+    }
+
+    /**
+     * Get the tenant that owns the item
+     */
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class, 'tenant_id');
+    }
+
+    /**
+     * Boot the model
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        static::bootTenantScope();
     }
 }

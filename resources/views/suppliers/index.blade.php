@@ -30,6 +30,9 @@
             <h3 class="page-title"></h3>
             <p>
                 <a href="{{ route('suppliers.create') }}" class="btn btn-primary mr-3 my-3">Add </a>
+                <a href="{{ route('suppliers.import.form') }}" class="btn btn-success mr-3 my-3">
+                    <i class="fas fa-upload"></i> Bulk Import
+                </a>
             </p>
 
         </div>

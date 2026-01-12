@@ -128,7 +128,7 @@ class TenantAdminController extends Controller
     /**
      * Display all sites for the tenant
      */
-    public function sites()
+    public function sites(Request $request)
     {
         try {
             $user = Auth::user();
@@ -139,9 +139,26 @@ class TenantAdminController extends Controller
                 return redirect()->route('home');
             }
 
-            $sites = $tenant->sites()->latest()->paginate(15);
+            $query = $tenant->sites()->withCount('users')->latest();
 
-            return view('tenant-admin.sites.index', compact('sites', 'tenant'));
+            // Search functionality
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('site_code', 'like', "%{$search}%");
+                });
+            }
+
+            $sites = $query->paginate(15)->withQueryString();
+
+            // Get statistics
+            $stats = [
+                'total' => $tenant->sites()->count(),
+                'total_users' => $tenant->users()->count(),
+            ];
+
+            return view('tenant-admin.sites.index', compact('sites', 'tenant', 'stats'));
         } catch (\Exception $e) {
             Log::error('TenantAdminController | sites() | Error: ' . $e->getMessage());
             Toastr::error('An error occurred.');
@@ -215,7 +232,7 @@ class TenantAdminController extends Controller
     /**
      * Display all users for the tenant
      */
-    public function users()
+    public function users(Request $request)
     {
         try {
             $user = Auth::user();
@@ -226,10 +243,38 @@ class TenantAdminController extends Controller
                 return redirect()->route('home');
             }
 
-            $users = $tenant->users()->with(['site', 'roles'])->latest()->paginate(15);
+            $query = $tenant->users()->with(['site', 'roles'])->latest();
+
+            // Search functionality
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            }
+
+            // Site filter
+            if ($request->filled('site_id') && $request->site_id !== 'all') {
+                $query->where('site_id', $request->site_id);
+            }
+
+            // Status filter
+            if ($request->filled('status') && $request->status !== 'all') {
+                $query->where('status', $request->status);
+            }
+
+            $users = $query->paginate(15)->withQueryString();
             $sites = $tenant->sites()->get();
 
-            return view('tenant-admin.users.index', compact('users', 'tenant', 'sites'));
+            // Get statistics
+            $stats = [
+                'total' => $tenant->users()->count(),
+                'active' => $tenant->users()->where('status', 'Active')->count(),
+                'inactive' => $tenant->users()->where('status', 'Inactive')->count(),
+            ];
+
+            return view('tenant-admin.users.index', compact('users', 'tenant', 'sites', 'stats'));
         } catch (\Exception $e) {
             Log::error('TenantAdminController | users() | Error: ' . $e->getMessage());
             Toastr::error('An error occurred.');

@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Log;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\LogsErrors;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\EndusersImport;
+use App\Exports\EndusersImportTemplateExport;
 
 class EnduserController extends Controller
 {
@@ -345,7 +348,79 @@ class EnduserController extends Controller
     // Redirect back with the error message
     return redirect()->back()
                      ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
+    }
 
+    }
+
+    /**
+     * Show bulk import form
+     */
+    public function showImportForm()
+    {
+        try {
+            return view('endusers.import');
+        } catch (\Exception $e) {
+            Log::error('EnduserController | showImportForm | Error: ' . $e->getMessage());
+            Toastr::error('An error occurred while loading the import form.');
+            return redirect()->route('endusers.index');
+        }
+    }
+
+    /**
+     * Handle bulk import of endusers from CSV/XLSX
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:csv,xlsx,xls|max:10240', // 10MB max
+        ]);
+
+        try {
+            $import = new EndusersImport();
+            
+            Excel::import($import, $request->file('file'));
+
+            $stats = $import->getStats();
+            $failures = $import->failures();
+
+            if ($stats['success'] > 0) {
+                Toastr::success("Successfully imported {$stats['success']} enduser(s).");
+            }
+
+            if ($stats['failed'] > 0 || count($failures) > 0) {
+                $errorMessage = "Failed to import {$stats['failed']} enduser(s).";
+                if (count($failures) > 0) {
+                    $errorMessage .= " Please check the file format and try again.";
+                }
+                Toastr::warning($errorMessage);
+            }
+
+            Log::info('EnduserController | import | Bulk import completed', [
+                'user_id' => Auth::id(),
+                'success_count' => $stats['success'],
+                'failed_count' => $stats['failed'],
+            ]);
+
+            return redirect()->route('endusers.index')
+                ->with('import_stats', $stats)
+                ->with('import_failures', $failures);
+
+        } catch (\Exception $e) {
+            Log::error('EnduserController | import | Error: ' . $e->getMessage(), [
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'user_id' => Auth::id(),
+            ]);
+            Toastr::error('An error occurred while importing endusers. Please check the file format and try again.');
+            return redirect()->back();
+        }
+    }
+
+    /**
+     * Download sample import template
+     */
+    public function downloadImportTemplate()
+    {
+        return Excel::download(new EndusersImportTemplateExport(), 'endusers_import_template.xlsx');
     }
 }

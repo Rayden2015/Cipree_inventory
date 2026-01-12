@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TenantScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Sorder extends Model
 {
-    use HasFactory;
+    use HasFactory, TenantScope;
 
     protected $fillable = [
     'inventory_id', 'description', 'quantity','make','price',
@@ -55,5 +56,13 @@ class Sorder extends Model
     {
         return $this->belongsTo(Tenant::class, 'tenant_id');
     }
-    
+
+    /**
+     * Boot the model
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        static::bootTenantScope();
+    }
 }

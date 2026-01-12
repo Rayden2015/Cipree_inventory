@@ -93,13 +93,42 @@
 
 
                             <div class="row">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label> Reorder Level: <span class="text-danger"></span></label>
                                         <input value="{{ $item->reorder_level }}"  type="number" name="reorder_level"
                                             class="form-control">
                                     </div>
                                 </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label> Maximum Stock Level: <span class="text-danger"></span></label>
+                                        <input value="{{ $item->max_stock_level }}"  type="number" min="0" name="max_stock_level"
+                                            class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label> Lead Time (Days): <span class="text-danger"></span></label>
+                                        <input value="{{ $item->lead_time_days }}"  type="number" min="0" name="lead_time_days"
+                                            class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label> Valuation Method: </label>
+                                        <select data-placeholder="Choose..." name="valuation_method" id="valuation_method"
+                                            class="select-search form-control">
+                                            <option value=""></option>
+                                            <option {{ $item->valuation_method == 'FIFO' ? 'selected' : '' }} value="FIFO">FIFO</option>
+                                            <option {{ $item->valuation_method == 'LIFO' ? 'selected' : '' }} value="LIFO">LIFO</option>
+                                            <option {{ $item->valuation_method == 'Weighted Average' ? 'selected' : '' }} value="Weighted Average">Weighted Average</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>UOM: </label>

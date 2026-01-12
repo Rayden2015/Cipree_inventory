@@ -117,9 +117,15 @@ class User extends Authenticatable
         // If no direct tenant_id, try to get from site
         if ($this->site_id) {
             // Load site relationship if not already loaded
-            $site = $this->site ?: Site::find($this->site_id);
+            // Use withoutTenantScope to avoid circular dependency when Site model has TenantScope
+            // Check if relation is loaded to avoid triggering it (which would trigger scope)
+            if ($this->relationLoaded('site')) {
+                $site = $this->site;
+            } else {
+                $site = Site::withoutTenantScope()->find($this->site_id);
+            }
             if ($site && $site->tenant_id) {
-                return $site->tenant ?: Tenant::find($site->tenant_id);
+                return $site->tenant ?? Tenant::find($site->tenant_id);
             }
         }
         

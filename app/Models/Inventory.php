@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TenantScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Inventory extends Model
 {
-    use HasFactory;
+    use HasFactory, TenantScope;
     protected $fillable = [
 'location_id','waybill','designation','codes','items','part_number','category_id','uom','quantity','supplier_id',
 'dollar_rate','unit_cost_exc_vat_gh','unit_cost_exc_vat_usd',
 'total_value_gh','total_value_usd','srf','erf','ats','drq',
-'po_number','grn_number','invoice_number','delivered_by','supplier_id','trans_type','remarks','date','billing_currency','enduser_id','user_id','exchange_rate','site_id','manual_remarks','updated_at'
+'po_number','grn_number','invoice_number','delivered_by','supplier_id','trans_type','remarks','date','billing_currency','enduser_id','user_id','exchange_rate','site_id','tenant_id','manual_remarks','updated_at'
     ];
 
 protected $attributes = [
@@ -53,5 +54,22 @@ protected $attributes = [
     }
     public function site(){
         return $this->belongsTo(Site::class,'site_id');
+    }
+
+    /**
+     * Get the tenant that owns the inventory
+     */
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class, 'tenant_id');
+    }
+
+    /**
+     * Boot the model
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        static::bootTenantScope();
     }
 }

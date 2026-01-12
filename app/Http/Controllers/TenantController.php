@@ -35,24 +35,51 @@ class TenantController extends Controller
     /**
      * Display a listing of tenants (Super Admin only)
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             Log::info('TenantController | index() | Fetching tenants list', [
                 'user_id' => Auth::id(),
                 'user_email' => Auth::user()->email ?? 'unknown',
+                'filters' => $request->all(),
             ]);
 
-            $tenants = Tenant::with(['tenantAdmins', 'sites'])
-                ->latest()
-                ->paginate(15);
+            $query = Tenant::withCount(['sites', 'users'])
+                ->latest();
+
+            // Search functionality
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%")
+                        ->orWhere('domain', 'like', "%{$search}%")
+                        ->orWhere('contact_name', 'like', "%{$search}%")
+                        ->orWhere('contact_email', 'like', "%{$search}%");
+                });
+            }
+
+            // Status filter
+            if ($request->filled('status') && $request->status !== 'all') {
+                $query->where('status', $request->status);
+            }
+
+            $tenants = $query->paginate(15)->withQueryString();
+
+            // Get statistics for the view
+            $stats = [
+                'total' => Tenant::count(),
+                'active' => Tenant::where('status', 'Active')->count(),
+                'inactive' => Tenant::where('status', 'Inactive')->count(),
+                'suspended' => Tenant::where('status', 'Suspended')->count(),
+            ];
 
             Log::info('TenantController | index() | Tenants fetched successfully', [
                 'count' => $tenants->total(),
                 'current_page' => $tenants->currentPage(),
             ]);
 
-            return view('tenants.index', compact('tenants'));
+            return view('tenants.index', compact('tenants', 'stats'));
         } catch (\Exception $e) {
             Log::error('TenantController | index() | Error fetching tenants', [
                 'error_message' => $e->getMessage(),
@@ -583,6 +610,103 @@ class TenantController extends Controller
                 'table_name' => $tableName,
                 'record_id' => $recordId,
             ]);
+        }
+    }
+
+    /**
+     * Display Super Admin dashboard
+     */
+    public function dashboard()
+    {
+        // Ensure only Super Admins can access
+        if (!Auth::user()->isSuperAdmin()) {
+            Toastr::error('You do not have permission to access this page.');
+            return redirect()->route('home');
+        }
+        
+        try {
+            // Get overall statistics
+            $totalTenants = Tenant::count();
+            $activeTenants = Tenant::where('status', 'Active')->count();
+            $inactiveTenants = Tenant::where('status', 'Inactive')->count();
+            $suspendedTenants = Tenant::where('status', 'Suspended')->count();
+            
+            // Get total users across all tenants
+            $totalUsers = User::whereNotNull('tenant_id')->count();
+            
+            // Get total sites across all tenants
+            $totalSites = Site::whereNotNull('tenant_id')->count();
+            
+            // Get tenant admins count
+            $totalTenantAdmins = User::whereHas('roles', function ($query) {
+                $query->where('name', 'Tenant Admin');
+            })->whereNotNull('tenant_id')->count();
+            
+            // Get recent tenants
+            $recentTenants = Tenant::withCount(['sites', 'users'])
+                ->latest()
+                ->take(5)
+                ->get();
+            
+            // Get tenants with most users
+            $topTenantsByUsers = Tenant::withCount(['users', 'sites'])
+                ->orderBy('users_count', 'desc')
+                ->take(5)
+                ->get();
+            
+            // Get tenants with most sites
+            $topTenantsBySites = Tenant::withCount(['sites', 'users'])
+                ->orderBy('sites_count', 'desc')
+                ->take(5)
+                ->get();
+            
+            // Get growth metrics (last 30 days)
+            $tenantsCreatedLastMonth = Tenant::where('created_at', '>=', now()->subDays(30))->count();
+            $usersCreatedLastMonth = User::whereNotNull('tenant_id')
+                ->where('created_at', '>=', now()->subDays(30))
+                ->count();
+            $sitesCreatedLastMonth = Site::whereNotNull('tenant_id')
+                ->where('created_at', '>=', now()->subDays(30))
+                ->count();
+            
+            // Get tenants created this month
+            $tenantsCreatedThisMonth = Tenant::whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->count();
+            
+            // Calculate active percentage
+            $activePercentage = $totalTenants > 0 ? round(($activeTenants / $totalTenants) * 100, 1) : 0;
+            
+            // Get recently created tenants (last 7 days)
+            $recentlyCreatedTenants = Tenant::where('created_at', '>=', now()->subDays(7))
+                ->withCount(['sites', 'users'])
+                ->latest()
+                ->get();
+
+            $stats = [
+                'total_tenants' => $totalTenants,
+                'active_tenants' => $activeTenants,
+                'inactive_tenants' => $inactiveTenants,
+                'suspended_tenants' => $suspendedTenants,
+                'total_users' => $totalUsers,
+                'total_sites' => $totalSites,
+                'total_tenant_admins' => $totalTenantAdmins,
+                'tenants_created_last_month' => $tenantsCreatedLastMonth,
+                'users_created_last_month' => $usersCreatedLastMonth,
+                'sites_created_last_month' => $sitesCreatedLastMonth,
+                'tenants_created_this_month' => $tenantsCreatedThisMonth,
+                'active_percentage' => $activePercentage,
+            ];
+
+            return view('super-admin.dashboard', compact('stats', 'recentTenants', 'topTenantsByUsers', 'topTenantsBySites', 'recentlyCreatedTenants'));
+        } catch (\Exception $e) {
+            Log::error('TenantController | dashboard() | Error: ' . $e->getMessage(), [
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'user_id' => Auth::id(),
+            ]);
+            Toastr::error('An error occurred while loading the dashboard.');
+            return redirect()->route('home');
         }
     }
 }

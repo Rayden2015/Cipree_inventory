@@ -52,8 +52,41 @@
     @endif
 
     @if (!$dashboard_included && Gate::allows('super-admin-dashboard'))
-        @include('dashboard.super_admin')
-        @php $dashboard_included = true; @endphp
+        @php
+            // Redirect Super Admins to the new dashboard
+            $dashboard_included = true;
+        @endphp
+        <script>
+            window.location.href = "{{ route('super-admin.dashboard') }}";
+        </script>
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1 class="m-0">Redirecting to Super Admin Dashboard...</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if (!$dashboard_included && Auth::user()->isTenantAdmin() && !Auth::user()->isSuperAdmin())
+        @php
+            // Redirect Tenant Admins to their dashboard
+            $dashboard_included = true;
+        @endphp
+        <script>
+            window.location.href = "{{ route('tenant-admin.dashboard') }}";
+        </script>
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1 class="m-0">Redirecting to Tenant Admin Dashboard...</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
     @endif
 
     @if (!$dashboard_included && Gate::allows('department-authoriser-dashboard'))

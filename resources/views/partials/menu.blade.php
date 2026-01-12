@@ -45,15 +45,21 @@
                 </li>
                 {{-- Tenant Management (Super Admin only) --}}
                 @if(Auth::user()->isSuperAdmin())
-                <li class="nav-item {{ request()->routeIs('tenants.*') ? 'menu-open' : '' }}">
-                    <a href="#" class="nav-link {{ request()->routeIs('tenants.*') ? 'active' : '' }}" style="{{ request()->routeIs('tenants.*') ? 'background-color: #0e6258' : '' }}">
+                <li class="nav-item {{ request()->routeIs('super-admin.*', 'tenants.*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->routeIs('super-admin.*', 'tenants.*') ? 'active' : '' }}" style="{{ request()->routeIs('super-admin.*', 'tenants.*') ? 'background-color: #0e6258' : '' }}">
                         <i class="nav-icon fas fa-building"></i>
                         <p>
-                            Tenant Management
+                            Super Admin
                             <i class="fas fa-angle-left right"></i>
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('super-admin.dashboard') }}" class="nav-link {{ request()->routeIs('super-admin.dashboard') ? 'active' : '' }}" style="{{ request()->routeIs('super-admin.dashboard') ? 'background-color: #0e6258' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a href="{{ route('tenants.index') }}" class="nav-link {{ request()->routeIs('tenants.index', 'tenants.create', 'tenants.store') ? 'active' : '' }}" style="{{ request()->routeIs('tenants.index', 'tenants.create', 'tenants.store') ? 'background-color: #0e6258' : '' }}">
                                 <i class="far fa-circle nav-icon"></i>
@@ -69,6 +75,46 @@
                     </ul>
                 </li>
                 @endif
+
+                {{-- Tenant Admin Menu --}}
+                @if(Auth::user()->isTenantAdmin() && !Auth::user()->isSuperAdmin())
+                <li class="nav-item {{ request()->routeIs('tenant-admin.*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->routeIs('tenant-admin.*') ? 'active' : '' }}" style="{{ request()->routeIs('tenant-admin.*') ? 'background-color: #0e6258' : '' }}">
+                        <i class="nav-icon fas fa-user-shield"></i>
+                        <p>
+                            Tenant Admin
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('tenant-admin.dashboard') }}" class="nav-link {{ request()->routeIs('tenant-admin.dashboard') ? 'active' : '' }}" style="{{ request()->routeIs('tenant-admin.dashboard') ? 'background-color: #0e6258' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('tenant-admin.sites.index') }}" class="nav-link {{ request()->routeIs('tenant-admin.sites.*') ? 'active' : '' }}" style="{{ request()->routeIs('tenant-admin.sites.*') ? 'background-color: #0e6258' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Manage Sites</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('tenant-admin.users.index') }}" class="nav-link {{ request()->routeIs('tenant-admin.users.*') ? 'active' : '' }}" style="{{ request()->routeIs('tenant-admin.users.*') ? 'background-color: #0e6258' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Manage Users</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('tenant-admin.settings') }}" class="nav-link {{ request()->routeIs('tenant-admin.settings', 'tenant-admin.update-settings') ? 'active' : '' }}" style="{{ request()->routeIs('tenant-admin.settings', 'tenant-admin.update-settings') ? 'background-color: #0e6258' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Settings</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                @endif
+
                 <li class="nav-item">
 
                     {{-- company tab --}}

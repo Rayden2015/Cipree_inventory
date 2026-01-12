@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\SuppliersImport;
+use App\Exports\SuppliersImportTemplateExport;
 
 class SupplierController extends Controller
 {
@@ -76,7 +79,9 @@ class SupplierController extends Controller
                 'phone' => 'string|nullable',
                 'email' => 'string|nullable',
             ]);
-            $site_id = Auth::user()->site->id;
+            $user = Auth::user();
+            $site_id = $user->site->id;
+            $tenant_id = $user->getCurrentTenant()?->id ?? $user->site->tenant_id ?? null;
             Supplier::create([
                 'name' => $request->name,
                 'address' => $request->address,
@@ -93,6 +98,7 @@ class SupplierController extends Controller
                 'item_cat2' => $request->item_cat2,
                 'item_cat3' => $request->item_cat3,
                 'site_id' => $site_id,
+                'tenant_id' => $tenant_id,
             ]);
 
             Log::info('SupplierController | store', [
@@ -210,7 +216,79 @@ class SupplierController extends Controller
     // Redirect back with the error message
     return redirect()->back()
                      ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
+    }
 
+    }
+
+    /**
+     * Show bulk import form
+     */
+    public function showImportForm()
+    {
+        try {
+            return view('suppliers.import');
+        } catch (\Exception $e) {
+            Log::error('SupplierController | showImportForm | Error: ' . $e->getMessage());
+            Toastr::error('An error occurred while loading the import form.');
+            return redirect()->route('suppliers.index');
+        }
+    }
+
+    /**
+     * Handle bulk import of suppliers from CSV/XLSX
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:csv,xlsx,xls|max:10240', // 10MB max
+        ]);
+
+        try {
+            $import = new SuppliersImport();
+            
+            Excel::import($import, $request->file('file'));
+
+            $stats = $import->getStats();
+            $failures = $import->failures();
+
+            if ($stats['success'] > 0) {
+                Toastr::success("Successfully imported {$stats['success']} supplier(s).");
+            }
+
+            if ($stats['failed'] > 0 || count($failures) > 0) {
+                $errorMessage = "Failed to import {$stats['failed']} supplier(s).";
+                if (count($failures) > 0) {
+                    $errorMessage .= " Please check the file format and try again.";
+                }
+                Toastr::warning($errorMessage);
+            }
+
+            Log::info('SupplierController | import | Bulk import completed', [
+                'user_id' => Auth::id(),
+                'success_count' => $stats['success'],
+                'failed_count' => $stats['failed'],
+            ]);
+
+            return redirect()->route('suppliers.index')
+                ->with('import_stats', $stats)
+                ->with('import_failures', $failures);
+
+        } catch (\Exception $e) {
+            Log::error('SupplierController | import | Error: ' . $e->getMessage(), [
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'user_id' => Auth::id(),
+            ]);
+            Toastr::error('An error occurred while importing suppliers. Please check the file format and try again.');
+            return redirect()->back();
+        }
+    }
+
+    /**
+     * Download sample import template
+     */
+    public function downloadImportTemplate()
+    {
+        return Excel::download(new SuppliersImportTemplateExport(), 'suppliers_import_template.xlsx');
     }
 }

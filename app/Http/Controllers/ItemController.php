@@ -11,6 +11,8 @@ use App\Models\InventoryItem;
 use App\Models\ItemCountPerSite;
 use Illuminate\Support\Facades\DB;
 use App\Exports\ItemsPerSiteExport;
+use App\Exports\ItemsImportTemplateExport;
+use App\Imports\ItemsImport;
 use App\Models\InventoryItemDetail;
 use Illuminate\Support\Facades\Log;
 use Brian2694\Toastr\Facades\Toastr;
@@ -100,6 +102,9 @@ class ItemController extends Controller
             $item->added_by = $added_by;
             $item->item_category_id = $request->item_category_id;
             $item->reorder_level = $request->reorder_level;
+            $item->max_stock_level = $request->max_stock_level;
+            $item->lead_time_days = $request->lead_time_days;
+            $item->valuation_method = $request->valuation_method;
             $item->new_category = $request->new_category;
             $item->site_id = $site_id;
             $item->save();
@@ -200,6 +205,9 @@ class ItemController extends Controller
             $item->modified_by = $modified_by;
             $item->item_category_id = $request->item_category_id;
             $item->reorder_level = $request->reorder_level;
+            $item->max_stock_level = $request->max_stock_level;
+            $item->lead_time_days = $request->lead_time_days;
+            $item->valuation_method = $request->valuation_method;
             $item->new_category = $request->new_category;
             // dd($lastorderId,$category_name,$item);
             $item->save();
@@ -356,5 +364,77 @@ class ItemController extends Controller
     public function exportItemsPerSite()
     {
         return Excel::download(new ItemsPerSiteExport, 'items_per_site.xlsx');
+    }
+
+    /**
+     * Show bulk import form
+     */
+    public function showImportForm()
+    {
+        try {
+            return view('items.import');
+        } catch (\Exception $e) {
+            Log::error('ItemController | showImportForm | Error: ' . $e->getMessage());
+            Toastr::error('An error occurred while loading the import form.');
+            return redirect()->route('items.index');
+        }
+    }
+
+    /**
+     * Handle bulk import of items from CSV/XLSX
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:csv,xlsx,xls|max:10240', // 10MB max
+        ]);
+
+        try {
+            $import = new ItemsImport();
+            
+            Excel::import($import, $request->file('file'));
+
+            $stats = $import->getStats();
+            $failures = $import->failures();
+
+            if ($stats['success'] > 0) {
+                Toastr::success("Successfully imported {$stats['success']} item(s).");
+            }
+
+            if ($stats['failed'] > 0 || count($failures) > 0) {
+                $errorMessage = "Failed to import {$stats['failed']} item(s).";
+                if (count($failures) > 0) {
+                    $errorMessage .= " Please check the file format and try again.";
+                }
+                Toastr::warning($errorMessage);
+            }
+
+            Log::info('ItemController | import | Bulk import completed', [
+                'user_id' => Auth::id(),
+                'success_count' => $stats['success'],
+                'failed_count' => $stats['failed'],
+            ]);
+
+            return redirect()->route('items.index')
+                ->with('import_stats', $stats)
+                ->with('import_failures', $failures);
+
+        } catch (\Exception $e) {
+            Log::error('ItemController | import | Error: ' . $e->getMessage(), [
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'user_id' => Auth::id(),
+            ]);
+            Toastr::error('An error occurred while importing items. Please check the file format and try again.');
+            return redirect()->back();
+        }
+    }
+
+    /**
+     * Download sample import template
+     */
+    public function downloadImportTemplate()
+    {
+        return Excel::download(new ItemsImportTemplateExport(), 'items_import_template.xlsx');
     }
 }

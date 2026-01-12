@@ -152,6 +152,37 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
+                                        <label for=""> Maximum Stock Level</label>
+                                        <input type="number" class="form-control" min="0" name="max_stock_level"
+                                            value="{{ old('max_stock_level') }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for=""> Lead Time (Days)</label>
+                                        <input type="number" class="form-control" min="0" name="lead_time_days"
+                                            value="{{ old('lead_time_days') }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label> Valuation Method: </label>
+                                        <select id="valuation_method" type="text"
+                                            class="form-control @error('valuation_method') is-invalid @enderror"
+                                            name="valuation_method" autocomplete="valuation_method">
+                                            <option value="" selected hidden>Please Select</option>
+                                            <option {{ old('valuation_method') == 'FIFO' ? 'selected' : '' }} value="FIFO">FIFO</option>
+                                            <option {{ old('valuation_method') == 'LIFO' ? 'selected' : '' }} value="LIFO">LIFO</option>
+                                            <option {{ old('valuation_method') == 'Weighted Average' ? 'selected' : '' }} value="Weighted Average">Weighted Average</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
                                         <label>Group: </label>
                                         <select id="item_category_id" type="text"
                                             class="form-control @error('item_category_id') is-invalid @enderror"

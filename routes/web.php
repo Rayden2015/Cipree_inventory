@@ -68,6 +68,9 @@ Route::prefix('error-logs')->name('error-logs.')->group(function () {
 
 Route::resource('company', CompanyController::class);
 Route::resource('suppliers', SupplierController::class);
+Route::get('suppliers/import', [App\Http\Controllers\SupplierController::class, 'showImportForm'])->name('suppliers.import.form');
+Route::post('suppliers/import', [App\Http\Controllers\SupplierController::class, 'import'])->name('suppliers.import');
+Route::get('suppliers/import/template', [App\Http\Controllers\SupplierController::class, 'downloadImportTemplate'])->name('suppliers.import.template');
 Route::get('supplier_search', [SupplierController::class, 'supplier_search'])->name('supplier_search');
 Route::get('logout', [LoginController::class, 'logout'])->name('logout');
 
@@ -82,6 +85,9 @@ Route::put('myaccounts/changepassword', [MyAccountController::class, 'changepass
 
 //item
 Route::resource('items', ItemController::class);
+Route::get('items/import', [App\Http\Controllers\ItemController::class, 'showImportForm'])->name('items.import.form');
+Route::post('items/import', [App\Http\Controllers\ItemController::class, 'import'])->name('items.import');
+Route::get('items/import/template', [App\Http\Controllers\ItemController::class, 'downloadImportTemplate'])->name('items.import.template');
 Route::get('item_search', [App\Http\Controllers\ItemController::class, 'item_search'])->name('item_search');
 Route::get('product_history', [App\Http\Controllers\ItemController::class, 'product_history'])->name('product_history');
 Route::get('product_history_show/{id}', [App\Http\Controllers\ItemController::class, 'product_history_show'])->name('product_history_show');
@@ -136,6 +142,9 @@ Route::resource('categories', CategoryController::class);
 Route::resource('sites', SiteController::class);
 // endusers
 Route::resource('endusers', EnduserController::class);
+Route::get('endusers/import', [App\Http\Controllers\EnduserController::class, 'showImportForm'])->name('endusers.import.form');
+Route::post('endusers/import', [App\Http\Controllers\EnduserController::class, 'import'])->name('endusers.import');
+Route::get('endusers/import/template', [App\Http\Controllers\EnduserController::class, 'downloadImportTemplate'])->name('endusers.import.template');
 Route::get('endusersearch', [EnduserController::class, 'search'])->name('endusers.search');
 Route::get('endusersort', [EnduserController::class, 'endusersort'])->name('endusersort');
 Route::get('enduser_show/{id}', [EnduserController::class, 'show'])->name('endusers.show');
@@ -356,6 +365,11 @@ Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 // Multi-tenancy routes - Super Admin only
 Route::middleware(['auth'])->group(function () {
+    // Super Admin Dashboard
+    Route::prefix('super-admin')->name('super-admin.')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\TenantController::class, 'dashboard'])->name('dashboard');
+    });
+    
     // Tenant management (Super Admin only)
     Route::prefix('tenants')->name('tenants.')->group(function () {
         Route::get('/', [App\Http\Controllers\TenantController::class, 'index'])->name('index');
