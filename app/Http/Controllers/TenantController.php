@@ -530,7 +530,8 @@ class TenantController extends Controller
     {
         try {
             $tenant = Tenant::findOrFail($tenantId);
-            return view('tenants.create-admin', compact('tenant'));
+            $sites = $tenant->sites()->get();
+            return view('tenants.create-admin', compact('tenant', 'sites'));
         } catch (\Exception $e) {
             Toastr::error('Tenant not found.');
             return redirect()->route('tenants.index');
@@ -546,17 +547,38 @@ class TenantController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
+            'site_id' => 'nullable|exists:sites,id',
         ]);
 
         try {
             $tenant = Tenant::findOrFail($tenantId);
+
+            // Verify site belongs to tenant if provided
+            $siteId = $request->site_id;
+            if ($siteId) {
+                $site = Site::where('id', $siteId)
+                    ->where('tenant_id', $tenant->id)
+                    ->first();
+                
+                if (!$site) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['site_id' => 'Selected site does not belong to this tenant.']);
+                }
+            } else {
+                // If no site selected, assign to the default "Head Office" site
+                $defaultSite = $tenant->sites()->where('name', 'Head Office')->first();
+                if ($defaultSite) {
+                    $siteId = $defaultSite->id;
+                }
+            }
 
             $tenantAdmin = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'tenant_id' => $tenant->id,
-                'site_id' => null,
+                'site_id' => $siteId,
                 'status' => 'Active',
             ]);
 
