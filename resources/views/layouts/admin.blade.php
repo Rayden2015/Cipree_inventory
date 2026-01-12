@@ -27,6 +27,49 @@
     <link rel="stylesheet" href="{{ asset('/assets/dist/css/adminlte.min.css') }}">
     <!-- overlayScrollbars -->
     <link rel="stylesheet" href="{{ asset('/assets/plugins/overlayScrollbars/css/OverlayScrollbars.min.css') }}">
+    
+    <!-- Tenant Branding Styles -->
+    @if(isset($tenantBranding))
+    <style>
+        :root {
+            --tenant-primary-color: {{ $tenantBranding['primary_color'] ?? '#007bff' }};
+            --tenant-secondary-color: {{ $tenantBranding['secondary_color'] ?? '#6c757d' }};
+        }
+        .btn-primary,
+        .bg-primary {
+            background-color: var(--tenant-primary-color) !important;
+            border-color: var(--tenant-primary-color) !important;
+        }
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background-color: var(--tenant-primary-color) !important;
+            border-color: var(--tenant-primary-color) !important;
+            opacity: 0.9;
+        }
+        .card-primary.card-outline {
+            border-top-color: var(--tenant-primary-color) !important;
+        }
+        .card-primary .card-header {
+            background-color: var(--tenant-primary-color) !important;
+            border-color: var(--tenant-primary-color) !important;
+        }
+        a:not(.btn):not(.nav-link) {
+            color: var(--tenant-primary-color);
+        }
+        a:not(.btn):not(.nav-link):hover {
+            color: var(--tenant-primary-color);
+            opacity: 0.8;
+        }
+        @if(isset($tenantBranding['secondary_color']) && $tenantBranding['secondary_color'])
+        .btn-secondary,
+        .bg-secondary {
+            background-color: var(--tenant-secondary-color) !important;
+            border-color: var(--tenant-secondary-color) !important;
+        }
+        @endif
+    </style>
+    @endif
+    
     <!-- Daterange picker -->
     <link rel="stylesheet" href="{{ asset('/assets/plugins/daterangepicker/daterangepicker.css') }}">
     <!-- summernote -->
