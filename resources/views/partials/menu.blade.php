@@ -7,9 +7,14 @@
 <aside class="main-sidebar sidebar-light-primary elevation-4">
     <!-- Brand Logo -->
     <a href="{{ route('home') }}" class="brand-link">
-        <img src="{{ asset('images/company/' . $logo) }}" alt="AdminLTE Logo" class="brand-image"
-            style="opacity: .8; width:210px; heigh:100px;"><br>
-        <span style="text-align:center; font-weight:bold; padding-left:80px;">CIPREE</span> <br>
+        @if(isset($tenantBranding['logo']) && $tenantBranding['logo'])
+            <img src="{{ $tenantBranding['logo'] }}" alt="{{ $tenantBranding['name'] }} Logo" class="brand-image"
+                style="opacity: .8; max-width:210px; max-height:100px; object-fit: contain;"><br>
+        @else
+            <img src="{{ asset('images/company/' . $logo) }}" alt="AdminLTE Logo" class="brand-image"
+                style="opacity: .8; width:210px; heigh:100px;"><br>
+        @endif
+        <span style="text-align:center; font-weight:bold; padding-left:80px;">{{ $tenantBranding['name'] ?? 'CIPREE' }}</span> <br>
         <h6 style="text-align:center; font-weight:bold; padding-top:3px;">{{ $first_name . ', ' }}
             {{-- {{ Auth::user()->role->name }} --}}
             @if ($user)

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Tenant;
 use App\Models\Site;
 use App\Models\User;
+use App\Helpers\UploadHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -124,6 +125,9 @@ class TenantController extends Controller
             'admin_name' => 'required|string|max:255',
             'admin_email' => 'required|email|unique:users,email',
             'admin_password' => 'required|string|min:8|confirmed',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'primary_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'secondary_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
         ]);
 
         try {
@@ -139,6 +143,8 @@ class TenantController extends Controller
                 'contact_email' => $request->contact_email,
                 'contact_phone' => $request->contact_phone,
                 'status' => $request->status,
+                'primary_color' => $request->primary_color ?? '#007bff',
+                'secondary_color' => $request->secondary_color,
             ];
 
             Log::info('TenantController | store() | Creating tenant', [
@@ -146,6 +152,31 @@ class TenantController extends Controller
             ]);
 
             $tenant = Tenant::create($tenantData);
+
+            // Handle logo upload
+            if ($request->hasFile('logo')) {
+                try {
+                    $uploadDir = public_path('images/tenants');
+                    if (!file_exists($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    
+                    $logoName = UploadHelper::upload($request->logo, 'tenant-' . $tenant->id, $uploadDir);
+                    $tenant->logo_path = 'images/tenants/' . $logoName;
+                    $tenant->save();
+                    
+                    Log::info('TenantController | store() | Logo uploaded', [
+                        'tenant_id' => $tenant->id,
+                        'logo_path' => $tenant->logo_path
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('TenantController | store() | Logo upload failed', [
+                        'tenant_id' => $tenant->id,
+                        'error' => $e->getMessage()
+                    ]);
+                    // Continue - tenant created but logo upload failed
+                }
+            }
 
             if (!$tenant || !$tenant->id) {
                 throw new \Exception('Failed to create tenant - no ID returned');
@@ -374,6 +405,9 @@ class TenantController extends Controller
             'contact_email' => 'nullable|email|max:255',
             'contact_phone' => 'nullable|string|max:255',
             'status' => 'required|in:Active,Inactive,Suspended',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'primary_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'secondary_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
         ]);
 
         try {
@@ -382,13 +416,45 @@ class TenantController extends Controller
             // Store old values for audit log
             $oldValues = $tenant->only([
                 'name', 'slug', 'domain', 'description',
-                'contact_name', 'contact_email', 'contact_phone', 'status'
+                'contact_name', 'contact_email', 'contact_phone', 'status',
+                'logo_path', 'primary_color', 'secondary_color'
             ]);
 
-            $tenant->update($request->only([
+            $updateData = $request->only([
                 'name', 'slug', 'domain', 'description',
-                'contact_name', 'contact_email', 'contact_phone', 'status'
-            ]));
+                'contact_name', 'contact_email', 'contact_phone', 'status',
+                'primary_color', 'secondary_color'
+            ]);
+            
+            // Handle logo upload
+            if ($request->hasFile('logo')) {
+                try {
+                    $uploadDir = public_path('images/tenants');
+                    if (!file_exists($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    
+                    $logoName = UploadHelper::update(
+                        $request->logo, 
+                        'tenant-' . $tenant->id, 
+                        $uploadDir, 
+                        $tenant->logo_path ? basename($tenant->logo_path) : null
+                    );
+                    $updateData['logo_path'] = 'images/tenants/' . $logoName;
+                    
+                    Log::info('TenantController | update() | Logo uploaded', [
+                        'tenant_id' => $tenant->id,
+                        'logo_path' => $updateData['logo_path']
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('TenantController | update() | Logo upload failed', [
+                        'tenant_id' => $tenant->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+
+            $tenant->update($updateData);
 
             // Log to file
             Log::info('TenantController | update() | Tenant updated', [

@@ -95,7 +95,7 @@
                 <!-- Middle navbar text -->
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item custom-nav-item">
-                        <span class="navbar-text" style="font-weight:bold;font-size:22px;margin-left:790px;">Maxmass Limited, {{ Auth::user()->site->name ?? 'Unknown Site' }}</span>
+                        <span class="navbar-text" style="font-weight:bold;font-size:22px;margin-left:790px;">{{ isset($tenantBranding) && isset($tenantBranding['name']) ? $tenantBranding['name'] : 'CIPREE' }}, {{ Auth::user()->site->name ?? 'Unknown Site' }}</span>
                     </li>
                 </ul>
             

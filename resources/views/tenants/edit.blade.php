@@ -32,7 +32,7 @@ use Illuminate\Support\Str;
                     <div class="card-header">
                         <h3 class="card-title"><i class="fas fa-edit mr-2"></i>Edit Tenant: {{ $tenant->name }}</h3>
                     </div>
-                    <form action="{{ route('tenants.update', $tenant->id) }}" method="POST">
+                    <form action="{{ route('tenants.update', $tenant->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
                         <div class="card-body">
@@ -173,6 +173,70 @@ use Illuminate\Support\Str;
                                                value="{{ old('contact_phone', $tenant->contact_phone) }}"
                                                placeholder="+1234567890">
                                         @error('contact_phone')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Branding Section -->
+                            <div class="row mt-4">
+                                <div class="col-md-12">
+                                    <h5 class="mb-3"><i class="fas fa-palette mr-2"></i>Branding</h5>
+                                    <hr>
+                                    <p class="text-muted">Customize the tenant's logo and color scheme.</p>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="logo">Logo</label>
+                                        @if($tenant->logo_path)
+                                            <div class="mb-2">
+                                                <img src="{{ asset($tenant->logo_path) }}" alt="{{ $tenant->name }} Logo" 
+                                                     style="max-width: 200px; max-height: 100px; border: 1px solid #ddd; padding: 5px;">
+                                                <p class="text-muted small mt-1">Current logo</p>
+                                            </div>
+                                        @endif
+                                        <input type="file" name="logo" id="logo" 
+                                               class="form-control-file @error('logo') is-invalid @enderror"
+                                               accept="image/jpeg,image/png,image/jpg,image/gif,image/svg">
+                                        <small class="form-text text-muted">Recommended: PNG or SVG, max 2MB. Leave empty to keep current logo.</small>
+                                        @error('logo')
+                                            <span class="invalid-feedback d-block" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="primary_color">Primary Color</label>
+                                        <input type="color" name="primary_color" id="primary_color" 
+                                               class="form-control @error('primary_color') is-invalid @enderror" 
+                                               value="{{ old('primary_color', $tenant->primary_color ?? '#007bff') }}"
+                                               style="height: 38px;">
+                                        <small class="form-text text-muted">Main theme color</small>
+                                        @error('primary_color')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="secondary_color">Secondary Color</label>
+                                        <input type="color" name="secondary_color" id="secondary_color" 
+                                               class="form-control @error('secondary_color') is-invalid @enderror" 
+                                               value="{{ old('secondary_color', $tenant->secondary_color ?? '#6c757d') }}">
+                                        <small class="form-text text-muted">Secondary theme color (optional)</small>
+                                        @error('secondary_color')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
                                             </span>

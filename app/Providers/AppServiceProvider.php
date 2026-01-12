@@ -5,7 +5,9 @@ namespace App\Providers;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\View;
 use Sentry\Laravel\ServiceProvider as SentryServiceProvider;
+use App\View\Composers\TenantBrandingComposer;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,5 +32,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrapFive();
         Schema::defaultStringLength(191);
+        
+        // Share tenant branding with all views
+        View::composer('*', TenantBrandingComposer::class);
     }
 }

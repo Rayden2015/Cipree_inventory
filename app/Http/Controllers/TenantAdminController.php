@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Tenant;
 use App\Models\Site;
 use App\Models\User;
+use App\Helpers\UploadHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -103,12 +104,46 @@ class TenantAdminController extends Controller
             'contact_email' => 'nullable|email|max:255',
             'contact_phone' => 'nullable|string|max:255',
             'settings' => 'nullable|array',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'primary_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'secondary_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
         ]);
 
         try {
-            $tenant->update($request->only([
-                'name', 'description', 'contact_name', 'contact_email', 'contact_phone', 'settings'
-            ]));
+            $updateData = $request->only([
+                'name', 'description', 'contact_name', 'contact_email', 'contact_phone', 'settings',
+                'primary_color', 'secondary_color'
+            ]);
+            
+            // Handle logo upload
+            if ($request->hasFile('logo')) {
+                try {
+                    $uploadDir = public_path('images/tenants');
+                    if (!file_exists($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    
+                    $logoName = UploadHelper::update(
+                        $request->logo, 
+                        'tenant-' . $tenant->id, 
+                        $uploadDir, 
+                        $tenant->logo_path ? basename($tenant->logo_path) : null
+                    );
+                    $updateData['logo_path'] = 'images/tenants/' . $logoName;
+                    
+                    Log::info('TenantAdminController | updateSettings() | Logo uploaded', [
+                        'tenant_id' => $tenant->id,
+                        'logo_path' => $updateData['logo_path']
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('TenantAdminController | updateSettings() | Logo upload failed', [
+                        'tenant_id' => $tenant->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+            
+            $tenant->update($updateData);
 
             Log::info('TenantAdminController | updateSettings() | Tenant settings updated', [
                 'tenant_id' => $tenant->id,

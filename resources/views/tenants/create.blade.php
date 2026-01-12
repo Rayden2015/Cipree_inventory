@@ -27,7 +27,7 @@
                     <div class="card-header">
                         <h3 class="card-title"><i class="fas fa-plus-circle mr-2"></i>New Tenant Information</h3>
                     </div>
-                    <form action="{{ route('tenants.store') }}" method="POST">
+                    <form action="{{ route('tenants.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="card-body">
                             <!-- Tenant Information Section -->
@@ -168,6 +168,63 @@
                                                value="{{ old('contact_phone') }}"
                                                placeholder="+1234567890">
                                         @error('contact_phone')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Branding Section -->
+                            <div class="row mt-4">
+                                <div class="col-md-12">
+                                    <h5 class="mb-3"><i class="fas fa-palette mr-2"></i>Branding</h5>
+                                    <hr>
+                                    <p class="text-muted">Customize the tenant's logo and color scheme.</p>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="logo">Logo</label>
+                                        <input type="file" name="logo" id="logo" 
+                                               class="form-control-file @error('logo') is-invalid @enderror"
+                                               accept="image/jpeg,image/png,image/jpg,image/gif,image/svg">
+                                        <small class="form-text text-muted">Recommended: PNG or SVG, max 2MB. Square images work best.</small>
+                                        @error('logo')
+                                            <span class="invalid-feedback d-block" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="primary_color">Primary Color</label>
+                                        <input type="color" name="primary_color" id="primary_color" 
+                                               class="form-control @error('primary_color') is-invalid @enderror" 
+                                               value="{{ old('primary_color', '#007bff') }}"
+                                               style="height: 38px;">
+                                        <small class="form-text text-muted">Main theme color</small>
+                                        @error('primary_color')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="secondary_color">Secondary Color</label>
+                                        <input type="color" name="secondary_color" id="secondary_color" 
+                                               class="form-control @error('secondary_color') is-invalid @enderror" 
+                                               value="{{ old('secondary_color', '#6c757d') }}">
+                                        <small class="form-text text-muted">Secondary theme color (optional)</small>
+                                        @error('secondary_color')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
                                             </span>
