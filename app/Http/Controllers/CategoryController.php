@@ -22,14 +22,26 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $site_id = Auth::user()->site->id;
-            $categories = Category::latest()->paginate(20);
-            Log::info('CategoryController | index() | Catories loaded successfully', [
+            $query = Category::latest();
+
+            // Search functionality
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+            }
+
+            $categories = $query->paginate(20)->withQueryString();
+
+            Log::info('CategoryController | index() | Categories loaded successfully', [
                 'user_details' => Auth::user(),
-                'categories' => $categories
+                'count' => $categories->total(),
+                'current_page' => $categories->currentPage(),
             ]);
             return view('categories.index', compact('categories'));
         } catch (\Exception $e) {
@@ -58,15 +70,21 @@ class CategoryController extends Controller
     {
         try {
             $request->validate([
-                'name' => 'nullable'
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string'
             ]);
-            $site_id = Auth::user()->site->id;
+            
+            $user = Auth::user();
+            $site_id = $user->site->id;
+            $tenant_id = $user->getCurrentTenant()?->id ?? $user->site->tenant_id ?? null;
+            
             Category::create([
                 'name' => $request->name,
                 'description' => $request->description,
                 'site_id' => $site_id,
+                'tenant_id' => $tenant_id,
             ]);
-            $authId = Auth::user()->name;
+            
             Log::info(
                 'CategoryController | store() | added a new category',
                 [
@@ -76,7 +94,11 @@ class CategoryController extends Controller
                 ]
             );
 
-            return redirect()->back()->withSuccess('Successfully Updated');
+            return redirect()->route('categories.index')->with('success', 'Category created successfully');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors($e->errors());
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
             Log::channel('error_log')->error('CategoryController | Store() Error ' . $unique_id, [
@@ -112,27 +134,31 @@ class CategoryController extends Controller
     public function update(Request $request, string $id)
     {
         try {
-            //code...
-            $category = Category::find($id);
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string'
+            ]);
+            
+            $category = Category::findOrFail($id);
             Log::info('Category Edit', [
-                'before_category_edit' => Category::find($id),
+                'before_category_edit' => $category->toArray(),
             ]);
 
             $category->name = $request->name;
             $category->description = $request->description;
             $category->save();
 
-            $authId = Auth::user()->name;
             Log::info(
-                'edited a category',
+                'CategoryController | update() | edited a category',
                 [
-                    'user_name' => $authId,
+                    'user_details' => Auth::user(),
+                    'category_id' => $id,
                     'category_name' => $request->name,
                     'description' => $request->description,
                 ]
             );
 
-            return redirect()->back()->withSuccess('Successfully Updated');
+            return redirect()->route('categories.index')->with('success', 'Category updated successfully');
         } catch (\Throwable $e) {
             $unique_id = floor(time() - 999999999);
             Log::channel('error_log')->error('CategoryController | Update() Error ' . $unique_id, [
@@ -150,18 +176,19 @@ class CategoryController extends Controller
     public function destroy(string $id)
     {
         try {
-            $category = Category::find($id);
-            $authId = Auth::user()->name;
+            $category = Category::findOrFail($id);
+            $categoryName = $category->name;
             $category->delete();
+            
             Log::info(
-                'CategoryController| destory()| Deleted a category',
+                'CategoryController | destroy() | Deleted a category',
                 [
-                    'user_name' => Auth::user(),
-                    'category_name' => $category->name,
+                    'user_details' => Auth::user(),
+                    'category_name' => $categoryName,
                 ]
             );
 
-            return redirect()->back()->withSuccess('Successfully Updated');
+            return redirect()->route('categories.index')->with('success', 'Category deleted successfully');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
             Log::channel('error_log')->error('CategoryController | Destroy() Error ' . $unique_id, [

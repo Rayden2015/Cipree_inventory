@@ -1,117 +1,148 @@
 @extends('layouts.admin')
+
 @section('content')
-   
-        <!DOCTYPE html>
-        <html lang="en">
-
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <meta http-equiv="X-UA-Compatible" content="ie=edge">
-            <link rel="stylesheet" href="https://cdn.bootcss.com/toastr.js/latest/css/toastr.min.css">
-            <link rel="stylesheet"
-                href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-
-            <!-- Font Awesome -->
-            <link rel="stylesheet" href="{{ asset('/assets/plugins/fontawesome-free/css/all.min.css') }}">
-            <!-- DataTables -->
-            <link rel="stylesheet" href="{{ asset('/assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
-            <link rel="stylesheet"
-                href="{{ asset('/assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
-            <link rel="stylesheet" href="{{ asset('/assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
-            <!-- Theme style -->
-            <link rel="stylesheet" href="{{ asset('/assets/dist/css/adminlte.min.css') }}">
-
-            <title>Sections List</title>
-
-        </head>
-
-        <body>
-            <div class="title d-flex justify-content-between">
-                <h3 class="page-title"></h3>
-
-                <p>
-                    <a href="{{ route('sectionslist.create') }}" class="btn btn-primary mr-3 my-3">Add </a>
-                </p>
-
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0"><i class="fas fa-layer-group"></i> Sections</h1>
             </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+                    <li class="breadcrumb-item active">Sections</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
 
-
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Section Lists</h3>
+<section class="content">
+    <div class="container-fluid">
+        <!-- Main Card -->
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-list mr-1"></i> All Sections</h3>
+                <div class="card-tools">
+                    @can('add-section')
+                    <a href="{{ route('sectionslist.create') }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus-circle mr-1"></i> Add Section
+                    </a>
+                    @endcan
                 </div>
-                <!-- /.card-header -->
+            </div>
+            <div class="card-body">
                 @if (session('success'))
-                <div class="alert alert-success">
-                    {{ session('success') }}
-                </div>
-            @endif
-    
-            @if (session('error'))
-                <div class="alert alert-danger">
-                    {{ session('error') }}
-                </div>
-            @endif
-                <div class="card-body">
-                    <table id="example1" class="table table-bordered table-striped">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                @can('edit-section')
-                                <th>Edit</th>
-                                @endcan
-                                {{-- @if (Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'site_admin') --}}
-                             @can('delete-section')
-                                    <th>Delete</th>
-                               @endcan
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ session('success') }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                @endif
 
+                @if (session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ session('error') }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                @endif
+
+                <!-- Search Form -->
+                <form method="GET" action="{{ route('sectionslist.index') }}" class="mb-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="text" 
+                                       class="form-control" 
+                                       name="search" 
+                                       placeholder="Search by name or description..." 
+                                       value="{{ request('search') }}">
+                                <div class="input-group-append">
+                                    <button class="btn btn-secondary" type="submit">
+                                        <i class="fas fa-search"></i> Search
+                                    </button>
+                                    @if(request('search'))
+                                    <a href="{{ route('sectionslist.index') }}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times"></i> Clear
+                                    </a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Sections Table -->
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-hover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th style="width: 80px;">ID</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th style="width: 120px;" class="text-center">Actions</th>
                             </tr>
                         </thead>
-                        @forelse ($sections as $st)
-                            <tbody>
+                        <tbody>
+                            @forelse ($sections as $section)
                                 <tr>
-                                    <td>{{ $st->id }}</td>
-                                    <td>{{ $st->name }}</td>
-                                    @can('edit-section')
-                                    <td>
-                                        <a href="{{ route('sectionslist.edit', $st->id) }}" class ="btn btn-success">Edit</a>
-                                    </td>
-                                    @endcan
-                                    @can('delete-section')
-                                        <td>
-
-                                            <form action="{{ route('sectionslist.destroy', $st->id) }}" method="post">
+                                    <td>{{ $section->id }}</td>
+                                    <td><strong>{{ $section->name }}</strong></td>
+                                    <td>{{ $section->description ?? '-' }}</td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            @can('edit-section')
+                                            <a href="{{ route('sectionslist.edit', $section->id) }}" 
+                                               class="btn btn-sm btn-success" 
+                                               title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            @endcan
+                                            @can('edit-section')
+                                            <form action="{{ route('sectionslist.destroy', $section->id) }}" 
+                                                  method="POST" 
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('Are you sure you want to delete this section?');">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" onclick="return confirm('Are you sure?')"
-                                                    class="btn btn-danger">Delete</button>
+                                                <button type="submit" 
+                                                        class="btn btn-sm btn-danger" 
+                                                        title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
                                             </form>
-                                        </td>
-                                    @endcan
-
-                                @empty
-                                <tr>
-                                    <td class="text-center" colspan="12">Data Not Found!</td>
+                                            @endcan
+                                        </div>
+                                    </td>
                                 </tr>
-                        @endforelse
-
-                        </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="text-center py-4">
+                                        <i class="fas fa-inbox fa-3x text-muted mb-2"></i>
+                                        <p class="text-muted">No sections found.</p>
+                                        @if(request('search'))
+                                            <a href="{{ route('sectionslist.index') }}" class="btn btn-sm btn-primary">
+                                                Clear search
+                                            </a>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
-
                     </table>
                 </div>
-                {{ $sections->links('pagination::bootstrap-4') }}
-                <!-- /.card-body -->
+
+                <!-- Pagination -->
+                @if($sections->hasPages())
+                    <div class="mt-3">
+                        {{ $sections->links('pagination::bootstrap-4') }}
+                    </div>
+                @endif
             </div>
-
-
-        </body>
-        <script src="https://cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
-        <script src="https://cdn.bootcss.com/toastr.js/latest/js/toastr.min.js"></script>
-        {!! Toastr::message() !!}
-
-        </html>
- 
+        </div>
+    </div>
+</section>
 @endsection

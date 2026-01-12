@@ -21,11 +21,37 @@ class DepartmentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $site_id = Auth::user()->site->id;
-        $departments = Department::latest()->paginate(15);
-        return view('departments.index', compact('departments'));
+        try {
+            $query = Department::latest();
+
+            // Search functionality
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+            }
+
+            $departments = $query->paginate(15)->withQueryString();
+
+            Log::info('DepartmentController | index() | Departments loaded successfully', [
+                'user_details' => Auth::user(),
+                'count' => $departments->total(),
+            ]);
+
+            return view('departments.index', compact('departments'));
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::channel('error_log')->error('DepartmentController | Index() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
     /**
@@ -44,35 +70,41 @@ class DepartmentController extends Controller
     {
         try {
             $request->validate([
-                'name' => 'unique:departments,name,except,id',
-                'description' => 'unique:departments,description,except,'
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string'
             ]);
-            $site_id = Auth::user()->site->id;
+            
+            $user = Auth::user();
+            $site_id = $user->site->id;
+            $tenant_id = $user->getCurrentTenant()?->id ?? $user->site->tenant_id ?? null;
+            
             Department::create([
                 'name' => $request->name,
                 'description' => $request->description,
-                'site_id'=>$site_id,
+                'site_id' => $site_id,
+                'tenant_id' => $tenant_id,
             ]);
 
-            $authId = Auth::user()->name;
-            Log::info('Create department', [
-                'user ' => $authId,
-                'details' => $request,
+            Log::info('DepartmentController | store() | Created department', [
+                'user_details' => Auth::user(),
+                'department_name' => $request->name,
             ]);
           
-            return redirect()->back()->withSuccess('Successfully Updated');
+            return redirect()->route('departmentslist.index')->with('success', 'Department created successfully');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors($e->errors());
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('DepartmentController | Store() Error ' . $unique_id ,[
+            Log::channel('error_log')->error('DepartmentController | Store() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
     /**
@@ -97,25 +129,34 @@ class DepartmentController extends Controller
      */
     public function update(Request $request, string $id)
     {
-
         try {
-            $department =  Department::find($id);
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string'
+            ]);
+            
+            $department = Department::findOrFail($id);
             $department->name = $request->name;
             $department->description = $request->description;
             $department->save();
-            return redirect()->back()->withSuccess('Successfully Updated');
+            
+            Log::info('DepartmentController | update() | Updated department', [
+                'user_details' => Auth::user(),
+                'department_id' => $id,
+                'department_name' => $request->name,
+            ]);
+            
+            return redirect()->route('departmentslist.index')->with('success', 'Department updated successfully');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('DepartmentController | Update() Error ' . $unique_id ,[
+            Log::channel('error_log')->error('DepartmentController | Update() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
     /**
@@ -124,26 +165,25 @@ class DepartmentController extends Controller
     public function destroy(string $id)
     {
         try {
-            $authId = Auth::user();
-            Log::info('Department before del', [
-                'User' => $authId,
-                'details' => Department::find($id)
-            ]);
-            $department = Department::find($id);
+            $department = Department::findOrFail($id);
+            $departmentName = $department->name;
             $department->delete();
+            
+            Log::info('DepartmentController | destroy() | Deleted department', [
+                'user_details' => Auth::user(),
+                'department_name' => $departmentName,
+            ]);
         
-            return redirect()->back()->withSuccess('Successfully Updated');
+            return redirect()->route('departmentslist.index')->with('success', 'Department deleted successfully');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('DepartmentController | Destroy() Error ' . $unique_id ,[
+            Log::channel('error_log')->error('DepartmentController | Destroy() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 }

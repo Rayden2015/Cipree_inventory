@@ -21,12 +21,37 @@ class SectionController extends Controller
     }
     
  
-    public function index()
+    public function index(Request $request)
     {
-        $site_id = Auth::user()->site->id;
-        $sections = Section::latest()->paginate(15);
-        return view('sections.index', compact('sections'));
+        try {
+            $query = Section::latest();
 
+            // Search functionality
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+            }
+
+            $sections = $query->paginate(15)->withQueryString();
+
+            Log::info('SectionController | index() | Sections loaded successfully', [
+                'user_details' => Auth::user(),
+                'count' => $sections->total(),
+            ]);
+
+            return view('sections.index', compact('sections'));
+        } catch (\Exception $e) {
+            $unique_id = floor(time() - 999999999);
+            Log::channel('error_log')->error('SectionController | Index() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
     /**
@@ -45,35 +70,41 @@ class SectionController extends Controller
     {
         try {
             $request->validate([
-                'name' => 'unique:sections,name,except,id',
-                'description' => 'unique:sections,description,except,id',
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string'
             ]);
-            $site_id = Auth::user()->site->id;
+            
+            $user = Auth::user();
+            $site_id = $user->site->id;
+            $tenant_id = $user->getCurrentTenant()?->id ?? $user->site->tenant_id ?? null;
+            
             Section::create([
                 'name' => $request->name,
                 'description' => $request->description,
-                'site_id'=>$site_id,
+                'site_id' => $site_id,
+                'tenant_id' => $tenant_id,
             ]);
 
-            $authId = Auth::user()->name;
-            Log::info('Create section', [
-                'user ' => $authId,
-                'details' => $request,
+            Log::info('SectionController | store() | Created section', [
+                'user_details' => Auth::user(),
+                'section_name' => $request->name,
             ]);
            
-            return redirect()->back()->withSuccess('Successfully Updated');
+            return redirect()->route('sectionslist.index')->with('success', 'Section created successfully');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors($e->errors());
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-                Log::channel('error_log')->error('SectionController | Store() Error ' . $unique_id  ,[
-                    'message' => $e->getMessage(),
-                    'stack_trace' => $e->getTraceAsString()
-                ]);
+            Log::channel('error_log')->error('SectionController | Store() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
     
-        // Redirect back with the error message
-        return redirect()->back()
-                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-    }
-    
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
     /**
@@ -98,26 +129,34 @@ class SectionController extends Controller
      */
     public function update(Request $request, string $id)
     {
-
         try {
-            $section =  Section::find($id);
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string'
+            ]);
+            
+            $section = Section::findOrFail($id);
             $section->name = $request->name;
             $section->description = $request->description;
             $section->save();
+            
+            Log::info('SectionController | update() | Updated section', [
+                'user_details' => Auth::user(),
+                'section_id' => $id,
+                'section_name' => $request->name,
+            ]);
         
-            return redirect()->back()->withSuccess('Successfully Updated');
+            return redirect()->route('sectionslist.index')->with('success', 'Section updated successfully');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-                Log::channel('error_log')->error('SectionController | Update() Error ' . $unique_id  ,[
-                    'message' => $e->getMessage(),
-                    'stack_trace' => $e->getTraceAsString()
-                ]);
+            Log::channel('error_log')->error('SectionController | Update() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
     
-        // Redirect back with the error message
-        return redirect()->back()
-                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-    }
-    
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
     /**
@@ -126,25 +165,25 @@ class SectionController extends Controller
     public function destroy(string $id)
     {
         try {
-            $authId = Auth::user();
-            Log::info('Section before del', [
-                'User' => $authId,
-                'details' => Section::find($id)
-            ]);
-            $section = Section::find($id);
+            $section = Section::findOrFail($id);
+            $sectionName = $section->name;
             $section->delete();
-            return redirect()->back()->withSuccess('Successfully Updated');
+            
+            Log::info('SectionController | destroy() | Deleted section', [
+                'user_details' => Auth::user(),
+                'section_name' => $sectionName,
+            ]);
+            
+            return redirect()->route('sectionslist.index')->with('success', 'Section deleted successfully');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-                Log::channel('error_log')->error('SectionController | Destroy() Error ' . $unique_id  ,[
-                    'message' => $e->getMessage(),
-                    'stack_trace' => $e->getTraceAsString()
-                ]);
+            Log::channel('error_log')->error('SectionController | Destroy() Error ' . $unique_id, [
+                'message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString()
+            ]);
     
-        // Redirect back with the error message
-        return redirect()->back()
-                         ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-    }
-    
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 }

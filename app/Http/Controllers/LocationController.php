@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 
 class LocationController extends Controller
 {
@@ -19,39 +18,39 @@ class LocationController extends Controller
         $this->middleware(['auth', 'permission:edit-location'])->only('edit');
     }
     
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $site_id = Auth::user()->site->id;
-    
-            // Log the user's action
-            Log::info('LocationController | index', [
+            $query = Location::latest();
+
+            // Search functionality
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+            }
+
+            $locations = $query->paginate(15)->withQueryString();
+
+            Log::info('LocationController | index() | Locations loaded successfully', [
                 'user_details' => Auth::user(),
-                'message' => 'Viewing location index'
+                'count' => $locations->total(),
+                'current_page' => $locations->currentPage(),
             ]);
-    
-            // Define cache key based on site ID and page number for unique caching
-            $page = request()->get('page', 1);
-            $cacheKey = "locations_site_{$site_id}_page_{$page}";
-    
-            // Cache the paginated results
-            $locations = Cache::remember($cacheKey, 60 * 5, function () use ($site_id) {
-                return Location::where('site_id', '=', $site_id)->latest()->paginate(15);
-            });
     
             return view('locations.index', compact('locations'));
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
     
-            // Log the error with a unique ID
             Log::channel('error_log')->error('LocationController | Index() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
     
-            // Redirect back with the error message
             return redirect()->back()
-                             ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
         }
     }
   
@@ -83,35 +82,41 @@ class LocationController extends Controller
     {
         try {
             $request->validate([
-                'name' => 'regex:/^[A-Za-z0-9. \"(),_-]+$/',
+                'name' => 'required|regex:/^[A-Za-z0-9. \"(),_-]+$/|max:255',
+                'description' => 'nullable|string'
             ]);
-            $site_id = Auth::user()->site->id;
+            
+            $user = Auth::user();
+            $site_id = $user->site->id;
+            $tenant_id = $user->getCurrentTenant()?->id ?? $user->site->tenant_id ?? null;
+            
             Location::create([
                 'name' => $request->name,
+                'description' => $request->description ?? null,
                 'site_id' => $site_id,
+                'tenant_id' => $tenant_id,
             ]);
 
-            $authId = Auth::user()->name;
-            Log::info('LocationController | store', [
-                'user_details' => $authId,
-                'located_name' => $request->name,
-                'message' => 'Added a location'
+            Log::info('LocationController | store() | Added a location', [
+                'user_details' => Auth::user(),
+                'location_name' => $request->name,
             ]);
 
-          
-            return redirect()->route('locations.index')->with('success','Successfully Added');
+            return redirect()->route('locations.index')->with('success', 'Location created successfully');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors($e->errors());
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('LocationController | Store() Error ' . $unique_id,[
+            Log::channel('error_log')->error('LocationController | Store() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
    
@@ -152,69 +157,63 @@ class LocationController extends Controller
     {
         try {
             $request->validate([
-                'name' => 'regex:/^[A-Za-z0-9. \"(),_-]+$/',
+                'name' => 'required|regex:/^[A-Za-z0-9. \"(),_-]+$/|max:255',
+                'description' => 'nullable|string'
             ]);
 
-            $location = Location::find($id);
-            $authId = Auth::user()->name;
+            $location = Location::findOrFail($id);
 
-            Log::info('LocationController | update (Before Editing)', [
-                'user_details' => $authId,
+            Log::info('LocationController | update() | Before editing location', [
+                'user_details' => Auth::user(),
+                'location_id' => $id,
                 'location_name_before' => $location->name,
-                'message' => 'Before editing location'
             ]);
 
             $location->name = $request->name;
+            $location->description = $request->description ?? $location->description;
             $location->save();
 
-            Log::info('LocationController | update (After Editing)', [
-                'user_details' => $authId,
+            Log::info('LocationController | update() | Edited location', [
+                'user_details' => Auth::user(),
+                'location_id' => $id,
                 'location_name_after' => $request->name,
-                'message' => 'Edited a location'
             ]);
 
-            return redirect()->back()->with('success','Successfully Updated');
+            return redirect()->route('locations.index')->with('success', 'Location updated successfully');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('LocationController | Update() Error ' . $unique_id,[
+            Log::channel('error_log')->error('LocationController | Update() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 
     public function destroy($id)
     {
         try {
-            $location = Location::find($id);
-            $authId = Auth::user()->name;
-
-            Log::info('LocationController | destroy', [
-                'user_details' => $authId,
-                'location_name' => $location->name,
-                'message' => 'Deleted a location'
-            ]);
-
+            $location = Location::findOrFail($id);
+            $locationName = $location->name;
             $location->delete();
 
-            // Toastr::success('Successfully Updated:)', 'Sucess');
-            return redirect()->route('locations.index')->with('success', 'Successfully Deleted');
+            Log::info('LocationController | destroy() | Deleted location', [
+                'user_details' => Auth::user(),
+                'location_name' => $locationName,
+            ]);
+
+            return redirect()->route('locations.index')->with('success', 'Location deleted successfully');
         } catch (\Exception $e) {
             $unique_id = floor(time() - 999999999);
-            Log::channel('error_log')->error('LocationController | Destroy() Error ' . $unique_id,[
+            Log::channel('error_log')->error('LocationController | Destroy() Error ' . $unique_id, [
                 'message' => $e->getMessage(),
                 'stack_trace' => $e->getTraceAsString()
             ]);
 
-    // Redirect back with the error message
-    return redirect()->back()
-                     ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
-}
-
+            return redirect()->back()
+                ->withError('An error occurred. Contact Administrator with error ID: ' . $unique_id . ' via the error code and Feedback Button');
+        }
     }
 }
