@@ -99,6 +99,7 @@ class InventoryItemUpdateTest extends TestCase
         $this->inventory = Inventory::create([
             'supplier_id' => $this->supplier->id,
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
             'billing_currency' => 'Cedi',
             'exchange_rate' => 1,
             'trans_type' => 'Purchase',
@@ -119,6 +120,7 @@ class InventoryItemUpdateTest extends TestCase
             'discount' => 0,
             'amount' => 100,
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
         ]);
 
         $payload = [
@@ -161,6 +163,7 @@ class InventoryItemUpdateTest extends TestCase
     {
         $updater = User::factory()->create([
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
             'department_id' => $this->department->id,
             'status' => 'Active',
             'name' => 'Unit Tester',
@@ -176,6 +179,7 @@ class InventoryItemUpdateTest extends TestCase
             'discount' => 0,
             'amount' => 100,
             'site_id' => $this->site->id,
+            'tenant_id' => $this->tenant->id,
             'last_updated_by' => $updater->id,
             'last_updated_at' => now()->subDay(),
         ]);

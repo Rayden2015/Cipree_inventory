@@ -242,8 +242,10 @@ class StoreRequestController extends Controller
             ]);
 
             $authid = Auth::id();
+            $user = Auth::user();
             $statusvalue = 'Requested';
-            $site_id = Auth::user()->site->id;
+            $site_id = $user->site->id;
+            $tenant_id = $user->getCurrentTenant()?->id;
             $cart = Session()->get('cart');
             $order = new Sorder();
             // $order->cart = serialize($cartItems);
@@ -261,6 +263,7 @@ class StoreRequestController extends Controller
             $order->work_order_number = $request->work_order_number;
             $order->requested_by = $authid;
             $order->site_id = $site_id;
+            $order->tenant_id = $tenant_id;
 
             $order->save();
             Log::info("StoreRequestController() | store() ", [
@@ -281,6 +284,7 @@ class StoreRequestController extends Controller
                 $orderItem->inventory_id = $item['id'];
                 $orderItem->sub_total =  $item['unit_cost_exc_vat_gh'] *  $item['quantity'];
                 $orderItem->site_id = $site_id;
+                $orderItem->tenant_id = $tenant_id;
                 $orderItem->save();
             }
 

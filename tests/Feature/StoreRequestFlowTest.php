@@ -21,9 +21,15 @@ class StoreRequestFlowTest extends TestCase
             Role::create(['name' => $role, 'guard_name' => 'web']);
         }
 
+        $tenant = Tenant::factory()->create([
+            'name' => 'Test Tenant',
+            'status' => 'Active',
+        ]);
+
         $site = Site::create([
             'name' => 'Main Site',
-            'site_code' => 'MS'
+            'site_code' => 'MS',
+            'tenant_id' => $tenant->id,
         ]);
 
         $department = Department::create([
