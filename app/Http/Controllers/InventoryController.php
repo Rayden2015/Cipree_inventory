@@ -126,7 +126,9 @@ class InventoryController extends Controller
             // Create the inventory
             $date = Carbon::now();
             $authid = Auth::id();
-            $site_id = Auth::user()->site->id;
+            $user = Auth::user();
+            $site_id = $user->site->id;
+            $tenant_id = $user->getCurrentTenant()?->id ?? $user->site->tenant_id ?? null;
             $inventory = Inventory::create([
                 'waybill' => $request->waybill,
                 'dollar_rate' => $request->dollar_rate,
@@ -143,7 +145,8 @@ class InventoryController extends Controller
                 'billing_currency' => $request->billing_currency,
                 'invoice_number' => $request->invoice_number,
                 'exchange_rate' => $request->exchange_rate,
-                'site_id' => $site_id
+                'site_id' => $site_id,
+                'tenant_id' => $tenant_id
             ]);
     
             // Log inventory creation success
@@ -197,6 +200,7 @@ class InventoryController extends Controller
                         'total_value_gh' => $totalValueGh,
                         'total_value_usd' => $totalValueUsd,
                         'site_id' => $site_id,
+                        'tenant_id' => $tenant_id,
                         'last_updated_by' => Auth::id(),
                         'last_updated_at' => now(),
                     ]);

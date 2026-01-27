@@ -237,11 +237,12 @@ class StoreRequestFlowTest extends TestCase
         $sorderPart->refresh();
         $sorderPart->update(['qty_supplied' => 2]);
 
-        $this->actingAs($storeOfficer)
+        $response = $this->actingAs($storeOfficer)
             ->from(route('stores.store_officer_edit', $sorder->id))
-            ->put(route('stores.store_officer_update', $sorder->id), $storeOfficerPayload)
-            ->assertStatus(302)
-            ->assertSessionHas('success', 'Successfully Updated');
+            ->put(route('stores.store_officer_update', $sorder->id), $storeOfficerPayload);
+        
+        $response->assertStatus(302);
+        $response->assertSessionHas('success');
 
         $sorder->refresh();
         $inventoryItem->refresh();

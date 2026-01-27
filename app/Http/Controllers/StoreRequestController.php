@@ -941,7 +941,7 @@ class StoreRequestController extends Controller
 
 
 
-            return redirect()->back()->withSuccess('Successfully Updated');
+            return redirect()->back()->with('success', 'Successfully Updated');
         } catch (\Exception $e) {
             return $this->handleError($e, 'store_officer_update()');
         }
