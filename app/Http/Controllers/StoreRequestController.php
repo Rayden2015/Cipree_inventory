@@ -234,15 +234,27 @@ class StoreRequestController extends Controller
 
     public function store(Request $request)
     {
-        try {
-            $request->validate([
-                'photo' => 'sometimes|nullable|image|mimes:jpeg,gif,png,jpg|max:9048',
-                'desc' => 'nullable',
-                'work_order_number' => 'nullable|string|max:100',
-            ]);
+        $user = Auth::user();
+        $isEngineeringDepartment = false;
 
+        if ($user && $user->department) {
+            $departmentName = $user->department->name;
+            $isEngineeringDepartment = is_string($departmentName)
+                && strcasecmp(trim($departmentName), 'engineering') === 0;
+        }
+
+        $rules = [
+            'photo' => 'sometimes|nullable|image|mimes:jpeg,gif,png,jpg|max:9048',
+            'desc' => 'nullable',
+            'work_order_number' => ($isEngineeringDepartment ? 'required|numeric' : 'nullable|numeric'),
+        ];
+
+        // Let Laravel's validation exception bubble up so the user
+        // gets proper field-level errors instead of a generic error handler.
+        $request->validate($rules);
+
+        try {
             $authid = Auth::id();
-            $user = Auth::user();
             $statusvalue = 'Requested';
             $site_id = $user->site->id;
             $tenant_id = $user->getCurrentTenant()?->id;

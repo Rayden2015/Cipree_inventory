@@ -267,7 +267,9 @@ class EnduserController extends Controller
         ]);
 
         try {
-            $enduser = Enduser::find($id);
+            // Use withoutGlobalScopes to ensure we can find the record
+            // even when tenant or other global scopes are applied.
+            $enduser = Enduser::withoutGlobalScopes()->find($id);
 
             // Check if Enduser exists
             if (!$enduser) {

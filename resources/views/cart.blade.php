@@ -158,12 +158,26 @@
                                                             placeholder={{ $request_date }}>
                                                     </div>
                                                     <div class="form-group col-md-4">
-                                                        <label for="work_order_number" class="col-form-label">Work Order Number <span class="text-muted">(Optional)</span></label>
+                                                        @php
+                                                            $user = Auth::user();
+                                                            $departmentName = $user && $user->department ? $user->department->name : null;
+                                                            $isEngineeringDepartment = is_string($departmentName) && strcasecmp(trim($departmentName), 'engineering') === 0;
+                                                        @endphp
+                                                        <label for="work_order_number" class="col-form-label">
+                                                            Work Order Number
+                                                            @if ($isEngineeringDepartment)
+                                                                <span style="color:red">*</span>
+                                                                <span class="text-muted">(Required for Engineering)</span>
+                                                            @else
+                                                                <span class="text-muted">(Optional)</span>
+                                                            @endif
+                                                        </label>
                                                         <input name="work_order_number"
                                                             id="work_order_number"
-                                                            type="text"
+                                                            type="number"
                                                             value="{{ old('work_order_number') }}"
                                                             class="form-control"
+                                                            @if ($isEngineeringDepartment) required @endif
                                                             placeholder="Enter work order number">
                                                         @error('work_order_number')
                                                             <span class="text-danger small">{{ $message }}</span>
