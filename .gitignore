@@ -22,6 +22,9 @@ yarn-error.log
 !/storage/logs
 storage/logs/errors/error.log
 
+# Secrets
+secrets.txt
+
 # Archive files
 Archive.zip
 *.zip
