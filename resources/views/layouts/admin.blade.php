@@ -124,6 +124,7 @@
 @endphp
 
 <body class="hold-transition sidebar-mini layout-fixed">
+    @include('partials.environment-banner')
     <div class="wrapper">
 
             <!-- Navbar -->
@@ -243,11 +244,16 @@
 
     <!-- jQuery -->
     <script src="{{ asset('/assets/plugins/jquery/jquery.min.js') }}"></script>
-    <!-- jQuery UI 1.11.4 -->
-    <script src="{{ asset('/assets/plugins/jquery-ui/jquery-ui.min.js') }}"></script>
-    <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+    <!-- jQuery UI 1.11.4 (with CDN fallback if local asset returns 403) -->
+    <script src="{{ asset('/assets/plugins/jquery-ui/jquery-ui.min.js') }}" id="jquery-ui-script"
+            onerror="this.onerror=null; var s=document.createElement('script'); s.src='https://code.jquery.com/ui/1.12.1/jquery-ui.min.js'; s.onload=function(){ if (typeof $ !== 'undefined' && $.widget && $.ui && $.ui.button) { $.widget.bridge('uibutton', $.ui.button); } }; document.body.appendChild(s);"></script>
+    <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip (guard when jQuery UI fails to load e.g. 403) -->
     <script>
-        $.widget.bridge('uibutton', $.ui.button)
+        (function() {
+            if (typeof $ !== 'undefined' && $.widget && $.ui && $.ui.button) {
+                $.widget.bridge('uibutton', $.ui.button);
+            }
+        })();
     </script>
     <!-- Bootstrap 4 -->
     <script src="{{ asset('/assets/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>

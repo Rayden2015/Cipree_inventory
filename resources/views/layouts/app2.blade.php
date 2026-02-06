@@ -17,6 +17,7 @@
     {{-- @vite(['resources/sass/app.scss', 'resources/js/app.js']) --}}
 </head>
 <body>
+    @include('partials.environment-banner')
     <div id="app">
         
 

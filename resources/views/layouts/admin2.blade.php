@@ -49,6 +49,7 @@
 @endphp
 
 <body class="hold-transition sidebar-mini layout-fixed">
+    @include('partials.environment-banner')
     <div class="wrapper">
 
      
@@ -180,10 +181,17 @@
     </div>
     <!-- ./wrapper -->
 
-
-    <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+    <!-- jQuery (local fallback; CDN already in head) -->
+    <script src="{{ asset('/assets/plugins/jquery/jquery.min.js') }}"></script>
+    <!-- jQuery UI (required for bridge below) -->
+    <script src="{{ asset('/assets/plugins/jquery-ui/jquery-ui.min.js') }}"></script>
+    <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip (guard when jQuery UI fails to load e.g. 403) -->
     <script>
-        $.widget.bridge('uibutton', $.ui.button)
+        (function() {
+            if (typeof $ !== 'undefined' && $.widget && $.ui && $.ui.button) {
+                $.widget.bridge('uibutton', $.ui.button);
+            }
+        })();
     </script>
     <!-- Bootstrap 4 -->
     <script src="{{ asset('/assets/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
