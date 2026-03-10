@@ -77,6 +77,9 @@ class PermissionSeeder extends Seeder
             'purchase-orders',
             'transfer-requests',
 
+            // Work Order Permissions
+            'manage-work-order-number',
+
             // Authoriser Permissions
             'authoriser-request-lists',
             'authoriser-purchase-lists',

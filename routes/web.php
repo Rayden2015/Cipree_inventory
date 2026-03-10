@@ -242,6 +242,10 @@ Route::get('fetch_single_enduser1/{id}', [StoreRequestController::class, 'fetch_
 Route::delete('sorderpart_delete/{id}', [StoreRequestController::class, 'sorderpart_delete'])->name('sorderpart_delete');
 Route::delete('/sorderpart/delete/{id}', [StoreRequestController::class, 'deleteSorderPart'])->name('sorderpart_delete');
 
+// Work Orders module
+Route::get('work-orders', [StoreRequestController::class, 'workOrdersIndex'])->name('work-orders.index');
+Route::get('work-orders/create', [StoreRequestController::class, 'workOrdersCreate'])->name('work-orders.create');
+
 
 // authoriser module
 Route::get('authorise_req_all', [AuthoriserController::class, 'req_all'])->name('authorise.req_all');

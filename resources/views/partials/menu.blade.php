@@ -547,8 +547,6 @@
                                     </a>
                                 </li>
                             @endcan
-
-                          
                             @can('requester-stock-requests')
                                 <li class="nav-item">
                                     <a href="{{ route('stores.requester_store_lists') }}"
@@ -776,6 +774,38 @@
                     </li>
                     {{-- end of reports module --}}
 
+                @endcan
+
+                {{-- Work Orders module --}}
+                @can('manage-work-order-number')
+                    <li class="nav-item {{ request()->routeIs('work-orders.*') ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ request()->routeIs('work-orders.*') ? 'active' : '' }}">
+                            <i>
+                                <img src="{{ asset('assets/images/icons/reports.jpg') }}" width="26" height="26"
+                                     alt="" />
+                            </i>
+                            <p>
+                                Work Orders
+                                <i class="fas fa-angle-left right"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{{ route('work-orders.index') }}"
+                                   class="nav-link {{ request()->routeIs('work-orders.index') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Work Orders (List)</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('work-orders.create') }}"
+                                   class="nav-link {{ request()->routeIs('work-orders.create') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Create Work Order</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                 @endcan
 
             </ul>
