@@ -476,14 +476,15 @@ class StockPurchaseRequestController extends Controller
             }
 
             DB::commit();
-            DB::select('UPDATE items i
+            DB::select("UPDATE items i
             JOIN (
                 SELECT t.item_id, SUM(t.quantity) AS calculated_quantity
                 FROM items i
                 JOIN inventory_items t ON i.id = t.item_id
+                WHERE t.status IN ('Active', 'Adjustment')
                 GROUP BY t.item_id
             ) AS subquery ON i.id = subquery.item_id
-            SET i.stock_quantity = subquery.calculated_quantity;');
+            SET i.stock_quantity = subquery.calculated_quantity");
          
             return redirect()->back()->withSuccess('Successfully Updated');
         } catch (\Exception $e) {

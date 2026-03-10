@@ -27,6 +27,7 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\TotalTaxController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\InventoryCorrectionController;
 use App\Http\Controllers\MyAccountController;
 use App\Http\Controllers\TaxLeviesController;
 use App\Http\Controllers\Auth\LoginController;
@@ -134,6 +135,15 @@ Route::delete('inventory_history_destroy/{id}', [InventoryController::class, 'in
 Route::get('generateinventoryPDF/{id}', [InventoryController::class, 'generateinventoryPDF'])->name('inventories.generateinventoryPDF');
 Route::post('check_waybill', [InventoryController::class, 'check_waybill'])->name('check_waybill');
 Route::post('check_po_number', [InventoryController::class, 'check_po_number'])->name('check_po_number');
+
+// V4.0 Correction & Audit Framework
+Route::get('inventory-corrections', [InventoryCorrectionController::class, 'index'])->name('inventory-corrections.index');
+Route::get('inventory-corrections/create/{inventory_item_id}', [InventoryCorrectionController::class, 'create'])->name('inventory-corrections.create');
+Route::post('inventory-corrections', [InventoryCorrectionController::class, 'store'])->name('inventory-corrections.store');
+Route::get('inventory-corrections/{id}', [InventoryCorrectionController::class, 'show'])->name('inventory-corrections.show');
+Route::post('inventory-corrections/{id}/approve', [InventoryCorrectionController::class, 'approve'])->name('inventory-corrections.approve');
+Route::post('inventory-corrections/{id}/reject', [InventoryCorrectionController::class, 'reject'])->name('inventory-corrections.reject');
+Route::get('inventory-corrections-audit-log', [InventoryCorrectionController::class, 'auditLog'])->name('inventory-corrections.audit-log');
 Route::post('check_invoice_number', [InventoryController::class, 'check_invoice_number'])->name('check_invoice_number');
 // Route::post('/check_superior',['uses'=>'PagesController@checkEmail']);
 // Route::post('sendProductNotification', [UserController::class, 'sendProductNotification'])->name('stores.sendproductnotification');

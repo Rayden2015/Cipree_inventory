@@ -82,22 +82,25 @@ class StoreRequestController extends Controller
                     'request_payload' => $request
                 ]);
                 $site_id = Auth::user()->site->id;
-                
-                // Fix N+1 query by eager loading site relationship and fixing WHERE clause grouping
+
+                // V4.0 Requester view: only Active and Adjustment lines (no Voided/negative garbage)
                 $inventory = Item::with(['site', 'category', 'user'])
                     ->join('inventory_items', 'items.id', '=', 'inventory_items.item_id')
                     ->leftJoin('sites', 'inventory_items.site_id', '=', 'sites.id')
+                    ->whereIn('inventory_items.status', [\App\Models\InventoryItem::STATUS_ACTIVE, \App\Models\InventoryItem::STATUS_ADJUSTMENT])
                     ->where('inventory_items.quantity', '>', '0')
-                    ->where(function($query) use ($request) {
-                        $query->where('items.item_description', 'like', "%" . $request->search . "%")
-                            ->orWhere('items.item_part_number', 'like', "%" . $request->search . "%")
-                            ->orWhere('items.item_stock_code', 'like', "%" . $request->search . "%");
+                    ->where('inventory_items.site_id', '=', $site_id)
+                    ->where(function ($query) use ($request) {
+                        $query->where('items.item_description', 'like', '%' . $request->search . '%')
+                            ->orWhere('items.item_part_number', 'like', '%' . $request->search . '%')
+                            ->orWhere('items.item_stock_code', 'like', '%' . $request->search . '%');
                     })
                     ->select(
                         'items.*',
                         'inventory_items.quantity',
                         'inventory_items.id as inventory_item_id',
                         'inventory_items.site_id as inventory_site_id',
+                        'inventory_items.status as inventory_item_status',
                         'sites.name as inventory_site_name'
                     )
                     ->orderBy('inventory_items.site_id')
@@ -149,7 +152,16 @@ class StoreRequestController extends Controller
     {
         try {
             $site_id = Auth::user()->site->id;
-            $product = Item::join('inventory_items', 'items.id', '=', 'inventory_items.item_id')->where('inventory_items.id', $id)->where('inventory_items.site_id', '=', $site_id)->first();
+            // V4.0: Only allow adding from Active lines with available balance (no Voided)
+            $product = Item::join('inventory_items', 'items.id', '=', 'inventory_items.item_id')
+                ->where('inventory_items.id', $id)
+                ->where('inventory_items.site_id', '=', $site_id)
+                ->where('inventory_items.status', \App\Models\InventoryItem::STATUS_ACTIVE)
+                ->where('inventory_items.quantity', '>', 0)
+                ->first();
+            if (!$product) {
+                return redirect()->back()->with('message', 'Item not available or no longer active.');
+            }
             // $product = DB::table('items')->join('inventory_items','items.id','=','inventory_items.item_id')->find('items.id',$id)->select('items.id,items.description as item_description,items.stock_code as item_code');
 
             $cart = session()->get('cart', []);
@@ -939,14 +951,15 @@ class StoreRequestController extends Controller
             // Update stock quantities
             if (! app()->environment('testing')) {
                 DB::select(
-                    'UPDATE items i
-         LEFT JOIN (
-              SELECT t.item_id, SUM(t.quantity) AS calculated_quantity
-              FROM items i
-              JOIN inventory_items t ON i.id = t.item_id
-              GROUP BY t.item_id
-          ) AS subquery ON i.id = subquery.item_id
-          SET i.stock_quantity = subquery.calculated_quantity;'
+                    "UPDATE items i
+                    LEFT JOIN (
+                        SELECT t.item_id, SUM(t.quantity) AS calculated_quantity
+                        FROM items i
+                        JOIN inventory_items t ON i.id = t.item_id
+                        WHERE t.status IN ('Active', 'Adjustment')
+                        GROUP BY t.item_id
+                    ) AS subquery ON i.id = subquery.item_id
+                    SET i.stock_quantity = COALESCE(subquery.calculated_quantity, 0)"
                 );
             }
             DB::commit();

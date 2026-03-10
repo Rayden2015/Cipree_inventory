@@ -1,45 +1,48 @@
 #!/bin/bash
 # Deployment script to fix file permissions for Laravel application
-# Run this script after deploying to your cloud server
-# Usage: ./deploy-fix-permissions.sh [web-server-user]
-# Example: ./deploy-fix-permissions.sh www-data
+# Can be used on full servers (with sudo/root) and on shared/cPanel hosting
+# Usage (server with sudo/root):   sudo ./deploy-fix-permissions.sh [web-server-user]
+# Usage (shared hosting / cPanel): ./deploy-fix-permissions.sh   (runs chmod-only, no chown)
 
 set -e
 
-# Default web server user (common options: www-data, apache, nginx, httpd)
-WEB_USER="${1:-www-data}"
+WEB_USER="${1:-www-data}"    # Ignored on shared hosting / when not root
 
 echo "=========================================="
 echo "Laravel Deployment - Fix Permissions"
 echo "=========================================="
-echo "Web Server User: $WEB_USER"
+echo "Web Server User (if applicable): $WEB_USER"
 echo ""
 
 # Get the directory where the script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-# Check if running as root
-if [ "$EUID" -ne 0 ]; then 
-    echo "⚠️  This script should be run as root or with sudo"
-    echo "   Usage: sudo ./deploy-fix-permissions.sh $WEB_USER"
-    exit 1
+# Detect environment: root/server vs shared hosting
+IS_ROOT=0
+if [ "$EUID" -eq 0 ]; then
+    IS_ROOT=1
 fi
 
-# Check if web user exists
-if ! id "$WEB_USER" &>/dev/null; then
-    echo "❌ Error: Web server user '$WEB_USER' does not exist"
-    echo "   Common users: www-data (Debian/Ubuntu), apache (CentOS/RHEL), nginx, httpd"
-    echo "   Please specify the correct user: ./deploy-fix-permissions.sh [user]"
-    exit 1
+if [ "$IS_ROOT" -eq 1 ]; then
+    # Server mode: validate web user and apply chown
+    if ! id "$WEB_USER" &>/dev/null; then
+        echo "❌ Error: Web server user '$WEB_USER' does not exist"
+        echo "   Common users: www-data (Debian/Ubuntu), apache (CentOS/RHEL), nginx, httpd"
+        echo "   Please specify the correct user: ./deploy-fix-permissions.sh [user]"
+        exit 1
+    fi
+
+    echo "✅ Web server user found: $WEB_USER"
+    echo ""
+
+    echo "📁 Setting ownership to $WEB_USER (server mode)..."
+    chown -R "$WEB_USER:$WEB_USER" .
+else
+    echo "ℹ️  Running in shared hosting mode (no sudo/chown)."
+    echo "    Ownership will NOT be changed; only chmod will be applied."
+    echo ""
 fi
-
-echo "✅ Web server user found: $WEB_USER"
-echo ""
-
-# Fix ownership - web server user should own all files
-echo "📁 Setting ownership to $WEB_USER..."
-chown -R "$WEB_USER:$WEB_USER" .
 
 # Set directory permissions (755 = rwxr-xr-x)
 echo "📂 Setting directory permissions to 755..."
@@ -52,33 +55,58 @@ find . -type f -exec chmod 644 {} \;
 # Make scripts executable
 echo "🔧 Making scripts executable..."
 find . -type f -name "*.sh" -exec chmod +x {} \;
-chmod +x artisan
+[ -f artisan ] && chmod +x artisan
 
 # Special permissions for storage and cache directories
 echo "💾 Setting special permissions for storage and cache..."
 if [ -d "storage" ]; then
     chmod -R 775 storage
-    chown -R "$WEB_USER:$WEB_USER" storage
+    if [ "$IS_ROOT" -eq 1 ]; then
+        chown -R "$WEB_USER:$WEB_USER" storage
+    fi
     echo "   ✅ storage/"
 fi
 
 if [ -d "bootstrap/cache" ]; then
     chmod -R 775 bootstrap/cache
-    chown -R "$WEB_USER:$WEB_USER" bootstrap/cache
+    if [ "$IS_ROOT" -eq 1 ]; then
+        chown -R "$WEB_USER:$WEB_USER" bootstrap/cache
+    fi
     echo "   ✅ bootstrap/cache/"
 fi
 
-# Ensure public directory is accessible
+# Ensure public directory is accessible (when script is run from project root)
 if [ -d "public" ]; then
     chmod -R 755 public
-    chown -R "$WEB_USER:$WEB_USER" public
+    if [ "$IS_ROOT" -eq 1 ]; then
+        chown -R "$WEB_USER:$WEB_USER" public
+    fi
     echo "   ✅ public/"
+fi
+
+# cPanel / shared-hosting friendly web asset permissions.
+# If the script is run from the public docroot (e.g. ~/dev.cipree.com/public),
+# make sure CSS/JS/image assets are world-readable without requiring sudo.
+if [ -d "assets" ]; then
+    echo "🌐 Fixing permissions for ./assets (CSS/JS/fonts)..."
+    find assets -type d -exec chmod 755 {} \;
+    find assets -type f -exec chmod 644 {} \;
+    echo "   ✅ assets/"
+fi
+
+if [ -d "global_assets" ]; then
+    echo "🌐 Fixing permissions for ./global_assets (CSS/JS/fonts)..."
+    find global_assets -type d -exec chmod 755 {} \; 2>/dev/null
+    find global_assets -type f -exec chmod 644 {} \; 2>/dev/null
+    echo "   ✅ global_assets/"
 fi
 
 # Fix .env file permissions (should be readable by web server, but not world-readable)
 if [ -f ".env" ]; then
     chmod 640 .env
-    chown "$WEB_USER:$WEB_USER" .env
+    if [ "$IS_ROOT" -eq 1 ]; then
+        chown "$WEB_USER:$WEB_USER" .env
+    fi
     echo "   ✅ .env (640)"
 fi
 

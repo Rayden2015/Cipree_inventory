@@ -674,6 +674,24 @@
                                     </a>
                                 </li>
                             @endcan
+                            @can('approve-inventory-correction')
+                                <li class="nav-item">
+                                    <a href="{{ route('inventory-corrections.index') }}"
+                                        class="nav-link {{ request()->routeIs('inventory-corrections.*') ? 'active' : '' }}" style="{{ request()->routeIs('inventory-corrections.index', 'inventory-corrections.show') ? 'background-color: #0e6258' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Correction Requests</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('view-inventory-audit-log')
+                                <li class="nav-item">
+                                    <a href="{{ route('inventory-corrections.audit-log') }}"
+                                        class="nav-link {{ request()->routeIs('inventory-corrections.audit-log') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Inventory Audit Log</p>
+                                    </a>
+                                </li>
+                            @endcan
                             {{-- @endif --}}
 
                         </ul>

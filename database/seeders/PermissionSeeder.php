@@ -104,6 +104,12 @@ class PermissionSeeder extends Seeder
             'edit-grn',
             'delete-grn',
 
+            // Correction & Audit Framework (V4.0)
+            'initiate-inventory-correction',
+            'approve-inventory-correction',
+            'execute-inventory-adjustment',
+            'view-inventory-audit-log',
+
             'stock-request-lists',
             'stock-purchase-requests',
             'request-lists',

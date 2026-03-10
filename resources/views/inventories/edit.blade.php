@@ -248,9 +248,12 @@
                                     <th style="width:20px;">Discount %</th>
 
                                     <th> Location</th>
+                                    <th>Status</th>
                                     <th>Last Updated By</th>
                                     <th>Edit</th>
-
+                                    @can('initiate-inventory-correction')
+                                    <th>Correction</th>
+                                    @endcan
                                 </tr>
                             </thead>
                             <tbody>
@@ -318,6 +321,7 @@
                                                     </select>
 
                                                 </td>
+                                                <td class="align-middle"><span class="badge badge-{{ $ph->status === 'Active' ? 'success' : ($ph->status === 'Voided' ? 'secondary' : 'info') }}">{{ $ph->status ?? 'Active' }}</span></td>
                                                 <td class="align-middle">
                                                     <strong>{{ optional($ph->lastUpdatedBy)->name ?? 'N/A' }}</strong>
                                                     @if (! empty($ph->last_updated_at))
@@ -325,13 +329,21 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    @if (Auth::user()->hasRole('store_officer'))
-                                                    <button type="submit" onclick="editable()"
-                                                    class="btn btn-primary">Submit</button>
+                                                    @can('execute-inventory-adjustment')
+                                                    <button type="submit" onclick="editable()" class="btn btn-primary">Submit</button>
                                                     @else
-                                                       
+                                                    <small class="text-muted">Use Flag for Correction</small>
+                                                    @endcan
+                                                </td>
+                                                @can('initiate-inventory-correction')
+                                                <td class="align-middle">
+                                                    @if (($ph->status ?? 'Active') === 'Active')
+                                                    <a href="{{ route('inventory-corrections.create', $ph->id) }}" class="btn btn-warning btn-sm">Flag for Correction</a>
+                                                    @else
+                                                    <span class="text-muted">—</span>
                                                     @endif
                                                 </td>
+                                                @endcan
                                             </form>
                                         </tr>
                                     @endforeach

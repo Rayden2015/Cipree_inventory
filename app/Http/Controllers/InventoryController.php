@@ -187,7 +187,7 @@ class InventoryController extends Controller
                         $totalValueUsd = round($totalamount / $inventory->exchange_rate, 2);
                     }
 
-                    // Create inventory item
+                    // Create inventory item (V4.0: status Active for new receipts)
                     InventoryItem::create([
                         'inventory_id' => $inventory->id,
                         'location_id' => $request->location_id[$i],
@@ -201,6 +201,7 @@ class InventoryController extends Controller
                         'total_value_usd' => $totalValueUsd,
                         'site_id' => $site_id,
                         'tenant_id' => $tenant_id,
+                        'status' => InventoryItem::STATUS_ACTIVE,
                         'last_updated_by' => Auth::id(),
                         'last_updated_at' => now(),
                     ]);
@@ -239,14 +240,15 @@ class InventoryController extends Controller
             // Update stock quantities
             if (! app()->environment('testing')) {
                 DB::select(
-                    'UPDATE items i
+                    "UPDATE items i
                     JOIN (
                         SELECT t.item_id, SUM(t.quantity) AS calculated_quantity
                         FROM items i
                         JOIN inventory_items t ON i.id = t.item_id
+                        WHERE t.status IN ('Active', 'Adjustment')
                         GROUP BY t.item_id
                     ) AS subquery ON i.id = subquery.item_id
-                    SET i.stock_quantity = subquery.calculated_quantity'
+                    SET i.stock_quantity = subquery.calculated_quantity"
                 );
             }
     
@@ -361,6 +363,12 @@ class InventoryController extends Controller
 }public function update_inventory_item(Request $request, $id)
 {
     try {
+        // V4.0: No direct UPDATE of quantity or price - use Correction workflow (Flag for Correction).
+        if (! Auth::user()->can('execute-inventory-adjustment')) {
+            Toastr::warning('Direct edits to quantity or unit cost are not allowed. Use "Flag for Correction" and request a Supervisor to approve.');
+            return redirect()->back();
+        }
+
         $request->validate([
             'quantity' => 'gte:0',
             'unit_cost_exc_vat_gh' => 'required|numeric|min:0',
@@ -850,18 +858,22 @@ class InventoryController extends Controller
     {
         try {
             if ($request->ajax()) {
+                // V4.0: No direct UPDATE/DELETE of quantity or price - use Correction workflow.
+                if ($request->action == 'edit' || $request->action == 'delete') {
+                    if (! Auth::user()->can('execute-inventory-adjustment')) {
+                        return response()->json(['error' => 'Use "Flag for Correction" workflow. Direct edits are not allowed.'], 403);
+                    }
+                }
                 if ($request->action == 'edit') {
                     $data = array(
-
                         'quantity' => $request->quantity,
-                        'unit_cost_exc_vat_gh' =>    $request->unit_cost_exc_vat_gh,
+                        'unit_cost_exc_vat_gh' => $request->unit_cost_exc_vat_gh,
                         'part_number' => $request->part_number,
                         'description' => $request->description,
                         'location_id' => $request->location_id,
                         'uom' => $request->uom,
                         'amount' => $request->amount,
                         'discount' => $request->discount,
-
                     );
 
                     DB::table('inventory_items')
@@ -873,7 +885,6 @@ class InventoryController extends Controller
                     $sub_total = $quantity * $unit_price;
                     $total_amount = (($sub_total) - ($sub_total * $discount) / 100);
                     InventoryItemDetail::where('id', $request->id)->update(['amount' => $total_amount]);
-                    // $sum1.val(Number($sum.val()) - (Number($sum.val()) * Number($num3.val()) / 100));
                 }
                 if ($request->action == 'delete') {
                     DB::table('inventory_items')
