@@ -79,6 +79,9 @@ class PermissionSeeder extends Seeder
 
             // Work Order Permissions
             'manage-work-order-number',
+            'view-work-order',
+            'add-work-order',
+            'edit-work-order',
 
             // Authoriser Permissions
             'authoriser-request-lists',
@@ -176,6 +179,7 @@ class PermissionSeeder extends Seeder
             'site-admin-dashboard',
             'store-officer-dashboard',
             'super-admin-dashboard',
+            'maintenance-planner-dashboard',
         ];
 
         // Looping and inserting permissions into the Permission table

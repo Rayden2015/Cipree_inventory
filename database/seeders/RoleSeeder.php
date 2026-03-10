@@ -29,6 +29,10 @@ class RoleSeeder extends Seeder
             'delete-item',
             'view-item',
             'manage-work-order-number',
+            'view-work-order',
+            'add-work-order',
+            'edit-work-order',
+            'maintenance-planner-dashboard',
         ];
 
         foreach ($adminPermissions as $permission) {

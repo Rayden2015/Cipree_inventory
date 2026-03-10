@@ -89,7 +89,7 @@ class InventoryItemUpdateTest extends TestCase
             'status' => 'Active',
         ]);
 
-        $permissions = ['view-grn', 'edit-grn'];
+        $permissions = ['view-grn', 'edit-grn', 'execute-inventory-adjustment'];
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }

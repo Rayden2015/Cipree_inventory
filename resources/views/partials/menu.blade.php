@@ -777,7 +777,7 @@
                 @endcan
 
                 {{-- Work Orders module --}}
-                @can('manage-work-order-number')
+                @can('view-work-order')
                     <li class="nav-item {{ request()->routeIs('work-orders.*') ? 'menu-open' : '' }}">
                         <a href="#" class="nav-link {{ request()->routeIs('work-orders.*') ? 'active' : '' }}">
                             <i>
@@ -790,20 +790,33 @@
                             </p>
                         </a>
                         <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="{{ route('work-orders.index') }}"
-                                   class="nav-link {{ request()->routeIs('work-orders.index') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Work Orders (List)</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('work-orders.create') }}"
-                                   class="nav-link {{ request()->routeIs('work-orders.create') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Create Work Order</p>
-                                </a>
-                            </li>
+                            @can('maintenance-planner-dashboard')
+                                <li class="nav-item">
+                                    <a href="{{ route('work-orders.dashboard') }}"
+                                       class="nav-link {{ request()->routeIs('work-orders.dashboard') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>WO Dashboard</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('view-work-order')
+                                <li class="nav-item">
+                                    <a href="{{ route('work-orders.index') }}"
+                                       class="nav-link {{ request()->routeIs('work-orders.index') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Work Orders (List)</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('add-work-order')
+                                <li class="nav-item">
+                                    <a href="{{ route('work-orders.create') }}"
+                                       class="nav-link {{ request()->routeIs('work-orders.create') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Create Work Order</p>
+                                    </a>
+                                </li>
+                            @endcan
                         </ul>
                     </li>
                 @endcan

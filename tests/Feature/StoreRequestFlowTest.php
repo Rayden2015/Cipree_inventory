@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 use App\Models\{User, Site, Department, Enduser, EndUsersCategory, Supplier, Item, Inventory, InventoryItem, Sorder, SorderPart, Tenant};
 use Carbon\Carbon;
@@ -125,6 +126,10 @@ class StoreRequestFlowTest extends TestCase
     public function test_engineering_department_requires_work_order_number(): void
     {
         $context = $this->createStoreRequestContext('Engineering');
+
+        // Engineering users that can manage work orders must still provide a work_order_number
+        $permission = Permission::firstOrCreate(['name' => 'manage-work-order-number', 'guard_name' => 'web']);
+        $context['requester']->givePermissionTo($permission);
 
         $this->actingAs($context['requester']);
 

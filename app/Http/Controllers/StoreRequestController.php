@@ -801,57 +801,6 @@ class StoreRequestController extends Controller
         }
     }
 
-    /**
-     * Work Orders list – dedicated module entry point.
-     * Lists only store requests that have a work_order_number.
-     */
-    public function workOrdersIndex(Request $request)
-    {
-        try {
-            $site_id = Auth::user()->site->id ?? null;
-
-            $query = Sorder::query();
-
-            if ($site_id !== null) {
-                $query->where('site_id', '=', $site_id);
-            }
-
-            // Only records that have a work order number
-            $query->whereNotNull('work_order_number');
-
-            // Simple search by request number or work order number
-            if ($request->filled('search')) {
-                $search = '%' . $request->search . '%';
-                $query->where(function ($q) use ($search) {
-                    $q->where('request_number', 'like', $search)
-                        ->orWhere('work_order_number', 'like', $search);
-                });
-            }
-
-            $work_orders = $query->with(['enduser', 'request_by'])
-                ->latest('created_at')
-                ->paginate(15)
-                ->appends($request->all());
-
-            return view('stores.work_orders_index', compact('work_orders'));
-        } catch (\Exception $e) {
-            return $this->handleError($e, 'workOrdersIndex()');
-        }
-    }
-
-    /**
-     * Entry point for creating a Work Order based request.
-     * Redirects into the existing requester flow, where work_order_number
-     * is enforced for Engineering department users.
-     */
-    public function workOrdersCreate()
-    {
-        try {
-            return redirect()->route('stores.request_search');
-        } catch (\Exception $e) {
-            return $this->handleError($e, 'workOrdersCreate()');
-        }
-    }
 
     public function store_requester_lists()
     {

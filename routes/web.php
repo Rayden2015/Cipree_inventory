@@ -36,6 +36,7 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\StoreRequestController;
+use App\Http\Controllers\WorkOrderController;
 use App\Http\Controllers\DashboardNavigationController;
 use App\Http\Controllers\StockPurchaseRequestController;
 use App\Http\Controllers\ErrorLogController;
@@ -243,8 +244,7 @@ Route::delete('sorderpart_delete/{id}', [StoreRequestController::class, 'sorderp
 Route::delete('/sorderpart/delete/{id}', [StoreRequestController::class, 'deleteSorderPart'])->name('sorderpart_delete');
 
 // Work Orders module
-Route::get('work-orders', [StoreRequestController::class, 'workOrdersIndex'])->name('work-orders.index');
-Route::get('work-orders/create', [StoreRequestController::class, 'workOrdersCreate'])->name('work-orders.create');
+Route::resource('work-orders', WorkOrderController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
 
 
 // authoriser module
@@ -377,6 +377,9 @@ Route::post('fetch_single_tax', [TotalTaxController::class, 'fetch_single_tax'])
 Auth::routes();
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::get('/work-orders/dashboard', function () {
+    return redirect()->route('home');
+})->name('work-orders.dashboard');
 
 // Multi-tenancy routes - Super Admin only
 Route::middleware(['auth'])->group(function () {

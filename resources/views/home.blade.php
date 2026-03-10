@@ -16,6 +16,11 @@
     <br>
 
     {{-- Dashboard Inclusions --}}
+    @if (!$dashboard_included && Gate::allows('maintenance-planner-dashboard'))
+        @include('dashboard.maintenance_planner')
+        @php $dashboard_included = true; @endphp
+    @endif
+
     @if (!$dashboard_included && Gate::allows('admin-dashboard'))
         @include('dashboard.admin')
         @php $dashboard_included = true; @endphp
