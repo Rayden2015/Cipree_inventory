@@ -220,7 +220,8 @@ class EnduserController extends Controller
                 'type' => $request->type,
                 'manufacturer' => $request->manufacturer,
                 'designation' => $request->designation,
-                'status' => $request->status ?? 'Active',
+                // Default all new assets/endusers to Operational unless explicitly overridden
+                'status' => $request->status ?? 'Operational',
                 'section_id' => $request->section_id,
                 'department_id' => $request->department_id,
                 'site_id' => $site_id,

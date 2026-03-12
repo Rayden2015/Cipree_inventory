@@ -1,6 +1,22 @@
 @extends('layouts.admin')
 
 @section('content')
+
+@section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+    <script>
+        $(function () {
+            $('#asset_enduser_id').select2({
+                width: '100%',
+                placeholder: '-- Select Asset (optional) --'
+            });
+            $('#responsible_enduser_id').select2({
+                width: '100%',
+                placeholder: '-- Select Responsible Person --'
+            });
+        });
+    </script>
+@endsection
 <section class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
@@ -47,7 +63,7 @@
                     </div>
 
                     <div class="form-row">
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-3">
                             <label for="priority">Priority</label>
                             <select name="priority" id="priority"
                                     class="form-control @error('priority') is-invalid @enderror">
@@ -61,7 +77,7 @@
                             <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
                         </div>
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-3">
                             <label for="status">Status</label>
                             <select name="status" id="status"
                                     class="form-control @error('status') is-invalid @enderror">
@@ -75,12 +91,26 @@
                             <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
                         </div>
-                        <div class="form-group col-md-4">
+                        <div class="form-group col-md-3">
                             <label for="requested_date">Requested Date</label>
                             <input type="datetime-local" name="requested_date" id="requested_date"
                                    class="form-control @error('requested_date') is-invalid @enderror"
                                    value="{{ old('requested_date', optional($workOrder->requested_date)->format('Y-m-d\TH:i')) }}">
                             @error('requested_date')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="asset_state">Asset State</label>
+                            <select name="asset_state" id="asset_state"
+                                    class="form-control @error('asset_state') is-invalid @enderror">
+                                @foreach(['Operational','Down','Standby'] as $state)
+                                    <option value="{{ $state }}" {{ old('asset_state', $workOrder->asset_state ?? 'Operational') === $state ? 'selected' : '' }}>
+                                        {{ $state }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('asset_state')
                             <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
                         </div>
@@ -105,6 +135,29 @@
                             <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
                         </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="asset_down_since">Asset Went Down At</label>
+                        <input type="datetime-local" name="asset_down_since" id="asset_down_since"
+                               class="form-control @error('asset_down_since') is-invalid @enderror"
+                               value="{{ old('asset_down_since', optional($workOrder->asset_down_since)->format('Y-m-d\TH:i')) }}">
+                        <small class="form-text text-muted">
+                            For Down state, this drives downtime calculations.
+                        </small>
+                        @error('asset_down_since')
+                        <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="work_done_details">Work Done Details (by Responsible Person)</label>
+                        <textarea name="work_done_details" id="work_done_details"
+                                  class="form-control @error('work_done_details') is-invalid @enderror"
+                                  rows="4">{{ old('work_done_details', $workOrder->work_done_details) }}</textarea>
+                        @error('work_done_details')
+                        <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
                     </div>
 
                     <div class="form-row">

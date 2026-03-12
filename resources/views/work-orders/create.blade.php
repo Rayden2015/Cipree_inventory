@@ -1,6 +1,21 @@
 @extends('layouts.admin')
 
 @section('content')
+@section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+    <script>
+        $(function () {
+            $('#asset_enduser_id').select2({
+                width: '100%',
+                placeholder: '-- Select Asset (optional) --'
+            });
+            $('#responsible_enduser_id').select2({
+                width: '100%',
+                placeholder: '-- Select Responsible Person --'
+            });
+        });
+    </script>
+@endsection
 <section class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
@@ -70,6 +85,32 @@
                                    class="form-control @error('due_date') is-invalid @enderror"
                                    value="{{ old('due_date') }}">
                             @error('due_date')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="asset_state">Asset State</label>
+                            <select name="asset_state" id="asset_state"
+                                    class="form-control @error('asset_state') is-invalid @enderror">
+                                @foreach(['Operational','Down','Standby'] as $state)
+                                    <option value="{{ $state }}" {{ old('asset_state','Operational') === $state ? 'selected' : '' }}>
+                                        {{ $state }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('asset_state')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="asset_down_since">Asset Went Down At</label>
+                            <input type="datetime-local" name="asset_down_since" id="asset_down_since"
+                                   class="form-control @error('asset_down_since') is-invalid @enderror"
+                                   value="{{ old('asset_down_since') }}">
+                            <small class="form-text text-muted">
+                                Required when Asset State is set to Down (used for downtime).
+                            </small>
+                            @error('asset_down_since')
                             <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
                         </div>

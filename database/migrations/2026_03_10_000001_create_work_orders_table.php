@@ -15,8 +15,8 @@ return new class extends Migration {
             $table->string('work_order_number')->unique();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->string('status')->default('Open'); // Open, In Progress, Completed, Cancelled
-            $table->string('priority')->default('Medium'); // Low, Medium, High, Critical
+            $table->string('status', 50)->default('Open'); // Open, In Progress, Completed, Cancelled
+            $table->string('priority', 50)->default('Medium'); // Low, Medium, High, Critical
             $table->dateTime('requested_date')->nullable();
             $table->dateTime('due_date')->nullable();
             $table->dateTime('completed_date')->nullable();

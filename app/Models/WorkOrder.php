@@ -16,9 +16,11 @@ class WorkOrder extends Model
         'description',
         'status',
         'priority',
+        'asset_state',
         'requested_date',
         'due_date',
         'completed_date',
+        'work_done_details',
         'asset_enduser_id',
         'responsible_enduser_id',
         'site_id',
@@ -31,6 +33,7 @@ class WorkOrder extends Model
         'requested_date' => 'datetime',
         'due_date' => 'datetime',
         'completed_date' => 'datetime',
+        'asset_down_since' => 'datetime',
     ];
 
     public function site()

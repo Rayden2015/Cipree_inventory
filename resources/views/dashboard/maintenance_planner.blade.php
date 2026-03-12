@@ -9,22 +9,21 @@
     $tenantId = $user->getCurrentTenant()?->id ?? $user->site->tenant_id ?? null;
 
     // Assets (equipment / machines)
-    $assetsQuery = Enduser::query()
+    $assetsBaseQuery = Enduser::query()
         ->when($tenantId, fn($q) => $q->where('tenant_id', $tenantId))
         ->when($siteId, fn($q) => $q->where('site_id', $siteId))
         ->whereIn('type', ['Equipment', 'Machine']);
-    $totalAssets = $assetsQuery->count();
 
-    // Assets with active work orders (Open / In Progress)
-    $assetsWithActiveWo = WorkOrder::query()
-        ->when($tenantId, fn($q) => $q->where('tenant_id', $tenantId))
-        ->when($siteId, fn($q) => $q->where('site_id', $siteId))
-        ->whereIn('status', ['Open', 'In Progress'])
-        ->distinct('asset_enduser_id')
-        ->count('asset_enduser_id');
+    // Total assets in scope
+    $totalAssets = $assetsBaseQuery->count();
+
+    // Assets currently marked as Operational
+    $operationalAssets = (clone $assetsBaseQuery)
+        ->where('status', 'Operational')
+        ->count();
 
     $assetAvailability = $totalAssets > 0
-        ? round(100 * (1 - ($assetsWithActiveWo / $totalAssets)), 1)
+        ? round(100 * ($operationalAssets / $totalAssets), 1)
         : null;
 
     // Active Work Orders (Open / In Progress / Standby)
@@ -56,14 +55,24 @@
         ->take(10)
         ->get();
 
-    // Pending correction requests
-    $pendingCorrections = InventoryCorrectionRequest::query()
-        ->with(['inventoryItem.item', 'requestedByUser'])
+    // Pending work orders (e.g. not yet started)
+    $pendingWorkOrders = WorkOrder::query()
+        ->with(['asset', 'responsiblePerson'])
         ->when($tenantId, fn($q) => $q->where('tenant_id', $tenantId))
         ->when($siteId, fn($q) => $q->where('site_id', $siteId))
-        ->where('status', InventoryCorrectionRequest::STATUS_PENDING)
-        ->latest()
+        ->where('status', 'Open')
+        ->latest('requested_date')
         ->take(10)
+        ->get();
+
+    // Top 5 active work orders (Open / In Progress / Standby)
+    $topActiveWorkOrders = WorkOrder::query()
+        ->with(['asset', 'responsiblePerson'])
+        ->when($tenantId, fn($q) => $q->where('tenant_id', $tenantId))
+        ->when($siteId, fn($q) => $q->where('site_id', $siteId))
+        ->whereIn('status', ['Open', 'In Progress', 'Standby'])
+        ->latest('requested_date')
+        ->take(5)
         ->get();
 
     // Open spares requests (SRs not yet supplied)
@@ -153,10 +162,13 @@
                                 </td>
                                 <td>{{ $wo->status }}</td>
                                 <td>
-                                    @if($wo->requested_date)
+                                    @php
+                                        $downSince = $wo->asset_down_since ?? $wo->requested_date;
+                                    @endphp
+                                    @if($downSince)
                                         <span class="downtime-clock"
-                                              data-start="{{ $wo->requested_date->toIso8601String() }}">
-                                            {{ $wo->requested_date->diffForHumans(null, true) }}
+                                              data-start="{{ $downSince->toIso8601String() }}">
+                                            {{ $downSince->diffForHumans(null, true) }}
                                         </span>
                                     @else
                                         N/A
@@ -190,34 +202,38 @@
         </div>
     </div>
 
-    <!-- Inventory Integration Hub -->
+    <!-- Inventory Integration Hub / Work Orders -->
     <div class="row">
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h3 class="card-title">Pending Correction Requests</h3>
+                    <h3 class="card-title">Pending Work Orders</h3>
                 </div>
                 <div class="card-body table-responsive p-0">
                     <table class="table table-striped">
                         <thead>
                         <tr>
-                            <th>Item</th>
-                            <th>Requested By</th>
-                            <th>Intended Qty</th>
-                            <th>Notes</th>
+                            <th>WO #</th>
+                            <th>Asset</th>
+                            <th>Responsible</th>
+                            <th>Requested</th>
                         </tr>
                         </thead>
                         <tbody>
-                        @forelse($pendingCorrections as $cr)
+                        @forelse($pendingWorkOrders as $wo)
                             <tr>
-                                <td>{{ optional(optional($cr->inventoryItem)->item)->item_description ?? 'N/A' }}</td>
-                                <td>{{ optional($cr->requestedByUser)->name ?? 'N/A' }}</td>
-                                <td>{{ $cr->intended_quantity }}</td>
-                                <td>{{ Str::limit($cr->notes, 40) }}</td>
+                                <td>
+                                    <a href="{{ route('work-orders.show', $wo) }}">
+                                        {{ $wo->work_order_number }}
+                                    </a>
+                                </td>
+                                <td>{{ optional($wo->asset)->asset_staff_id ?? 'N/A' }}</td>
+                                <td>{{ optional($wo->responsiblePerson)->name_description ?? 'N/A' }}</td>
+                                <td>{{ optional($wo->requested_date)->format('d-M-Y') ?? 'N/A' }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center text-muted">No pending corrections.</td>
+                                <td colspan="4" class="text-center text-muted">No pending work orders.</td>
                             </tr>
                         @endforelse
                         </tbody>
@@ -225,37 +241,44 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="col-lg-6">
+    <!-- Top 5 Active Work Orders -->
+    <div class="row">
+        <div class="col-lg-12">
             <div class="card">
                 <div class="card-header bg-info text-white">
-                    <h3 class="card-title">Open Spares Requests</h3>
+                    <h3 class="card-title">Top 5 Active Work Orders</h3>
                 </div>
                 <div class="card-body table-responsive p-0">
                     <table class="table table-striped">
                         <thead>
                         <tr>
-                            <th>Request #</th>
-                            <th>Enduser</th>
+                            <th>WO #</th>
+                            <th>Asset</th>
                             <th>Status</th>
-                            <th>Created</th>
+                            <th>Priority</th>
+                            <th>Responsible</th>
+                            <th>Requested</th>
                         </tr>
                         </thead>
                         <tbody>
-                        @forelse($openSparesRequests as $sr)
+                        @forelse($topActiveWorkOrders as $wo)
                             <tr>
                                 <td>
-                                    <a href="{{ route('sorders.store_list_view', $sr->id) }}">
-                                        {{ $sr->request_number ?? 'SR-'.$sr->id }}
+                                    <a href="{{ route('work-orders.show', $wo) }}">
+                                        {{ $wo->work_order_number }}
                                     </a>
                                 </td>
-                                <td>{{ optional($sr->enduser)->asset_staff_id ?? 'N/A' }}</td>
-                                <td>{{ $sr->status ?? 'N/A' }}</td>
-                                <td>{{ optional($sr->created_at)->format('d-M-Y H:i') }}</td>
+                                <td>{{ optional($wo->asset)->asset_staff_id ?? 'N/A' }}</td>
+                                <td>{{ $wo->status }}</td>
+                                <td>{{ $wo->priority }}</td>
+                                <td>{{ optional($wo->responsiblePerson)->name_description ?? 'N/A' }}</td>
+                                <td>{{ optional($wo->requested_date)->format('d-M-Y') ?? 'N/A' }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center text-muted">No open spares requests.</td>
+                                <td colspan="6" class="text-center text-muted">No active work orders found.</td>
                             </tr>
                         @endforelse
                         </tbody>

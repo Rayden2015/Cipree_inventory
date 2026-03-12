@@ -81,6 +81,8 @@ class WorkOrderController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'priority' => 'required|string|in:Low,Medium,High,Critical',
+            'asset_state' => 'required|string|in:Operational,Down,Standby',
+            'asset_down_since' => 'nullable|date',
             'requested_date' => 'nullable|date',
             'due_date' => 'nullable|date|after_or_equal:requested_date',
             'asset_enduser_id' => 'nullable|exists:endusers,id',
@@ -90,6 +92,14 @@ class WorkOrderController extends Controller
         $user = Auth::user();
         $site_id = $user->site->id ?? null;
         $tenant_id = $user->getCurrentTenant()?->id ?? $user->site->tenant_id ?? null;
+
+        // If the user marked the asset as Down but didn't specify when it went down,
+        // assume "now" so downtime can be calculated.
+        $assetState = $request->asset_state;
+        $assetDownSince = $request->asset_down_since;
+        if ($assetState === 'Down' && empty($assetDownSince)) {
+            $assetDownSince = now();
+        }
 
         // Auto-generate a unique work order number per tenant/site context
         $prefixParts = ['WO'];
@@ -114,6 +124,8 @@ class WorkOrderController extends Controller
             'description' => $request->description,
             'status' => 'Open',
             'priority' => $request->priority,
+            'asset_state' => $assetState,
+            'asset_down_since' => $assetDownSince,
             'requested_date' => $request->requested_date ?? now(),
             'due_date' => $request->due_date,
             'asset_enduser_id' => $request->asset_enduser_id,
@@ -123,6 +135,11 @@ class WorkOrderController extends Controller
             'created_by' => $user->id,
             'updated_by' => $user->id,
         ]);
+
+        // Keep the primary asset record in sync with the state captured on the work order.
+        if ($workOrder->asset_enduser_id && $assetState) {
+            Enduser::where('id', $workOrder->asset_enduser_id)->update(['status' => $assetState]);
+        }
 
         Log::info('WorkOrderController@store - Work order created', [
             'user_id' => $user->id,
@@ -176,27 +193,45 @@ class WorkOrderController extends Controller
             'description' => 'nullable|string',
             'priority' => 'required|string|in:Low,Medium,High,Critical',
             'status' => 'required|string|in:Open,In Progress,Completed,Cancelled',
+            'asset_state' => 'required|string|in:Operational,Down,Standby',
+            'asset_down_since' => 'nullable|date',
             'requested_date' => 'nullable|date',
             'due_date' => 'nullable|date|after_or_equal:requested_date',
             'completed_date' => 'nullable|date',
             'asset_enduser_id' => 'nullable|exists:endusers,id',
             'responsible_enduser_id' => 'required|exists:endusers,id',
+            'work_done_details' => 'nullable|string',
         ]);
 
         $user = Auth::user();
+
+        $assetState = $request->asset_state;
+        $assetDownSince = $request->asset_down_since;
+        if ($assetState === 'Down' && empty($assetDownSince)) {
+            // If the asset is now being marked as Down for the first time, start the clock now.
+            $assetDownSince = now();
+        }
 
         $workOrder->update([
             'title' => $request->title,
             'description' => $request->description,
             'priority' => $request->priority,
             'status' => $request->status,
+            'asset_state' => $assetState,
+            'asset_down_since' => $assetDownSince,
             'requested_date' => $request->requested_date ?? $workOrder->requested_date,
             'due_date' => $request->due_date,
             'completed_date' => $request->completed_date,
+            'work_done_details' => $request->work_done_details,
             'asset_enduser_id' => $request->asset_enduser_id,
             'responsible_enduser_id' => $request->responsible_enduser_id,
             'updated_by' => $user->id,
         ]);
+
+        // Sync the asset master state with the latest state chosen on the work order.
+        if ($workOrder->asset_enduser_id && $assetState) {
+            Enduser::where('id', $workOrder->asset_enduser_id)->update(['status' => $assetState]);
+        }
 
         Toastr::success('Work order updated successfully.');
 

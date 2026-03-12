@@ -37,7 +37,15 @@
 
                     <dt class="col-sm-3">Asset</dt>
                     <dd class="col-sm-9">
-                        {{ optional($workOrder->asset)->name_description ?? 'N/A' }}
+                        @if($workOrder->asset)
+                            {{ $workOrder->asset->name_description ?? $workOrder->asset->name }}
+                            ({{ $workOrder->asset->asset_staff_id }})
+                            @if($workOrder->asset->type)
+                                - {{ $workOrder->asset->type }}
+                            @endif
+                        @else
+                            N/A
+                        @endif
                     </dd>
 
                     <dt class="col-sm-3">Responsible Person</dt>
@@ -60,6 +68,21 @@
                         {{ optional($workOrder->completed_date)->format('d-M-Y H:i') ?? 'N/A' }}
                     </dd>
 
+                    <dt class="col-sm-3">Asset State</dt>
+                    <dd class="col-sm-9">
+                        {{ $workOrder->asset_state ?? 'Operational' }}
+                    </dd>
+
+                    <dt class="col-sm-3">Asset Went Down At</dt>
+                    <dd class="col-sm-9">
+                        {{ optional($workOrder->asset_down_since)->format('d-M-Y H:i') ?? 'N/A' }}
+                    </dd>
+
+                    <dt class="col-sm-3">Work Done Details</dt>
+                    <dd class="col-sm-9">
+                        {{ $workOrder->work_done_details ?? 'N/A' }}
+                    </dd>
+
                     <dt class="col-sm-3">Linked Requests</dt>
                     <dd class="col-sm-9">
                         @php($requests = $workOrder->storeRequests)
@@ -78,6 +101,14 @@
                         @endif
                     </dd>
                 </dl>
+
+                <hr>
+                <div class="mt-3">
+                    <a href="{{ route('stores.request_search', ['work_order_number' => $workOrder->work_order_number]) }}"
+                       class="btn btn-primary">
+                        Create Parts Request for this Work Order
+                    </a>
+                </div>
             </div>
         </div>
     </div>

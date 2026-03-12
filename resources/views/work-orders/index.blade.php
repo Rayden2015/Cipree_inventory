@@ -32,10 +32,11 @@
                         <th>#</th>
                         <th>Work Order #</th>
                         <th>Title</th>
+                        <th>Asset</th>
+                        <th>Asset Type</th>
                         <th>Status</th>
                         <th>Priority</th>
                         <th>Request #</th>
-                        <th>Asset</th>
                         <th>Responsible</th>
                         <th>Requested On</th>
                     </tr>
@@ -48,6 +49,15 @@
                                 <a href="{{ route('work-orders.show', $wo) }}">{{ $wo->work_order_number }}</a>
                             </td>
                             <td>{{ $wo->title }}</td>
+                            <td>
+                                @if($wo->asset)
+                                    {{ $wo->asset->name_description ?? $wo->asset->name }}
+                                    ({{ $wo->asset->asset_staff_id }})
+                                @else
+                                    N/A
+                                @endif
+                            </td>
+                            <td>{{ $wo->asset->type ?? 'N/A' }}</td>
                             <td>{{ $wo->status }}</td>
                             <td>{{ $wo->priority }}</td>
                             <td>
@@ -62,7 +72,6 @@
                                     @endforeach
                                 @endif
                             </td>
-                            <td>{{ optional($wo->asset)->name_description ?? 'N/A' }}</td>
                             <td>{{ optional($wo->responsiblePerson)->name_description ?? 'N/A' }}</td>
                             <td>{{ optional($wo->requested_date)->format('d-M-Y H:i') }}</td>
                         </tr>
