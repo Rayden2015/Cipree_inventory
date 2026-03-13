@@ -378,8 +378,8 @@ Auth::routes();
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::get('/work-orders/dashboard', function () {
-    return redirect()->route('home');
-})->name('work-orders.dashboard');
+    return view('work-orders.dashboard');
+})->middleware('auth')->name('work-orders.dashboard');
 
 // Multi-tenancy routes - Super Admin only
 Route::middleware(['auth'])->group(function () {

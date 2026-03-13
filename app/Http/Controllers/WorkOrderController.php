@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Enduser;
 use App\Models\Site;
 use App\Models\WorkOrder;
+use App\Traits\LogsErrors;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -12,6 +13,7 @@ use Brian2694\Toastr\Facades\Toastr;
 
 class WorkOrderController extends Controller
 {
+    use LogsErrors;
     public function __construct()
     {
         $this->middleware('auth');
@@ -22,220 +24,279 @@ class WorkOrderController extends Controller
 
     public function index(Request $request)
     {
-        $site_id = Auth::user()->site->id ?? null;
-        $tenant_id = Auth::user()->getCurrentTenant()?->id;
+        try {
+            $user = Auth::user();
+            $site_id = $user->site->id ?? null;
+            $tenant_id = $user->getCurrentTenant()?->id;
 
-        $query = WorkOrder::query();
+            Log::info('WorkOrderController | index()', [
+                'user_id' => $user->id ?? null,
+                'site_id' => $site_id,
+                'tenant_id' => $tenant_id,
+                'search' => $request->input('search'),
+            ]);
 
-        if ($tenant_id) {
-            $query->where('tenant_id', $tenant_id);
+            $query = WorkOrder::query();
+
+            if ($tenant_id) {
+                $query->where('tenant_id', $tenant_id);
+            }
+
+            if ($site_id) {
+                $query->where('site_id', $site_id);
+            }
+
+            if ($request->filled('search')) {
+                $search = '%' . $request->search . '%';
+                $query->where(function ($q) use ($search) {
+                    $q->where('work_order_number', 'like', $search)
+                        ->orWhere('title', 'like', $search);
+                });
+            }
+
+            $workOrders = $query->with(['asset', 'responsiblePerson', 'storeRequests'])
+                ->latest('requested_date')
+                ->paginate(10)
+                ->appends($request->all());
+
+            return view('work-orders.index', compact('workOrders'));
+        } catch (\Exception $e) {
+            return $this->handleError($e, 'index()');
         }
-
-        if ($site_id) {
-            $query->where('site_id', $site_id);
-        }
-
-        if ($request->filled('search')) {
-            $search = '%' . $request->search . '%';
-            $query->where(function ($q) use ($search) {
-                $q->where('work_order_number', 'like', $search)
-                    ->orWhere('title', 'like', $search);
-            });
-        }
-
-        $workOrders = $query->with(['asset', 'responsiblePerson', 'storeRequests'])
-            ->latest('requested_date')
-            ->paginate(20)
-            ->appends($request->all());
-
-        return view('work-orders.index', compact('workOrders'));
     }
 
     public function create()
     {
-        $site_id = Auth::user()->site->id ?? null;
-        $tenant_id = Auth::user()->getCurrentTenant()?->id;
+        try {
+            $user = Auth::user();
+            $site_id = $user->site->id ?? null;
+            $tenant_id = $user->getCurrentTenant()?->id;
 
-        // Assets: equipment / machines
-        $assets = Enduser::query()
-            ->when($tenant_id, fn($q) => $q->where('tenant_id', $tenant_id))
-            ->when($site_id, fn($q) => $q->where('site_id', $site_id))
-            ->whereIn('type', ['Equipment', 'Machine'])
-            ->orderBy('name_description')
-            ->get();
+            Log::info('WorkOrderController | create()', [
+                'user_id' => $user->id ?? null,
+                'site_id' => $site_id,
+                'tenant_id' => $tenant_id,
+            ]);
 
-        // Responsible people: individual/personnel (non-machine)
-        $people = Enduser::query()
-            ->when($tenant_id, fn($q) => $q->where('tenant_id', $tenant_id))
-            ->when($site_id, fn($q) => $q->where('site_id', $site_id))
-            ->whereNotIn('type', ['Equipment', 'Machine'])
-            ->orderBy('name_description')
-            ->get();
+            // Assets: equipment / machines
+            $assets = Enduser::query()
+                ->when($tenant_id, fn($q) => $q->where('tenant_id', $tenant_id))
+                ->when($site_id, fn($q) => $q->where('site_id', $site_id))
+                ->whereIn('type', ['Equipment', 'Machine'])
+                ->orderBy('name_description')
+                ->get();
 
-        return view('work-orders.create', compact('assets', 'people'));
+            // Responsible people: individual/personnel (non-machine)
+            $people = Enduser::query()
+                ->when($tenant_id, fn($q) => $q->where('tenant_id', $tenant_id))
+                ->when($site_id, fn($q) => $q->where('site_id', $site_id))
+                ->whereNotIn('type', ['Equipment', 'Machine'])
+                ->orderBy('name_description')
+                ->get();
+
+            return view('work-orders.create', compact('assets', 'people'));
+        } catch (\Exception $e) {
+            return $this->handleError($e, 'create()');
+        }
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'priority' => 'required|string|in:Low,Medium,High,Critical',
-            'asset_state' => 'required|string|in:Operational,Down,Standby',
-            'asset_down_since' => 'nullable|date',
-            'requested_date' => 'nullable|date',
-            'due_date' => 'nullable|date|after_or_equal:requested_date',
-            'asset_enduser_id' => 'nullable|exists:endusers,id',
-            'responsible_enduser_id' => 'required|exists:endusers,id',
-        ]);
+        try {
+            $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'priority' => 'required|string|in:Low,Medium,High,Critical',
+                'asset_state' => 'required|string|in:Operational,Down,Standby',
+                'asset_down_since' => 'nullable|date',
+                'requested_date' => 'nullable|date',
+                'due_date' => 'nullable|date|after_or_equal:requested_date',
+                'asset_enduser_id' => 'nullable|exists:endusers,id',
+                'responsible_enduser_id' => 'required|exists:endusers,id',
+            ]);
 
-        $user = Auth::user();
-        $site_id = $user->site->id ?? null;
-        $tenant_id = $user->getCurrentTenant()?->id ?? $user->site->tenant_id ?? null;
+            $user = Auth::user();
+            $site_id = $user->site->id ?? null;
+            $tenant_id = $user->getCurrentTenant()?->id ?? $user->site->tenant_id ?? null;
 
-        // If the user marked the asset as Down but didn't specify when it went down,
-        // assume "now" so downtime can be calculated.
-        $assetState = $request->asset_state;
-        $assetDownSince = $request->asset_down_since;
-        if ($assetState === 'Down' && empty($assetDownSince)) {
-            $assetDownSince = now();
+            // If the user marked the asset as Down but didn't specify when it went down,
+            // assume "now" so downtime can be calculated.
+            $assetState = $request->asset_state;
+            $assetDownSince = $request->asset_down_since;
+            if ($assetState === 'Down' && empty($assetDownSince)) {
+                $assetDownSince = now();
+            }
+
+            // Auto-generate a unique work order number per tenant/site context
+            $prefixParts = ['WO'];
+            if ($user->site && $user->site->site_code) {
+                $prefixParts[] = strtoupper($user->site->site_code);
+            }
+            $prefixParts[] = now()->format('Ymd');
+            $prefix = implode('-', $prefixParts);
+
+            $counter = 1;
+            do {
+                $candidate = sprintf('%s-%03d', $prefix, $counter);
+                $exists = WorkOrder::where('work_order_number', $candidate)->exists();
+                $counter++;
+            } while ($exists && $counter < 1000);
+
+            $workOrderNumber = $candidate;
+
+            $workOrder = WorkOrder::create([
+                'work_order_number' => $workOrderNumber,
+                'title' => $request->title,
+                'description' => $request->description,
+                'status' => 'Open',
+                'priority' => $request->priority,
+                'asset_state' => $assetState,
+                'asset_down_since' => $assetDownSince,
+                'requested_date' => $request->requested_date ?? now(),
+                'due_date' => $request->due_date,
+                'asset_enduser_id' => $request->asset_enduser_id,
+                'responsible_enduser_id' => $request->responsible_enduser_id,
+                'site_id' => $site_id,
+                'tenant_id' => $tenant_id,
+                'created_by' => $user->id,
+                'updated_by' => $user->id,
+            ]);
+
+            // Keep the primary asset record in sync with the state captured on the work order.
+            if ($workOrder->asset_enduser_id && $assetState) {
+                Enduser::where('id', $workOrder->asset_enduser_id)->update(['status' => $assetState]);
+            }
+
+            Log::info('WorkOrderController | store()', [
+                'user_id' => $user->id,
+                'work_order_id' => $workOrder->id,
+                'site_id' => $site_id,
+                'tenant_id' => $tenant_id,
+            ]);
+
+            Toastr::success('Work order created successfully.');
+
+            return redirect()->route('work-orders.index');
+        } catch (\Exception $e) {
+            return $this->handleError($e, 'store()');
         }
-
-        // Auto-generate a unique work order number per tenant/site context
-        $prefixParts = ['WO'];
-        if ($user->site && $user->site->site_code) {
-            $prefixParts[] = strtoupper($user->site->site_code);
-        }
-        $prefixParts[] = now()->format('Ymd');
-        $prefix = implode('-', $prefixParts);
-
-        $counter = 1;
-        do {
-            $candidate = sprintf('%s-%03d', $prefix, $counter);
-            $exists = WorkOrder::where('work_order_number', $candidate)->exists();
-            $counter++;
-        } while ($exists && $counter < 1000);
-
-        $workOrderNumber = $candidate;
-
-        $workOrder = WorkOrder::create([
-            'work_order_number' => $workOrderNumber,
-            'title' => $request->title,
-            'description' => $request->description,
-            'status' => 'Open',
-            'priority' => $request->priority,
-            'asset_state' => $assetState,
-            'asset_down_since' => $assetDownSince,
-            'requested_date' => $request->requested_date ?? now(),
-            'due_date' => $request->due_date,
-            'asset_enduser_id' => $request->asset_enduser_id,
-            'responsible_enduser_id' => $request->responsible_enduser_id,
-            'site_id' => $site_id,
-            'tenant_id' => $tenant_id,
-            'created_by' => $user->id,
-            'updated_by' => $user->id,
-        ]);
-
-        // Keep the primary asset record in sync with the state captured on the work order.
-        if ($workOrder->asset_enduser_id && $assetState) {
-            Enduser::where('id', $workOrder->asset_enduser_id)->update(['status' => $assetState]);
-        }
-
-        Log::info('WorkOrderController@store - Work order created', [
-            'user_id' => $user->id,
-            'work_order_id' => $workOrder->id,
-        ]);
-
-        Toastr::success('Work order created successfully.');
-
-        return redirect()->route('work-orders.index');
     }
 
     public function show(WorkOrder $workOrder)
     {
-        $this->authorizeWorkOrder($workOrder);
+        try {
+            $this->authorizeWorkOrder($workOrder);
 
-        $workOrder->load(['asset', 'responsiblePerson']);
+            Log::info('WorkOrderController | show()', [
+                'user_id' => Auth::id(),
+                'work_order_id' => $workOrder->id,
+            ]);
 
-        return view('work-orders.show', compact('workOrder'));
+            $workOrder->load(['asset', 'responsiblePerson']);
+
+            return view('work-orders.show', compact('workOrder'));
+        } catch (\Exception $e) {
+            return $this->handleError($e, 'show()');
+        }
     }
 
     public function edit(WorkOrder $workOrder)
     {
-        $this->authorizeWorkOrder($workOrder);
+        try {
+            $this->authorizeWorkOrder($workOrder);
 
-        $site_id = Auth::user()->site->id ?? null;
-        $tenant_id = Auth::user()->getCurrentTenant()?->id;
+            $user = Auth::user();
+            $site_id = $user->site->id ?? null;
+            $tenant_id = $user->getCurrentTenant()?->id;
 
-        $assets = Enduser::query()
-            ->when($tenant_id, fn($q) => $q->where('tenant_id', $tenant_id))
-            ->when($site_id, fn($q) => $q->where('site_id', $site_id))
-            ->whereIn('type', ['Equipment', 'Machine'])
-            ->orderBy('name_description')
-            ->get();
+            Log::info('WorkOrderController | edit()', [
+                'user_id' => $user->id ?? null,
+                'work_order_id' => $workOrder->id,
+                'site_id' => $site_id,
+                'tenant_id' => $tenant_id,
+            ]);
 
-        $people = Enduser::query()
-            ->when($tenant_id, fn($q) => $q->where('tenant_id', $tenant_id))
-            ->when($site_id, fn($q) => $q->where('site_id', $site_id))
-            ->whereNotIn('type', ['Equipment', 'Machine'])
-            ->orderBy('name_description')
-            ->get();
+            $assets = Enduser::query()
+                ->when($tenant_id, fn($q) => $q->where('tenant_id', $tenant_id))
+                ->when($site_id, fn($q) => $q->where('site_id', $site_id))
+                ->whereIn('type', ['Equipment', 'Machine'])
+                ->orderBy('name_description')
+                ->get();
 
-        return view('work-orders.edit', compact('workOrder', 'assets', 'people'));
+            $people = Enduser::query()
+                ->when($tenant_id, fn($q) => $q->where('tenant_id', $tenant_id))
+                ->when($site_id, fn($q) => $q->where('site_id', $site_id))
+                ->whereNotIn('type', ['Equipment', 'Machine'])
+                ->orderBy('name_description')
+                ->get();
+
+            return view('work-orders.edit', compact('workOrder', 'assets', 'people'));
+        } catch (\Exception $e) {
+            return $this->handleError($e, 'edit()');
+        }
     }
 
     public function update(Request $request, WorkOrder $workOrder)
     {
-        $this->authorizeWorkOrder($workOrder);
+        try {
+            $this->authorizeWorkOrder($workOrder);
 
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'priority' => 'required|string|in:Low,Medium,High,Critical',
-            'status' => 'required|string|in:Open,In Progress,Completed,Cancelled',
-            'asset_state' => 'required|string|in:Operational,Down,Standby',
-            'asset_down_since' => 'nullable|date',
-            'requested_date' => 'nullable|date',
-            'due_date' => 'nullable|date|after_or_equal:requested_date',
-            'completed_date' => 'nullable|date',
-            'asset_enduser_id' => 'nullable|exists:endusers,id',
-            'responsible_enduser_id' => 'required|exists:endusers,id',
-            'work_done_details' => 'nullable|string',
-        ]);
+            $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'priority' => 'required|string|in:Low,Medium,High,Critical',
+                'status' => 'required|string|in:Open,In Progress,Completed,Cancelled',
+                'asset_state' => 'required|string|in:Operational,Down,Standby',
+                'asset_down_since' => 'nullable|date',
+                'requested_date' => 'nullable|date',
+                'due_date' => 'nullable|date|after_or_equal:requested_date',
+                'completed_date' => 'nullable|date',
+                'asset_enduser_id' => 'nullable|exists:endusers,id',
+                'responsible_enduser_id' => 'required|exists:endusers,id',
+                'work_done_details' => 'nullable|string',
+            ]);
 
-        $user = Auth::user();
+            $user = Auth::user();
 
-        $assetState = $request->asset_state;
-        $assetDownSince = $request->asset_down_since;
-        if ($assetState === 'Down' && empty($assetDownSince)) {
-            // If the asset is now being marked as Down for the first time, start the clock now.
-            $assetDownSince = now();
+            $assetState = $request->asset_state;
+            $assetDownSince = $request->asset_down_since;
+            if ($assetState === 'Down' && empty($assetDownSince)) {
+                // If the asset is now being marked as Down for the first time, start the clock now.
+                $assetDownSince = now();
+            }
+
+            $workOrder->update([
+                'title' => $request->title,
+                'description' => $request->description,
+                'priority' => $request->priority,
+                'status' => $request->status,
+                'asset_state' => $assetState,
+                'asset_down_since' => $assetDownSince,
+                'requested_date' => $request->requested_date ?? $workOrder->requested_date,
+                'due_date' => $request->due_date,
+                'completed_date' => $request->completed_date,
+                'work_done_details' => $request->work_done_details,
+                'asset_enduser_id' => $request->asset_enduser_id,
+                'responsible_enduser_id' => $request->responsible_enduser_id,
+                'updated_by' => $user->id,
+            ]);
+
+            // Sync the asset master state with the latest state chosen on the work order.
+            if ($workOrder->asset_enduser_id && $assetState) {
+                Enduser::where('id', $workOrder->asset_enduser_id)->update(['status' => $assetState]);
+            }
+
+            Log::info('WorkOrderController | update()', [
+                'user_id' => $user->id,
+                'work_order_id' => $workOrder->id,
+            ]);
+
+            Toastr::success('Work order updated successfully.');
+
+            return redirect()->route('work-orders.show', $workOrder);
+        } catch (\Exception $e) {
+            return $this->handleError($e, 'update()');
         }
-
-        $workOrder->update([
-            'title' => $request->title,
-            'description' => $request->description,
-            'priority' => $request->priority,
-            'status' => $request->status,
-            'asset_state' => $assetState,
-            'asset_down_since' => $assetDownSince,
-            'requested_date' => $request->requested_date ?? $workOrder->requested_date,
-            'due_date' => $request->due_date,
-            'completed_date' => $request->completed_date,
-            'work_done_details' => $request->work_done_details,
-            'asset_enduser_id' => $request->asset_enduser_id,
-            'responsible_enduser_id' => $request->responsible_enduser_id,
-            'updated_by' => $user->id,
-        ]);
-
-        // Sync the asset master state with the latest state chosen on the work order.
-        if ($workOrder->asset_enduser_id && $assetState) {
-            Enduser::where('id', $workOrder->asset_enduser_id)->update(['status' => $assetState]);
-        }
-
-        Toastr::success('Work order updated successfully.');
-
-        return redirect()->route('work-orders.show', $workOrder);
     }
 
     protected function authorizeWorkOrder(WorkOrder $workOrder): void
@@ -243,7 +304,26 @@ class WorkOrderController extends Controller
         $user = Auth::user();
         $tenant_id = $user->getCurrentTenant()?->id;
 
-        if ($tenant_id && $workOrder->tenant_id !== $tenant_id) {
+        Log::info('WorkOrderController | authorizeWorkOrder()', [
+            'user_id' => $user->id ?? null,
+            'user_roles' => $user->roles->pluck('name'),
+            'user_tenant_id' => $tenant_id,
+            'work_order_id' => $workOrder->id,
+            'work_order_tenant_id' => $workOrder->tenant_id,
+        ]);
+
+        // Super Admins can see all work orders regardless of tenant.
+        if ($user->hasRole('Super Admin')) {
+            return;
+        }
+
+        // If either side has no tenant scoped, don't hard-block; this covers
+        // legacy data created before tenants were enforced.
+        if (! $tenant_id || ! $workOrder->tenant_id) {
+            return;
+        }
+
+        if ($workOrder->tenant_id !== $tenant_id) {
             abort(403);
         }
     }
