@@ -3,10 +3,22 @@
 @section('content')
     <div class="bg-light p-4 rounded">
         <h2>Permissions</h2>
-        <div class="lead">
-            Manage your permissions here.
-            <a href="{{ route('permissions.create') }}" class="btn btn-primary btn-sm float-right">Add permissions</a>
+        <div class="lead d-flex justify-content-between align-items-center flex-wrap">
+            <span>Manage your permissions here.</span>
+            <a href="{{ route('permissions.create') }}" class="btn btn-primary btn-sm">Add permissions</a>
         </div>
+
+        <form method="GET" action="{{ route('permissions.index') }}" class="form-inline mt-3 mb-2">
+            <div class="form-group mr-2 mb-2">
+                <input type="text"
+                       name="search"
+                       value="{{ old('search', $search ?? '') }}"
+                       class="form-control"
+                       placeholder="Search by name or guard">
+            </div>
+            <button type="submit" class="btn btn-primary mb-2">Search</button>
+            <a href="{{ route('permissions.index') }}" class="btn btn-default mb-2 ml-2">Reset</a>
+        </form>
 
         <div class="mt-2">
             {{-- @include('layouts.partials.messages') --}}
@@ -32,24 +44,37 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($permissions as $permission)
+                @forelse ($permissions as $permission)
                     <tr>
                         <td>{{ $permission->name }}</td>
                         <td>{{ $permission->guard_name }}</td>
-                        <td><a href="{{ route('permissions.edit', $permission->id) }}" class="btn btn-info btn-sm">Edit</a>
+                        <td>
+                            <a href="{{ route('permissions.edit', $permission->id) }}" class="btn btn-info btn-sm">
+                                Edit
+                            </a>
                         </td>
                         <td>
                             <form action="{{ route('permissions.destroy', $permission->id) }}" method="post">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" onclick="return confirm('Are you sure?')"
-                                    class="btn btn-danger">Delete</button>
+                                <button type="submit"
+                                        onclick="return confirm('Are you sure?')"
+                                        class="btn btn-danger btn-sm">
+                                    Delete
+                                </button>
                             </form>
                         </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">No permissions found.</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
 
+        <div class="mt-2">
+            {{ $permissions->links('pagination::bootstrap-4') }}
+        </div>
     </div>
 @endsection

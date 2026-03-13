@@ -16,12 +16,28 @@ class PermissionsController extends Controller
         $this->middleware(['auth', 'permission:edit-permission'])->only('edit');
     }
   
-    public function index()
-    {   
-        $permissions = Permission::all();
+    public function index(Request $request)
+    {
+        $search = $request->input('search');
+
+        $query = Permission::query();
+
+        if (! empty($search)) {
+            $like = '%' . $search . '%';
+            $query->where(function ($q) use ($like) {
+                $q->where('name', 'like', $like)
+                  ->orWhere('guard_name', 'like', $like);
+            });
+        }
+
+        $permissions = $query
+            ->orderBy('name')
+            ->paginate(20)
+            ->appends($request->only('search'));
 
         return view('permissions.index', [
-            'permissions' => $permissions
+            'permissions' => $permissions,
+            'search' => $search,
         ]);
     }
 

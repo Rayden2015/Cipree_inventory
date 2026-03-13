@@ -10,6 +10,12 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        // In some environments this table may already exist (earlier deployments).
+        // Only create it if it does not exist to avoid "table already exists" errors.
+        if (Schema::hasTable('work_orders')) {
+            return;
+        }
+
         Schema::create('work_orders', function (Blueprint $table) {
             $table->id();
             $table->string('work_order_number')->unique();
