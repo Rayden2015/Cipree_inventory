@@ -299,7 +299,7 @@ class StoreRequestFlowTest extends TestCase
             'type_of_purchase' => 'Internal',
             'enduser_id' => $enduser->id,
             'currency' => 'GHS',
-            'work_order_number' => 5001,
+            'work_order_number' => '5001',
         ];
 
         $this->actingAs($requester);
@@ -312,7 +312,7 @@ class StoreRequestFlowTest extends TestCase
         $this->assertEquals('Requested', $sorder->status);
         $this->assertEquals($requester->id, $sorder->user_id);
         $this->assertEquals($site->id, $sorder->site_id);
-        $this->assertEquals(5001, $sorder->work_order_number);
+        $this->assertEquals('5001', $sorder->work_order_number);
 
         $sorderPart = SorderPart::first();
         $this->assertNotNull($sorderPart);

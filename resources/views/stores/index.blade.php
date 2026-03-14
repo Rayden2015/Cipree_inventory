@@ -75,9 +75,12 @@
                                 <th>Status</th>
                                 <th>Approval Status</th>
                                 <th>View</th>
-<<<<<<< HEAD
-                                <th class="text-nowrap">Actions</th>
-                                <th>Delete</th>
+                                @hasanyrole('purchasing_officer|Super Authoriser|store_officer|store_assistant')
+                                    <th>Action</th>
+                                @endhasanyrole
+                                @hasanyrole('purchasing_officer|Admin')
+                                    <th>Delete</th>
+                                @endhasanyrole
                             </tr>
                         </thead>
                         <tbody>
@@ -87,63 +90,39 @@
                                 <td>{{ $rq->request_by->name ?? '' }}</td>
                                 <td>{{ $rq->enduser->asset_staff_id ?? 'Not Set' }}</td>
                                 <td>{{ $rq->request_number ?? '' }}</td>
-                                <td>{{ $rq->work_order_number ?? 'Not Set' }}</td>
-                                <td>{{ date('d-m-Y (H:i)', strtotime($rq->request_date)) }}</td>
+                                <td>{{ $rq->work_order_number ?? '—' }}</td>
+                                <td>{{ $rq->request_date ? \Carbon\Carbon::parse($rq->request_date)->format('d-m-Y (H:i)') : '—' }}</td>
                                 <td>{{ $rq->status ?? '' }}</td>
                                 <td>{{ $rq->approval_status ?? 'Pending' }}</td>
                                 <td>
-                                    <a href="{{ route('sorders.store_list_view', $rq->id) }}"
-                                        class="btn btn-secondary btn-sm">View</a>
+                                    <a href="{{ route('sorders.store_list_view', $rq->id) }}" class="btn btn-secondary btn-sm">View</a>
                                 </td>
-                                <td class="text-nowrap">
-                                    @if ($rq->status === 'Supplied')
-                                        <span class="badge badge-success">Processed</span>
-                                    @elseif ($rq->approval_status !== 'Approved' || $rq->depart_auth_approval_status !== 'Approved')
-                                        <span class="badge badge-warning">Awaiting Approval</span>
-                                    @else
-                                        @if (Auth::user()->hasRole('store_officer') || Auth::user()->hasRole('store_assistant'))
-                                            <a href="{{ route('sorders.store_list_view', $rq->id) }}#process" class="btn btn-outline-success btn-sm">Process</a>
+                                @hasanyrole('purchasing_officer|Super Authoriser|store_officer|store_assistant')
+                                    <td class="text-nowrap">
+                                        @if ($rq->status === 'Supplied')
+                                            <span class="badge badge-success">Processed</span>
+                                        @elseif ($rq->approval_status !== 'Approved' || $rq->depart_auth_approval_status !== 'Approved')
+                                            <span class="badge badge-warning">Awaiting Approval</span>
                                         @else
-                                            <a href="{{ route('sorders.store_list_edit', $rq->id) }}" class="btn btn-success btn-sm">Edit</a>
-                                        @endif
-                                    @endif
-                                </td>
-                                <td>
-=======
-
-                                {{-- @if (Auth::user()->role->name == 'purchasing_officer' ||
-                                        Auth::user()->role->name == 'Super Authoriser' ||
-                                        Auth::user()->role->name == 'store_officer') --}}
-                                        @hasanyrole('purchasing_officer|Super Authoriser|store_officer|store_assistant')
-                                        <td class="text-nowrap">
-                                            @if ($rq->status === 'Supplied')
-                                                <span class="badge badge-success">Processed</span>
-                                            @elseif ($rq->approval_status !== 'Approved' || $rq->depart_auth_approval_status !== 'Approved')
-                                                <span class="badge badge-warning">Awaiting Approval</span>
+                                            @if (Auth::user()->hasRole('store_officer') || Auth::user()->hasRole('store_assistant'))
+                                                <a href="{{ route('sorders.store_list_view', $rq->id) }}#process" class="btn btn-outline-success btn-sm">Process</a>
                                             @else
-                                                @if (Auth::user()->hasRole('store_officer') || Auth::user()->hasRole('store_assistant'))
-                                                    <a href="{{ route('sorders.store_list_view', $rq->id) }}#process" class="btn btn-outline-success btn-sm">Process</a>
-                                                @else
-                                                    <a href="{{ route('sorders.store_list_edit', $rq->id) }}" class="btn btn-success btn-sm">Edit</a>
-                                                @endif
+                                                <a href="{{ route('sorders.store_list_edit', $rq->id) }}" class="btn btn-success btn-sm">Edit</a>
                                             @endif
-                                        </td>
-                                    @endhasanyrole
-
-
-                                    {{-- @if (Auth::user()->role->name == 'purchasing_officer' || Auth::user()->role->name == 'admin') --}}
->>>>>>> 8af09c4 (Add login banner, fix production error display, and suppress Carbon deprecation warnings)
-                                    @hasanyrole('purchasing_officer|Admin')
-                                        <form action="{{ route('purchases.purchase_destroy', $rq->id) }}" method="post">
+                                        @endif
+                                    </td>
+                                @endhasanyrole
+                                @hasanyrole('purchasing_officer|Admin')
+                                    <td>
+                                        <form action="{{ route('purchases.purchase_destroy', $rq->id) }}" method="post" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" onclick="return confirm('Are you sure?')"
-                                                class="btn btn-danger btn-sm">Delete</button>
+                                            <button type="submit" onclick="return confirm('Are you sure?')" class="btn btn-danger btn-sm">Delete</button>
                                         </form>
-                                    @else
-                                        <span class="text-muted">--</span>
-                                    @endhasanyrole
-                                </td>
+                                    </td>
+                                @else
+                                    <td><span class="text-muted">—</span></td>
+                                @endhasanyrole
                             </tr>
                         @empty
                             <tr>

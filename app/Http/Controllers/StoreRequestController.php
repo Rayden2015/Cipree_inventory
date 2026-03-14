@@ -41,6 +41,12 @@ class StoreRequestController extends Controller
                 'request_payload' => $request->all() // Include all request data in the log
             ]);
 
+            // Preserve work_order_number from URL so it can be prefilled on the cart (e.g. from Work Order "Create Parts Request" link)
+            $workOrderNumber = $request->query('work_order_number');
+            if ($workOrderNumber) {
+                session()->put('work_order_number', $workOrderNumber);
+            }
+
             if ($request->search) {
                 $site_id = Auth::user()->site->id;
                 $inventory = Item::join('inventory_items', 'items.id', '=', 'inventory_items.item_id')
@@ -61,11 +67,11 @@ class StoreRequestController extends Controller
 
                     return redirect()->back()->withError('Item not in stock', 'Oops');
                 } else {
-                    return view('purchases.request_search', compact('inventory'));
+                    return view('purchases.request_search', compact('inventory', 'workOrderNumber'));
                 }
             }
 
-            return view('purchases.request_search');
+            return view('purchases.request_search', compact('workOrderNumber'));
         } catch (\Exception $e) {
             return $this->handleError($e, 'request_search()');
         }
@@ -141,7 +147,8 @@ class StoreRequestController extends Controller
                     'user_details' => Auth::user(),
                     'response payload' => session('cart')
                 ]);
-                return view('cart', compact('request_number', 'request_date', 'customers'));
+                $workOrderNumber = session('work_order_number');
+                return view('cart', compact('request_number', 'request_date', 'customers', 'workOrderNumber'));
             }
         } catch (\Exception $e) {
             return $this->handleError($e, 'cart()');
@@ -258,7 +265,7 @@ class StoreRequestController extends Controller
         $rules = [
             'photo' => 'sometimes|nullable|image|mimes:jpeg,gif,png,jpg|max:9048',
             'desc' => 'nullable',
-            'work_order_number' => ($isEngineeringDepartment ? 'required|numeric' : 'nullable|numeric'),
+            'work_order_number' => ($isEngineeringDepartment ? 'required|string|max:100' : 'nullable|string|max:100'),
         ];
 
         if ($isEngineeringDepartment && ! $user->can('manage-work-order-number')) {
@@ -1095,6 +1102,16 @@ class StoreRequestController extends Controller
                         ->orWhere('inventories.grn_number', 'like', $searchTerm);
                 });
             }
+
+            // Apply SR Number filter if present
+            if ($request->filled('sr_number')) {
+                $query->where('sorders.request_number', 'like', '%' . $request->sr_number . '%');
+            }
+
+            // Apply GRN Number filter if present
+            if ($request->filled('grn_number')) {
+                $query->where('inventories.grn_number', 'like', '%' . $request->grn_number . '%');
+            }
     
             // Apply date range filter if present
             if ($request->start_date && $request->end_date) {
@@ -1106,6 +1123,8 @@ class StoreRequestController extends Controller
                 ->paginate(100)
                 ->appends([
                     'search' => $request->search,
+                    'sr_number' => $request->sr_number,
+                    'grn_number' => $request->grn_number,
                     'start_date' => $request->start_date,
                     'end_date' => $request->end_date
                 ]);

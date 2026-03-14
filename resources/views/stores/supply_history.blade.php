@@ -42,11 +42,21 @@
                     <div class="input-group mb-3">
                         <input type="text" class="form-control"
                             placeholder="Search Description or Part Number, Enduser or Stock Code"
-                            aria-describedby="basic-addon2" name="search">
+                            aria-describedby="basic-addon2" name="search" value="{{ request('search') }}">
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">SR Number</label>
+                            <input type="text" class="form-control" name="sr_number" placeholder="e.g. STK/REQ/CHI-2529007" value="{{ request('sr_number') }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">GRN Number</label>
+                            <input type="text" class="form-control" name="grn_number" placeholder="e.g. GRN-2024-001" value="{{ request('grn_number') }}">
+                        </div>
                     </div>
                     <div class="input-group mb-3">
-                        <input type="date" class="form-control" name="start_date">
-                        <input type="date" class="form-control" name="end_date">
+                        <input type="date" class="form-control" name="start_date" value="{{ request('start_date') }}">
+                        <input type="date" class="form-control" name="end_date" value="{{ request('end_date') }}">
                     </div>
                     <div class="input-group mb-3">
                         <button class="btn btn-secondary" type="submit">Search</button>

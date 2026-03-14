@@ -3,7 +3,8 @@
 @section('content')
     @if (Auth::user()->hasRole('requester') ||
             Auth::user()->hasRole('store_officer') ||
-            Auth::user()->hasRole('purchasing_officer'))
+            Auth::user()->hasRole('purchasing_officer') ||
+            Auth::user()->hasRole('Super Admin'))
         <!-- Left Sidebar End -->
 
         <!-- ============================================================== -->
@@ -59,7 +60,7 @@
                                     <h2>Check Item Availability <p style="float:right;"><i class="fa fa-shopping-cart"
                                                 aria-hidden="true"></i> <span class="badge badge-pill badge-danger">
                                                 @if (count((array) session('cart')) == '0')
-                                                    <a href="{{ route('stores.request_search') }}">
+                                                    <a href="{{ route('stores.request_search', isset($workOrderNumber) ? ['work_order_number' => $workOrderNumber] : []) }}">
                                                         {{ count((array) session('cart')) }}
                                                     </a>
                                                 @elseif(session('cart') > '0')
@@ -70,11 +71,20 @@
                                             </span> </p>
                                     </h2>
 
-                                    <form action="" method="GET">
+                                    @if (!empty($workOrderNumber))
+                                        <div class="alert alert-secondary mb-3">
+                                            <strong>Work Order:</strong> {{ $workOrderNumber }} — Parts requested will be linked to this work order.
+                                        </div>
+                                    @endif
+
+                                    <form action="{{ route('stores.request_search') }}" method="GET">
+                                        @if (!empty($workOrderNumber))
+                                            <input type="hidden" name="work_order_number" value="{{ $workOrderNumber }}">
+                                        @endif
                                         <div class="input-group mb-3">
                                             <input type="text" class="form-control"
                                                 placeholder="Enter Description or Part number or Stock Code"
-                                                aria-describedby="basic-addon2" name="search">
+                                                aria-describedby="basic-addon2" name="search" value="{{ request('search') }}">
                                             <div class="input-group-append">
                                                 <button class="btn btn-secondary" type="submit">Search</button>
                                             </div>
@@ -185,5 +195,24 @@
         {!! Toastr::message() !!}
 
         </html>
+    @else
+        <div class="content-wrapper">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-12">
+                            <h1>Stock Request</h1>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="alert alert-info">
+                        You do not have permission to create stock requests. Please contact your administrator if you need access.
+                    </div>
+                </div>
+            </section>
+        </div>
     @endif
 @endsection()

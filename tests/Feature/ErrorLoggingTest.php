@@ -76,7 +76,9 @@ class ErrorLoggingTest extends TestCase
      */
     public function test_error_logging_format()
     {
-        $logFile = storage_path('logs/errors/error.log');
+        // Log path is env-specific (e.g. error-local.log, error-testing.log)
+        $environment = app()->environment();
+        $logFile = storage_path("logs/errors/error-{$environment}.log");
         if (file_exists($logFile)) {
             unlink($logFile);
         }

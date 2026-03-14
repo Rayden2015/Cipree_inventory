@@ -174,11 +174,11 @@
                                                         </label>
                                                         <input name="work_order_number"
                                                             id="work_order_number"
-                                                            type="number"
-                                                            value="{{ old('work_order_number') }}"
+                                                            type="text"
+                                                            value="{{ old('work_order_number', $workOrderNumber ?? '') }}"
                                                             class="form-control"
                                                             @if ($isEngineeringDepartment) required @endif
-                                                            placeholder="Enter work order number">
+                                                            placeholder="e.g. WO-CHI-20260313-001">
                                                         @error('work_order_number')
                                                             <span class="text-danger small">{{ $message }}</span>
                                                         @enderror
