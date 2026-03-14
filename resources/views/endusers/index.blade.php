@@ -21,7 +21,7 @@
         <!-- Theme style -->
         <link rel="stylesheet" href="{{ asset('/assets/dist/css/adminlte.min.css') }}">
 
-        <title>Enduser List</title>
+        <title>{{ isset($listType) && $listType === 'assets' ? 'Assets' : (isset($listType) && $listType === 'personnel' ? 'Personnel' : 'Enduser List') }}</title>
 
     </head>
 
@@ -29,25 +29,48 @@
         <div class="title d-flex justify-content-between">
             <h3 class="page-title"></h3>
             <p>
-                <a href="{{ route('endusers.create') }}" class="btn btn-primary mr-3 my-3">Add</a>
-                <a href="{{ route('endusers.import.form') }}" class="btn btn-success mr-3 my-3">
-                    <i class="fas fa-upload"></i> Bulk Import
-                </a>
+                @php
+                    $canAdd = (isset($listType) && $listType === 'assets' && (Auth::user()->can('add-asset') || Auth::user()->can('add-enduser')))
+                        || (isset($listType) && $listType === 'personnel' && (Auth::user()->can('add-personnel') || Auth::user()->can('add-enduser')))
+                        || (!isset($listType) && Auth::user()->can('add-enduser'));
+                @endphp
+                @if($canAdd)
+                    <a href="{{ route('endusers.create') }}" class="btn btn-primary mr-3 my-3">Add</a>
+                    <a href="{{ route('endusers.import.form') }}" class="btn btn-success mr-3 my-3">
+                        <i class="fas fa-upload"></i> Bulk Import
+                    </a>
+                @endif
             </p>
         </div>
 
 
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Endusers List</h3> <br>
+                <h3 class="card-title">
+                    @if(isset($listType) && $listType === 'assets')
+                        Assets
+                    @elseif(isset($listType) && $listType === 'personnel')
+                        Personnel
+                    @else
+                        Endusers List
+                    @endif
+                </h3> <br>
                 <form action="{{ route('endusers.search') }}" method="get" class="form">
-                    {{-- @csrf --}}
+                    @if(isset($listType))
+                        <input type="hidden" name="listType" value="{{ $listType }}">
+                    @endif
                     <div class="input-group">
                         <input type="text" name="query" placeholder="Search..." class="form-control"
-                            style="width:50%;">
+                            style="width:50%;" value="{{ request('query') }}">
                         <div class="input-group-append">
                             <button type="submit" class="btn btn-primary">Submit</button>
-                            <a href="{{ route('endusers.index') }}" class="btn btn-danger">Reset</a>
+                            @if(isset($listType) && $listType === 'assets')
+                                <a href="{{ route('endusers.assets') }}" class="btn btn-danger">Reset</a>
+                            @elseif(isset($listType) && $listType === 'personnel')
+                                <a href="{{ route('endusers.personnel') }}" class="btn btn-danger">Reset</a>
+                            @else
+                                <a href="{{ route('endusers.index') }}" class="btn btn-danger">Reset</a>
+                            @endif
                         </div>
                     </div>
                 </form>
@@ -67,6 +90,9 @@
 
                 <div style="float:right">
                     <form action="{{ route('endusersort') }}" method="get">
+                        @if(isset($listType))
+                            <input type="hidden" name="listType" value="{{ $listType }}">
+                        @endif
                         <div class="input-group">
                             <select id="enduser_category_id" class="form-control" name="enduser_category_id">
                                 <option value="" selected hidden>Please Select</option>

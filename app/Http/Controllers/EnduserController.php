@@ -20,14 +20,62 @@ class EnduserController extends Controller
 {
     use LogsErrors;
     
-    public function __construct() {
+    /** Asset types (equipment/machines); all other types are Personnel. */
+    public const ASSET_TYPES = ['Equipment', 'Machine'];
+
+    public function __construct()
+    {
         $this->middleware('auth');
-        $this->middleware(['auth', 'permission:view-enduser'])->only('show');
-        $this->middleware(['auth', 'permission:add-enduser'])->only('create');
+        $this->middleware(['auth', 'permission:view-enduser|view-asset|view-personnel'])->only('show');
+        $this->middleware(['auth', 'permission:add-enduser|add-asset|add-personnel'])->only('create');
         $this->middleware(['auth', 'permission:view-enduser'])->only('index');
-        $this->middleware(['auth', 'permission:edit-enduser'])->only('edit');
+        $this->middleware(['auth', 'permission:edit-enduser|edit-asset|edit-personnel'])->only('edit');
+        $this->middleware(['auth', 'permission:view-asset'])->only('indexAssets');
+        $this->middleware(['auth', 'permission:view-personnel'])->only('indexPersonnel');
     }
-    
+
+    /**
+     * List assets (equipment/machines) for planners.
+     */
+    public function indexAssets()
+    {
+        return $this->indexFiltered('assets', fn ($q) => $q->whereIn('type', self::ASSET_TYPES));
+    }
+
+    /**
+     * List personnel (people) for site admin / HR.
+     */
+    public function indexPersonnel()
+    {
+        return $this->indexFiltered('personnel', fn ($q) => $q->whereNotIn('type', self::ASSET_TYPES));
+    }
+
+    /**
+     * Shared list logic with optional type filter and listType for view.
+     */
+    protected function indexFiltered(string $listType, callable $typeFilter)
+    {
+        try {
+            if (! Auth::user()->site) {
+                return redirect()->back()
+                    ->withError('Your account is not assigned to a site. Please contact the administrator.');
+            }
+            $site_id = Auth::user()->site->id;
+            $endusers = Enduser::with(['departmente', 'sectione'])
+                ->where('site_id', '=', $site_id)
+                ->when($typeFilter, $typeFilter)
+                ->latest()
+                ->paginate(15)
+                ->appends(['listType' => $listType]);
+            $endusercategories = Enduser::where('site_id', '=', $site_id)
+                ->when($typeFilter, $typeFilter)
+                ->groupBy('type')
+                ->pluck('type');
+            return view('endusers.index', compact('endusers', 'endusercategories', 'listType'));
+        } catch (\Exception $e) {
+            return $this->handleError($e, 'indexFiltered');
+        }
+    }
 
     public function index()
     {
@@ -57,11 +105,12 @@ class EnduserController extends Controller
                 ->paginate(15);
             
             // Fix: Filter categories by site_id
-            $endusercategories = Enduser::where('site_id','=',$site_id)
+            $endusercategories = Enduser::where('site_id', '=', $site_id)
                 ->groupBy('type')
                 ->pluck('type');
-                
-            return view('endusers.index', compact('endusers','endusercategories'));
+
+            $listType = null;
+            return view('endusers.index', compact('endusers', 'endusercategories', 'listType'));
         } catch (\Exception $e) {
             return $this->handleError($e, 'index()');
         }
@@ -77,36 +126,66 @@ class EnduserController extends Controller
             
             $site_id = Auth::user()->site->id;
             $query = $request->input('query');
-            
-            // Fix: Group where clauses properly to avoid SQL logic issues
-            // Use eager loading to match view expectations
-            $endusers = Enduser::with(['departmente', 'sectione'])
-                ->where('site_id', '=', $site_id)
-                ->where(function($q) use ($query) {
-                    $q->where('asset_staff_id', 'like', '%' . $query . '%')
-                      ->orWhere('model', 'like', '%' . $query . '%')
-                      ->orWhere('serial_number', 'like', '%' . $query . '%')
-                      ->orWhere('name_description', 'like', '%' . $query . '%')
-                      ->orWhereHas('departmente', function($q) use ($query) {
-                          $q->where('name', 'like', '%' . $query . '%');
-                      });
-                })
+            $listType = $request->input('listType');
+
+            $q = Enduser::with(['departmente', 'sectione'])
+                ->where('site_id', '=', $site_id);
+            if ($listType === 'assets') {
+                $q->whereIn('type', self::ASSET_TYPES);
+            } elseif ($listType === 'personnel') {
+                $q->whereNotIn('type', self::ASSET_TYPES);
+            }
+            $endusers = $q->where(function ($sub) use ($query) {
+                $sub->where('asset_staff_id', 'like', '%' . $query . '%')
+                    ->orWhere('model', 'like', '%' . $query . '%')
+                    ->orWhere('serial_number', 'like', '%' . $query . '%')
+                    ->orWhere('name_description', 'like', '%' . $query . '%')
+                    ->orWhereHas('departmente', function ($q) use ($query) {
+                        $q->where('name', 'like', '%' . $query . '%');
+                    });
+            })
                 ->latest()
-                ->paginate(15);
-                
-            $endusercategories = Enduser::where('site_id', '=', $site_id)
-                ->groupBy('type')
-                ->pluck('type');
-                
-            return view('endusers.index', compact('endusers', 'endusercategories'));
+                ->paginate(15)
+                ->appends($request->only(['query', 'listType']));
+
+            $endusercategories = Enduser::where('site_id', '=', $site_id);
+            if ($listType === 'assets') {
+                $endusercategories->whereIn('type', self::ASSET_TYPES);
+            } elseif ($listType === 'personnel') {
+                $endusercategories->whereNotIn('type', self::ASSET_TYPES);
+            }
+            $endusercategories = $endusercategories->groupBy('type')->pluck('type');
+
+            return view('endusers.index', compact('endusers', 'endusercategories', 'listType'));
         } catch (\Exception $e) {
             return $this->handleError($e, 'search()');
         }
     }
 
-    public function show($id){
-        $enduser = Enduser::find($id);
+    public function show($id)
+    {
+        $enduser = Enduser::findOrFail($id);
+        $this->authorizeEnduserAccess($enduser, 'view');
         return view('endusers.show', compact('enduser'));
+    }
+
+    /**
+     * Ensure user has permission to access this enduser (asset vs personnel).
+     */
+    protected function authorizeEnduserAccess(Enduser $enduser, string $action): void
+    {
+        $isAsset = in_array($enduser->type, self::ASSET_TYPES, true);
+        if ($isAsset) {
+            $allowed = $action === 'view' ? (Auth::user()->can('view-asset') || Auth::user()->can('view-enduser')) : (Auth::user()->can('edit-asset') || Auth::user()->can('edit-enduser'));
+            if (! $allowed) {
+                abort(403, 'You do not have permission to access this asset.');
+            }
+        } else {
+            $allowed = $action === 'view' ? (Auth::user()->can('view-personnel') || Auth::user()->can('view-enduser')) : (Auth::user()->can('edit-personnel') || Auth::user()->can('edit-enduser'));
+            if (! $allowed) {
+                abort(403, 'You do not have permission to access this personnel record.');
+            }
+        }
     }
     
     public function endusersort(Request $request)
@@ -119,26 +198,30 @@ class EnduserController extends Controller
             
             $site_id = Auth::user()->site->id;
             $enduserCategoryId = $request->input('enduser_category_id');
+            $listType = $request->input('listType');
 
-            // Use eager loading to match view expectations
-            if ($enduserCategoryId === 'all' || empty($enduserCategoryId)) {
-                $endusers = Enduser::with(['departmente', 'sectione'])
-                    ->where('site_id', '=', $site_id)
-                    ->latest()
-                    ->paginate(15);
-            } else {
-                $endusers = Enduser::with(['departmente', 'sectione'])
-                    ->where('site_id', '=', $site_id)
-                    ->where('type', '=', $enduserCategoryId)
-                    ->latest()
-                    ->paginate(15);
+            $baseQuery = Enduser::with(['departmente', 'sectione'])->where('site_id', '=', $site_id);
+            if ($listType === 'assets') {
+                $baseQuery->whereIn('type', self::ASSET_TYPES);
+            } elseif ($listType === 'personnel') {
+                $baseQuery->whereNotIn('type', self::ASSET_TYPES);
             }
+            if ($enduserCategoryId === 'all' || empty($enduserCategoryId)) {
+                $endusers = (clone $baseQuery)->latest()->paginate(15);
+            } else {
+                $endusers = (clone $baseQuery)->where('type', '=', $enduserCategoryId)->latest()->paginate(15);
+            }
+            $endusers->appends($request->only(['enduser_category_id', 'listType']));
 
-            $endusercategories = Enduser::where('site_id', '=', $site_id)
-                ->groupBy('type')
-                ->pluck('type');
+            $catQuery = Enduser::where('site_id', '=', $site_id);
+            if ($listType === 'assets') {
+                $catQuery->whereIn('type', self::ASSET_TYPES);
+            } elseif ($listType === 'personnel') {
+                $catQuery->whereNotIn('type', self::ASSET_TYPES);
+            }
+            $endusercategories = $catQuery->groupBy('type')->pluck('type');
 
-            return view('endusers.index', compact('endusers', 'endusercategories'));
+            return view('endusers.index', compact('endusers', 'endusercategories', 'listType'));
         } catch (\Exception $e) {
             return $this->handleError($e, 'endusersort()');
         }
@@ -161,8 +244,9 @@ class EnduserController extends Controller
                 'user_details' => Auth::user(),
                 'message' => 'Editing enduser with ID: ' . $id
             ]);
+            $enduser = Enduser::findOrFail($id);
+            $this->authorizeEnduserAccess($enduser, 'edit');
             $site_id = Auth::user()->site->id;
-            $enduser = Enduser::find($id);
             $sites = Site::all();
             $sections = Section::all();
             $departments = Department::all();

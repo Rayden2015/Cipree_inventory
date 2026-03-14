@@ -53,6 +53,18 @@ class PermissionSeeder extends Seeder
             'edit-enduser',
             'delete-enduser',
 
+            // Assets (equipment/machines) – for planners
+            'view-asset',
+            'add-asset',
+            'edit-asset',
+            'delete-asset',
+
+            // Personnel (people) – for site admin / HR
+            'view-personnel',
+            'add-personnel',
+            'edit-personnel',
+            'delete-personnel',
+
             // Departments Permissions
             'view-department',
             'add-department',
@@ -182,9 +194,11 @@ class PermissionSeeder extends Seeder
             'maintenance-planner-dashboard',
         ];
 
-        // Looping and inserting permissions into the Permission table
+        // Looping and inserting permissions into the Permission table (guard_name required by Spatie)
         foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
+            Permission::firstOrCreate(
+                ['name' => $permission, 'guard_name' => 'web']
+            );
         }
     }
 }

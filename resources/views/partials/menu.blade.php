@@ -258,37 +258,50 @@
                 {{-- @endif --}}
                 {{-- end of employees management tab --}}
 
-                {{-- endusers tab --}}
-                {{-- @if (Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'site_admin') --}}
-                @can('endusers-module')
+                {{-- End User: split into Assets (planners) and Personnel (site admin / HR) --}}
+                @if(Auth::user()->can('endusers-module') || Auth::user()->can('view-asset') || Auth::user()->can('view-personnel'))
                     <li class="nav-item {{ request()->routeIs('endusers.*') || request()->is('endusersearch*', 'endusersort*', 'enduser_show*') ? 'menu-open' : '' }}">
                         <a href="#" class="nav-link {{ request()->routeIs('endusers.*') || request()->is('endusersearch*', 'endusersort*', 'enduser_show*') ? 'active' : '' }}" style="{{ request()->routeIs('endusers.*') || request()->is('endusersearch*', 'endusersort*', 'enduser_show*') ? 'background-color: #0e6258' : '' }}">
                             <i>
-                                <img src="{{ asset('assets/images/icons/enduser.jpg') }}"width="26" height="26"
-                                    alt="" />
+                                <img src="{{ asset('assets/images/icons/enduser.jpg') }}" width="26" height="26" alt="" />
                             </i>
                             <p>
-                                Endusers
+                                End User
                                 <i class="fas fa-angle-left right"></i>
                             </p>
                         </a>
                         <ul class="nav nav-treeview">
-
-                            <li class="nav-item">
-                                <a href="{{ route('endusers.index') }}"
-                                    class="nav-link {{ request()->routeIs('endusers.*') || request()->is('endusersearch*', 'endusersort*', 'enduser_show*') ? 'active' : '' }}" style="{{ request()->routeIs('endusers.*') || request()->is('endusersearch*', 'endusersort*', 'enduser_show*') ? 'background-color: #0e6258' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Endusers</p>
-                                </a>
-                            </li>
-
-
-
+                            @can('view-asset')
+                                <li class="nav-item">
+                                    <a href="{{ route('endusers.assets') }}"
+                                        class="nav-link {{ request()->routeIs('endusers.assets') || (request()->is('endusersearch*', 'endusersort*') && request()->get('listType') === 'assets') ? 'active' : '' }}" style="{{ request()->routeIs('endusers.assets') || (request()->is('endusersearch*', 'endusersort*') && request()->get('listType') === 'assets') ? 'background-color: #0e6258' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Assets</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('view-personnel')
+                                <li class="nav-item">
+                                    <a href="{{ route('endusers.personnel') }}"
+                                        class="nav-link {{ request()->routeIs('endusers.personnel') || (request()->is('endusersearch*', 'endusersort*') && request()->get('listType') === 'personnel') ? 'active' : '' }}" style="{{ request()->routeIs('endusers.personnel') || (request()->is('endusersearch*', 'endusersort*') && request()->get('listType') === 'personnel') ? 'background-color: #0e6258' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Personnel</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('endusers-module')
+                                <li class="nav-item">
+                                    <a href="{{ route('endusers.index') }}"
+                                        class="nav-link {{ request()->routeIs('endusers.index') && !request()->routeIs('endusers.assets') && !request()->routeIs('endusers.personnel') ? 'active' : '' }}" style="{{ request()->routeIs('endusers.index') && !request()->routeIs('endusers.assets') && !request()->routeIs('endusers.personnel') ? 'background-color: #0e6258' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>All Endusers</p>
+                                    </a>
+                                </li>
+                            @endcan
                         </ul>
                     </li>
-                @endcan
-                {{-- @endif --}}
-                {{-- end of endusers tab --}}
+                @endif
+                {{-- end of end user tab --}}
 
                 {{-- suppliers tab --}}
                 {{-- @if (Auth::user()->role->name == 'admin') --}}

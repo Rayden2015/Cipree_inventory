@@ -152,7 +152,9 @@ Route::post('check_invoice_number', [InventoryController::class, 'check_invoice_
 Route::resource('categories', CategoryController::class);
 // sites
 Route::resource('sites', SiteController::class);
-// endusers
+// endusers (assets and personnel routes before resource so they are not captured as {enduser})
+Route::get('endusers/assets', [EnduserController::class, 'indexAssets'])->name('endusers.assets');
+Route::get('endusers/personnel', [EnduserController::class, 'indexPersonnel'])->name('endusers.personnel');
 Route::resource('endusers', EnduserController::class);
 Route::get('endusers/import', [App\Http\Controllers\EnduserController::class, 'showImportForm'])->name('endusers.import.form');
 Route::post('endusers/import', [App\Http\Controllers\EnduserController::class, 'import'])->name('endusers.import');

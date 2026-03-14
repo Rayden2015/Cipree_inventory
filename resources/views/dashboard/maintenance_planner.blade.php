@@ -44,13 +44,12 @@
     // PM Compliance – placeholder until PM data model is implemented
     $pmCompliance = null;
 
-    // Critical Queue (reactive)
-    $criticalQueue = WorkOrder::query()
+    // Work Orders In Progress (tells the planner which jobs are in progress)
+    $workOrdersInProgress = WorkOrder::query()
         ->with(['asset', 'responsiblePerson'])
         ->when($tenantId, fn($q) => $q->where('tenant_id', $tenantId))
         ->when($siteId, fn($q) => $q->where('site_id', $siteId))
-        ->where('priority', 'Critical')
-        ->whereIn('status', ['Open', 'In Progress', 'Standby'])
+        ->where('status', 'In Progress')
         ->latest('requested_date')
         ->take(10)
         ->get();
@@ -139,8 +138,9 @@
     <div class="row">
         <div class="col-lg-6">
             <div class="card">
-                <div class="card-header bg-danger text-white">
-                    <h3 class="card-title">Critical Queue (Reactive)</h3>
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title">Work Orders In Progress</h3>
+                    <p class="mb-0 small">Jobs currently in progress</p>
                 </div>
                 <div class="card-body table-responsive p-0">
                     <table class="table table-striped">
@@ -154,7 +154,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        @forelse($criticalQueue as $wo)
+                        @forelse($workOrdersInProgress as $wo)
                             <tr class="{{ $wo->priority === 'Critical' ? 'emergency' : '' }}">
                                 <td>{{ optional($wo->asset)->asset_staff_id ?? 'N/A' }}</td>
                                 <td>
@@ -178,7 +178,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center text-muted">No critical work orders.</td>
+                                <td colspan="5" class="text-center text-muted">No work orders in progress.</td>
                             </tr>
                         @endforelse
                         </tbody>
