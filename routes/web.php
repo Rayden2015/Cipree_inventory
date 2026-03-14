@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PDFController;
-use App\Http\Controllers\SmsController;
+use App\Http\Controllers\SMSController;
 use App\Http\Controllers\UomController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ItemController;
@@ -243,7 +243,10 @@ Route::get('fetch_single_enduser1/{id}', [StoreRequestController::class, 'fetch_
 Route::delete('sorderpart_delete/{id}', [StoreRequestController::class, 'sorderpart_delete'])->name('sorderpart_delete');
 Route::delete('/sorderpart/delete/{id}', [StoreRequestController::class, 'deleteSorderPart'])->name('sorderpart_delete');
 
-// Work Orders module
+// Work Orders module (dashboard must be before resource so /work-orders/dashboard is not matched as show)
+Route::get('/work-orders/dashboard', function () {
+    return view('work-orders.dashboard');
+})->middleware('auth')->name('work-orders.dashboard');
 Route::resource('work-orders', WorkOrderController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
 
 
@@ -271,8 +274,8 @@ Route::get('read/{id}', [NotificationController::class, 'read'])->name('notifica
 
 Route::post('fetch_single_product', [InventoryController::class, 'fetch_single_product'])->name('fetch_single_product');
 
-//SMS routes
-Route::post('/sms/send/{to}/{content}', [SmsController::class, 'sendSms']);
+// SMS routes
+Route::post('/sms/send/{to}/{content}', [SMSController::class, 'sendSms']);
 
 //dashboard tab navigations
 Route::get('pending_po_approvals', [DashboardNavigationController::class, 'pending_po_approvals'])->name('dashboard.pending_po_approvals');
@@ -377,9 +380,6 @@ Route::post('fetch_single_tax', [TotalTaxController::class, 'fetch_single_tax'])
 Auth::routes();
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
-Route::get('/work-orders/dashboard', function () {
-    return view('work-orders.dashboard');
-})->middleware('auth')->name('work-orders.dashboard');
 
 // Multi-tenancy routes - Super Admin only
 Route::middleware(['auth'])->group(function () {

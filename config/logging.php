@@ -5,9 +5,11 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
 
+$environment = env('APP_ENV', 'local');
+
 $stackChannels = ['daily', 'error_log'];
 
-if (env('APP_ENV') !== 'testing') {
+if ($environment !== 'testing') {
     $stackChannels[] = 'sentry_logs';
 }
 
@@ -80,22 +82,23 @@ return [
     ],
 
         'error_log' => [
-            'driver' => env('APP_ENV') === 'testing' ? 'single' : 'daily',
-            'path' => storage_path('logs/errors/error.log'),
+            'driver' => $environment === 'testing' ? 'single' : 'daily',
+            'path' => storage_path("logs/errors/error-{$environment}.log"),
             'level' => 'error',
             'days' => env('ERROR_LOG_DAYS', 30),
             'replace_placeholders' => true,
         ],
         'single' => [
             'driver' => 'single',
-            'path' => storage_path('logs/laravel.log'),
+            'path' => storage_path("logs/laravel-{$environment}.log"),
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
         ],
 
         'daily' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/laravel.log'),
+            // Laravel will append the date to this base name, e.g. laravel-testing-2026-03-13.log
+            'path' => storage_path("logs/laravel-{$environment}.log"),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => env('LOG_DAILY_DAYS', 14),
             'replace_placeholders' => true,
@@ -152,7 +155,7 @@ return [
         ],
 
         'emergency' => [
-            'path' => storage_path('logs/laravel.log'),
+            'path' => storage_path("logs/laravel-{$environment}.log"),
         ],
     ],
 
