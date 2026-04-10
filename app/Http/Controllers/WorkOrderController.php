@@ -14,6 +14,42 @@ use Brian2694\Toastr\Facades\Toastr;
 class WorkOrderController extends Controller
 {
     use LogsErrors;
+
+    protected function baseLogContext(): array
+    {
+        $user = Auth::user();
+        $tenant = $user?->getCurrentTenant();
+
+        return [
+            'user_id' => $user?->id,
+            'user_name' => $user?->name,
+            'user_email' => $user?->email,
+            'site_id' => $user?->site?->id,
+            'tenant_id' => $tenant?->id,
+            'tenant_name' => $tenant?->name,
+        ];
+    }
+
+    protected function logInfo(string $method, array $context = [], ?string $suffix = null): void
+    {
+        $message = 'WorkOrderController | ' . $method;
+        if ($suffix) {
+            $message .= ' | ' . $suffix;
+        }
+
+        Log::info($message, array_merge($this->baseLogContext(), $context));
+    }
+
+    protected function logWarning(string $method, array $context = [], ?string $suffix = null): void
+    {
+        $message = 'WorkOrderController | ' . $method;
+        if ($suffix) {
+            $message .= ' | ' . $suffix;
+        }
+
+        Log::warning($message, array_merge($this->baseLogContext(), $context));
+    }
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -29,10 +65,7 @@ class WorkOrderController extends Controller
             $site_id = $user->site->id ?? null;
             $tenant_id = $user->getCurrentTenant()?->id;
 
-            Log::info('WorkOrderController | index()', [
-                'user_id' => $user->id ?? null,
-                'site_id' => $site_id,
-                'tenant_id' => $tenant_id,
+            $this->logInfo('index()', [
                 'search' => $request->input('search'),
             ]);
 
@@ -72,11 +105,7 @@ class WorkOrderController extends Controller
             $site_id = $user->site->id ?? null;
             $tenant_id = $user->getCurrentTenant()?->id;
 
-            Log::info('WorkOrderController | create()', [
-                'user_id' => $user->id ?? null,
-                'site_id' => $site_id,
-                'tenant_id' => $tenant_id,
-            ]);
+            $this->logInfo('create()');
 
             // Assets: equipment / machines
             $assets = Enduser::query()
@@ -167,18 +196,15 @@ class WorkOrderController extends Controller
                 Enduser::where('id', $workOrder->asset_enduser_id)->update(['status' => $assetState]);
             }
 
-            Log::info('WorkOrderController | store()', [
-                'user_id' => $user->id,
+            $this->logInfo('store()', [
                 'work_order_id' => $workOrder->id,
-                'site_id' => $site_id,
-                'tenant_id' => $tenant_id,
             ]);
 
             Toastr::success('Work order created successfully.');
 
             return redirect()->route('work-orders.index');
         } catch (\Exception $e) {
-            return $this->handleError($e, 'store()');
+            return $this->handleError($e, 'store()', $this->baseLogContext());
         }
     }
 
@@ -187,8 +213,7 @@ class WorkOrderController extends Controller
         try {
             $this->authorizeWorkOrder($workOrder);
 
-            Log::info('WorkOrderController | show()', [
-                'user_id' => Auth::id(),
+            $this->logInfo('show()', [
                 'work_order_id' => $workOrder->id,
             ]);
 
@@ -196,7 +221,7 @@ class WorkOrderController extends Controller
 
             return view('work-orders.show', compact('workOrder'));
         } catch (\Exception $e) {
-            return $this->handleError($e, 'show()');
+            return $this->handleError($e, 'show()', $this->baseLogContext());
         }
     }
 
@@ -209,11 +234,8 @@ class WorkOrderController extends Controller
             $site_id = $user->site->id ?? null;
             $tenant_id = $user->getCurrentTenant()?->id;
 
-            Log::info('WorkOrderController | edit()', [
-                'user_id' => $user->id ?? null,
+            $this->logInfo('edit()', [
                 'work_order_id' => $workOrder->id,
-                'site_id' => $site_id,
-                'tenant_id' => $tenant_id,
             ]);
 
             $assets = Enduser::query()
@@ -232,7 +254,7 @@ class WorkOrderController extends Controller
 
             return view('work-orders.edit', compact('workOrder', 'assets', 'people'));
         } catch (\Exception $e) {
-            return $this->handleError($e, 'edit()');
+            return $this->handleError($e, 'edit()', $this->baseLogContext());
         }
     }
 
@@ -286,8 +308,7 @@ class WorkOrderController extends Controller
                 Enduser::where('id', $workOrder->asset_enduser_id)->update(['status' => $assetState]);
             }
 
-            Log::info('WorkOrderController | update()', [
-                'user_id' => $user->id,
+            $this->logInfo('update()', [
                 'work_order_id' => $workOrder->id,
             ]);
 
@@ -295,7 +316,7 @@ class WorkOrderController extends Controller
 
             return redirect()->route('work-orders.show', $workOrder);
         } catch (\Exception $e) {
-            return $this->handleError($e, 'update()');
+            return $this->handleError($e, 'update()', $this->baseLogContext());
         }
     }
 
@@ -303,11 +324,11 @@ class WorkOrderController extends Controller
     {
         $user = Auth::user();
         $tenant_id = $user->getCurrentTenant()?->id;
+        $userTenantId = is_null($tenant_id) ? null : (string) $tenant_id;
+        $workOrderTenantId = is_null($workOrder->tenant_id) ? null : (string) $workOrder->tenant_id;
 
-        Log::info('WorkOrderController | authorizeWorkOrder()', [
-            'user_id' => $user->id ?? null,
+        $this->logInfo('authorizeWorkOrder()', [
             'user_roles' => $user->roles->pluck('name'),
-            'user_tenant_id' => $tenant_id,
             'work_order_id' => $workOrder->id,
             'work_order_tenant_id' => $workOrder->tenant_id,
         ]);
@@ -319,11 +340,15 @@ class WorkOrderController extends Controller
 
         // If either side has no tenant scoped, don't hard-block; this covers
         // legacy data created before tenants were enforced.
-        if (! $tenant_id || ! $workOrder->tenant_id) {
+        if (! $userTenantId || ! $workOrderTenantId) {
             return;
         }
 
-        if ($workOrder->tenant_id !== $tenant_id) {
+        if ($workOrderTenantId !== $userTenantId) {
+            $this->logWarning('authorizeWorkOrder()', [
+                'work_order_id' => $workOrder->id,
+                'work_order_tenant_id' => $workOrderTenantId,
+            ], 'forbidden');
             abort(403);
         }
     }

@@ -36,11 +36,6 @@ class StoreRequestController extends Controller
     public function request_search(Request $request)
     {
         try {
-            Log::info('StoreRequestController | request_search() | ', [
-                'user_details' => Auth::user(),
-                'request_payload' => $request->all() // Include all request data in the log
-            ]);
-
             // Preserve work_order_number from URL so it can be prefilled on the cart (e.g. from Work Order "Create Parts Request" link)
             $workOrderNumber = $request->query('work_order_number');
             if ($workOrderNumber) {
@@ -58,11 +53,6 @@ class StoreRequestController extends Controller
                     ->get();
 
 
-                Log::info('StoreRequestController | request_search() | ', [
-                    'user_details' => Auth::user(),
-                    'response' => $inventory
-                ]);
-
                 if ($inventory->isEmpty()) {
 
                     return redirect()->back()->withError('Item not in stock', 'Oops');
@@ -73,7 +63,7 @@ class StoreRequestController extends Controller
 
             return view('purchases.request_search', compact('workOrderNumber'));
         } catch (\Exception $e) {
-            return $this->handleError($e, 'request_search()');
+            return $this->handleError($e, 'request_search()', $this->storeRequestSearchErrorContext($request, 'request_search'));
         }
     }
 
@@ -83,10 +73,6 @@ class StoreRequestController extends Controller
     {
         try {
             if ($request->search) {
-                Log::info('StoreRequestController | requester_search() | ', [
-                    'user_details' => Auth::user(),
-                    'request_payload' => $request
-                ]);
                 $site_id = Auth::user()->site->id;
 
                 // V4.0 Requester view: only Active and Adjustment lines (no Voided/negative garbage)
@@ -112,11 +98,6 @@ class StoreRequestController extends Controller
                     ->orderBy('inventory_items.site_id')
                     ->get();
 
-                Log::info('StoreRequestController | requester_search() | ', [
-                    'user_details' => Auth::user(),
-                    'result_count' => $inventory->count()
-                ]);
-
                 if ($inventory->isEmpty()) {
                     return redirect()->back()->withError('Item not in stock', 'Oops');
                 } elseif ($inventory->isNotEmpty()) {
@@ -125,8 +106,30 @@ class StoreRequestController extends Controller
                 return view('purchases.request_search', compact('inventory'));
             }
         } catch (\Exception $e) {
-            return $this->handleError($e, 'requester_search()');
+            return $this->handleError($e, 'requester_search()', $this->storeRequestSearchErrorContext($request, 'requester_search'));
         }
+    }
+
+    /**
+     * Context for error logs only (Sentry + error_log channel via LogsErrors).
+     */
+    protected function storeRequestSearchErrorContext(Request $request, string $methodKey): array
+    {
+        $user = Auth::user();
+        $tenant = $user?->getCurrentTenant();
+
+        return [
+            'controller_method' => 'StoreRequestController@' . $methodKey,
+            'route' => $methodKey === 'requester_search' ? 'stores.requester_search' : 'stores.request_search',
+            'user_id' => $user?->id,
+            'user_name' => $user?->name,
+            'user_email' => $user?->email,
+            'site_id' => $user?->site_id,
+            'tenant_id' => $tenant?->id,
+            'tenant_name' => $tenant?->name,
+            'search' => $request->input('search'),
+            'work_order_number' => $request->input('work_order_number'),
+        ];
     }
 
     public function cart()

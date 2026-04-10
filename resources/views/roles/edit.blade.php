@@ -60,16 +60,21 @@
                                 <label for="permissions"
                                     class="col-md-4 col-form-label text-md-end text-start">Permissions</label>
                                 <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <input type="text" id="permission_search" class="form-control"
+                                            placeholder="Search permissions (e.g. work-order, asset, view-…)"
+                                            autocomplete="off">
+                                    </div>
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" id="select_all_permissions">
-                                        <label class="form-check-label" for="select_all_permissions">
-                                            Select All
+                                        <label class="form-check-label" for="select_all_permissions" id="select_all_permissions_label">
+                                            Select all visible
                                         </label>
                                     </div>
-                                    <div class="form-check"
+                                    <div class="form-check permission-list"
                                         style="height: 210px; overflow-y: auto; border: 1px solid #ced4da; padding: 10px;">
                                         @forelse ($permissions as $permission)
-                                            <div class="form-check">
+                                            <div class="form-check permission-item" data-permission-name="{{ strtolower($permission->name) }}">
                                                 <input class="form-check-input @error('permissions') is-invalid @enderror"
                                                     type="checkbox" name="permissions[]" value="{{ $permission->id }}"
                                                     id="permission_{{ $permission->id }}"
@@ -82,6 +87,7 @@
                                             <p>No permissions available</p>
                                         @endforelse
                                     </div>
+                                    <p id="permission_search_no_match" class="small text-muted mt-1 mb-0" style="display: none;">No permissions match your search.</p>
                                     @if ($errors->has('permissions'))
                                         <span class="text-danger">{{ $errors->first('permissions') }}</span>
                                     @endif
@@ -101,21 +107,65 @@
             document.addEventListener('DOMContentLoaded', function() {
                 const selectAllCheckbox = document.getElementById('select_all_permissions');
                 const permissionCheckboxes = document.querySelectorAll('input[name="permissions[]"]');
+                const permissionItems = document.querySelectorAll('.permission-item');
+                const searchInput = document.getElementById('permission_search');
+                const noMatchEl = document.getElementById('permission_search_no_match');
 
+                function getVisiblePermissionItems() {
+                    return document.querySelectorAll('.permission-item.permission-visible');
+                }
+
+                function syncSelectAllCheckbox() {
+                    var visible = getVisiblePermissionItems();
+                    var visibleChecked = document.querySelectorAll('.permission-item.permission-visible input[name="permissions[]"]:checked');
+                    selectAllCheckbox.checked = visible.length > 0 && visibleChecked.length === visible.length;
+                }
+
+                function updateSelectAllLabel() {
+                    var label = document.getElementById('select_all_permissions_label');
+                    if (label) {
+                        var hasActiveSearch = searchInput && (searchInput.value || '').trim();
+                        label.textContent = hasActiveSearch ? 'Select all visible' : 'Select all';
+                    }
+                }
+
+                function filterPermissions() {
+                    const q = searchInput ? (searchInput.value || '').trim().toLowerCase() : '';
+                    let visibleCount = 0;
+                    permissionItems.forEach(function(item) {
+                        const name = (item.getAttribute('data-permission-name') || '').toLowerCase();
+                        const show = !q || name.indexOf(q) !== -1;
+                        item.style.display = show ? '' : 'none';
+                        if (show) {
+                            item.classList.add('permission-visible');
+                            visibleCount++;
+                        } else {
+                            item.classList.remove('permission-visible');
+                        }
+                    });
+                    noMatchEl.style.display = (q && visibleCount === 0) ? 'block' : 'none';
+                    updateSelectAllLabel();
+                    syncSelectAllCheckbox();
+                }
+
+                if (searchInput) {
+                    searchInput.addEventListener('input', filterPermissions);
+                    searchInput.addEventListener('keyup', filterPermissions);
+                }
+
+                // Run once on load so all items get permission-visible when search is empty
+                filterPermissions();
+
+                // "Select all visible" must only affect visible items; never touch hidden (filtered) checkboxes to avoid data loss.
                 selectAllCheckbox.addEventListener('change', function() {
-                    permissionCheckboxes.forEach(checkbox => {
-                        checkbox.checked = selectAllCheckbox.checked;
+                    getVisiblePermissionItems().forEach(function(item) {
+                        var cb = item.querySelector('input[name="permissions[]"]');
+                        if (cb) cb.checked = selectAllCheckbox.checked;
                     });
                 });
 
                 permissionCheckboxes.forEach(checkbox => {
-                    checkbox.addEventListener('change', function() {
-                        if (!checkbox.checked) {
-                            selectAllCheckbox.checked = false;
-                        } else if (Array.from(permissionCheckboxes).every(cb => cb.checked)) {
-                            selectAllCheckbox.checked = true;
-                        }
-                    });
+                    checkbox.addEventListener('change', syncSelectAllCheckbox);
                 });
             });
         </script>

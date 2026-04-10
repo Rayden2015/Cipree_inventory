@@ -69,9 +69,10 @@ return [
 
     'sentry_logs' => [
         'driver' => 'sentry',
-        // The minimum logging level at which this handler will be triggered
-        // Available levels: debug, info, notice, warning, error, critical, alert, emergency
-        'level' => env('LOG_LEVEL', 'info'), // defaults to `debug` if not set
+        // Keep Sentry for real problems: `Log::info()` on hot routes (e.g. requester_search)
+        // otherwise creates thousands of "Issues" that are not errors. Use LOG_LEVEL for file logs.
+        // Set SENTRY_LOG_LEVEL=info only if you intentionally want every info line in Sentry.
+        'level' => env('SENTRY_LOG_LEVEL', 'warning'),
     ],
 
     'update_inventory_item' => [
