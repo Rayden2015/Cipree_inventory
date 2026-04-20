@@ -42,9 +42,11 @@ class MasterDataControllersTest extends TestCase
         Permission::firstOrCreate(['name' => 'view-department', 'guard_name' => 'web']);
         Permission::firstOrCreate(['name' => 'add-department', 'guard_name' => 'web']);
         Permission::firstOrCreate(['name' => 'edit-department', 'guard_name' => 'web']);
+        Permission::firstOrCreate(['name' => 'delete-department', 'guard_name' => 'web']);
         Permission::firstOrCreate(['name' => 'view-section', 'guard_name' => 'web']);
         Permission::firstOrCreate(['name' => 'add-section', 'guard_name' => 'web']);
         Permission::firstOrCreate(['name' => 'edit-section', 'guard_name' => 'web']);
+        Permission::firstOrCreate(['name' => 'delete-section', 'guard_name' => 'web']);
         Permission::firstOrCreate(['name' => 'view-location', 'guard_name' => 'web']);
         Permission::firstOrCreate(['name' => 'add-location', 'guard_name' => 'web']);
         Permission::firstOrCreate(['name' => 'edit-location', 'guard_name' => 'web']);
@@ -76,8 +78,8 @@ class MasterDataControllersTest extends TestCase
         $this->tenantAdmin->assignRole('Tenant Admin');
         $this->tenantAdmin->givePermissionTo([
             'view-item-group', 'add-item-group', 'edit-item-group',
-            'view-department', 'add-department', 'edit-department',
-            'view-section', 'add-section', 'edit-section',
+            'view-department', 'add-department', 'edit-department', 'delete-department',
+            'view-section', 'add-section', 'edit-section', 'delete-section',
             'view-location', 'add-location', 'edit-location',
         ]);
 

@@ -14,10 +14,10 @@ class SectionController extends Controller
 {
     public function __construct() {
         $this->middleware('auth');
-        $this->middleware(['auth', 'permission:view-section'])->only('show');
-        $this->middleware(['auth', 'permission:add-section'])->only('create');
-        $this->middleware(['auth', 'permission:view-section'])->only('index');
-        $this->middleware(['auth', 'permission:edit-section'])->only('edit');
+        $this->middleware(['auth', 'permission:view-section'])->only(['index', 'show']);
+        $this->middleware(['auth', 'permission:add-section'])->only(['create', 'store']);
+        $this->middleware(['auth', 'permission:edit-section'])->only(['edit', 'update']);
+        $this->middleware(['auth', 'permission:delete-section'])->only(['destroy']);
     }
     
  

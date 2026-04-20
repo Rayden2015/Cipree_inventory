@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class RoleSeeder extends Seeder
 {
@@ -14,7 +15,7 @@ class RoleSeeder extends Seeder
     public function run(): void
     {
         Role::firstOrCreate(['name' => 'Super Admin']);
-        Role::firstOrCreate(['name' => 'Tenant Admin']);
+        $tenantAdmin = Role::firstOrCreate(['name' => 'Tenant Admin']);
         $admin = Role::firstOrCreate(['name' => 'Admin']);
         $productManager = Role::firstOrCreate(['name' => 'Product Manager']);
 
@@ -51,6 +52,27 @@ class RoleSeeder extends Seeder
         foreach ($productManagerPermissions as $permission) {
             if (!$productManager->hasPermissionTo($permission)) {
                 $productManager->givePermissionTo($permission);
+            }
+        }
+
+        // Tenant Admin should have full access within their tenant scope (org-wide setup data).
+        // Departments and Sections are tenant-wide structures, not site-only.
+        $tenantAdminPermissions = [
+            'view-department',
+            'add-department',
+            'edit-department',
+            'delete-department',
+            'view-section',
+            'add-section',
+            'edit-section',
+            'delete-section',
+        ];
+
+        foreach ($tenantAdminPermissions as $permissionName) {
+            // Ensure the permission exists before assignment (safe for partial seed runs).
+            Permission::firstOrCreate(['name' => $permissionName, 'guard_name' => 'web']);
+            if (!$tenantAdmin->hasPermissionTo($permissionName)) {
+                $tenantAdmin->givePermissionTo($permissionName);
             }
         }
     }

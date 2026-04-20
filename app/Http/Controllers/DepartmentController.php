@@ -12,10 +12,10 @@ class DepartmentController extends Controller
 {
     public function __construct() {
         $this->middleware('auth');
-        $this->middleware(['auth', 'permission:view-department'])->only('show');
-        $this->middleware(['auth', 'permission:add-department'])->only('create');
-        $this->middleware(['auth', 'permission:view-department'])->only('index');
-        $this->middleware(['auth', 'permission:edit-department'])->only('edit');
+        $this->middleware(['auth', 'permission:view-department'])->only(['index', 'show']);
+        $this->middleware(['auth', 'permission:add-department'])->only(['create', 'store']);
+        $this->middleware(['auth', 'permission:edit-department'])->only(['edit', 'update']);
+        $this->middleware(['auth', 'permission:delete-department'])->only(['destroy']);
     }
     
     /**

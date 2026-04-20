@@ -124,7 +124,7 @@
 
                     {{-- company tab --}}
                     {{-- @if (Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'site_admin') --}}
-                    @can('company-module')
+                    @if(Auth::user()->canAny(['company-module', 'info', 'account', 'reviews', 'view-site', 'bulk-mails', 'view-uom', 'view-role', 'view-permission']))
                     <li
                         class="nav-item {{ request()->routeIs('company.*', 'users.*', 'reviews.*', 'sites.*', 'roles.*', 'permissions.*', 'uom.*','send.bulk.email') ? 'menu-open' : '' }}">
                         <a href="#"
@@ -221,7 +221,7 @@
 
                         </ul>
                     </li>
-                @endcan
+                @endif
                 {{-- @endif --}}
                 {{-- end of company tab --}}
 
@@ -303,9 +303,67 @@
                 @endif
                 {{-- end of end user tab --}}
 
+                {{-- Organization Setup: tenant-wide master data (Departments & Sections) --}}
+                @if(Auth::user()->can('view-department') || Auth::user()->can('view-section') || Auth::user()->can('add-department') || Auth::user()->can('add-section'))
+                    <li class="nav-item {{ request()->routeIs('departmentslist.*', 'sectionslist.*') ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ request()->routeIs('departmentslist.*', 'sectionslist.*') ? 'active' : '' }}"
+                            style="{{ request()->routeIs('departmentslist.*', 'sectionslist.*') ? 'background-color: #0e6258' : '' }}">
+                            <i class="nav-icon fas fa-sitemap"></i>
+                            <p>
+                                Organization Setup
+                                <i class="fas fa-angle-left right"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            @can('view-department')
+                                <li class="nav-item">
+                                    <a href="{{ route('departmentslist.index') }}"
+                                        class="nav-link {{ request()->routeIs('departmentslist.index', 'departmentslist.edit', 'departmentslist.update') ? 'active' : '' }}"
+                                        style="{{ request()->routeIs('departmentslist.index', 'departmentslist.edit', 'departmentslist.update') ? 'background-color: #0e6258' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Departments</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('add-department')
+                                <li class="nav-item">
+                                    <a href="{{ route('departmentslist.create') }}"
+                                        class="nav-link {{ request()->routeIs('departmentslist.create', 'departmentslist.store') ? 'active' : '' }}"
+                                        style="{{ request()->routeIs('departmentslist.create', 'departmentslist.store') ? 'background-color: #0e6258' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Create Department</p>
+                                    </a>
+                                </li>
+                            @endcan
+
+                            @can('view-section')
+                                <li class="nav-item">
+                                    <a href="{{ route('sectionslist.index') }}"
+                                        class="nav-link {{ request()->routeIs('sectionslist.index', 'sectionslist.edit', 'sectionslist.update') ? 'active' : '' }}"
+                                        style="{{ request()->routeIs('sectionslist.index', 'sectionslist.edit', 'sectionslist.update') ? 'background-color: #0e6258' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Sections</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('add-section')
+                                <li class="nav-item">
+                                    <a href="{{ route('sectionslist.create') }}"
+                                        class="nav-link {{ request()->routeIs('sectionslist.create', 'sectionslist.store') ? 'active' : '' }}"
+                                        style="{{ request()->routeIs('sectionslist.create', 'sectionslist.store') ? 'background-color: #0e6258' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Create Section</p>
+                                    </a>
+                                </li>
+                            @endcan
+                        </ul>
+                    </li>
+                @endif
+                {{-- end of organization setup --}}
+
                 {{-- suppliers tab --}}
                 {{-- @if (Auth::user()->role->name == 'admin') --}}
-                @can('suppliers-module')
+                @if(Auth::user()->canAny(['suppliers-module', 'view-supplier', 'add-supplier', 'edit-supplier', 'delete-supplier']))
                     <li class="nav-item {{ request()->routeIs('suppliers.*') || request()->is('supplier_search*') ? 'menu-open' : '' }}">
                         <a href="#" class="nav-link {{ request()->routeIs('suppliers.*') || request()->is('supplier_search*') ? 'active' : '' }}" style="{{ request()->routeIs('suppliers.*') || request()->is('supplier_search*') ? 'background-color: #0e6258' : '' }}">
                             <i>
@@ -327,13 +385,21 @@
                             </li>
                         </ul>
                     </li>
-                @endcan
+                @endif
                 {{-- @endif --}}
                 {{-- end if suppliers tab --}}
 
                 {{-- inventory management tab --}}
                 {{-- @if (Auth::user()->role->name == 'store_officer' || Auth::user()->role->name == 'store_assistant' || Auth::user()->role->name == 'site_admin') --}}
-                @can('inventory-management-module')
+                @if(Auth::user()->canAny([
+                    'inventory-management-module',
+                    'view-item', 'add-item', 'edit-item', 'delete-item',
+                    'view-location', 'add-location', 'edit-location', 'delete-location',
+                    'view-item-group', 'add-item-group', 'edit-item-group', 'delete-item-group',
+                    'view-grn', 'add-grn', 'edit-grn', 'delete-grn',
+                    'stock-request-lists', 'stock-purchase-requests',
+                    'approve-inventory-correction', 'view-inventory-audit-log'
+                ]))
                     <li
                         class="nav-item {{ request()->is('items*', 'locations*', 'stores*', 'inventories*', 'categories*', 'spr_*', 'auth_spr_*', 'itemspersite*', 'product_history*', 'store_officer_*', 'store_list_*', 'item_search*', 'inventory_*') || request()->routeIs('items.*', 'locations.*', 'stores.*', 'inventories.*', 'categories.*') ? 'menu-open' : '' }}">
                         <a href="#"
@@ -447,12 +513,21 @@
                             {{-- @endif --}}
                         </ul>
                     </li>
-                @endcan
+                @endif
 
                 {{-- end of inventory management tab --}}
                 {{-- @endif --}}
                 {{-- navigate --}}
-                @can('navigate-module')
+                @if(Auth::user()->canAny([
+                    'navigate-module',
+                    'authoriser-request-lists', 'authoriser-purchase-lists', 'authoriser-stock-requests', 'authoriser-stock-purchase-requests',
+                    'request-lists', 'purchase-lists', 'purchase-requests', 'requester-stock-requests',
+                    'received-history', 'supply-history',
+                    'direct-purchase-requests', 'direct-purchase-orders',
+                    'stock-purchase-orders', 'draft-purchase-orders', 'stock-purchase-request-pos',
+                    'view-grn',
+                    'approve-inventory-correction', 'view-inventory-audit-log'
+                ]))
                     <li
                         class="nav-item {{ request()->routeIs('purchases.*', 'sorders.*', 'auth_spr_lists', 'authorise.*', 'stores.*', 'po_spr_lists', 'spr_pos*') || request()->is('purchase_*', 'all_requests*', 'req_all*', 'inventory_history*', 'supply_history*', 'requester_store_*', 'store_officer_*', 'drafts*', 'po_spr_*', 'spr_pos*', 'generatePDF*', 'generatesorderPDF*') ? 'menu-open' : '' }}">
                         <a href="#"
@@ -707,11 +782,11 @@
 
                         </ul>
                     </li>
-                @endcan
+                @endif
                 {{-- end of navigate module --}}
                 {{-- purchase model --}}
                 {{-- @if (Auth::user()->role->name == 'site_admin' || Auth::user()->role->name == 'purchasing_officer') --}}
-                @can('purchase-management-module')
+                @if(Auth::user()->canAny(['purchase-management-module', 'view-tax', 'add-tax', 'edit-tax', 'delete-tax', 'view-levy', 'add-levy', 'edit-levy', 'delete-levy', 'view-uom', 'add-uom', 'edit-uom', 'delete-uom']))
                     <li
                         class="nav-item {{ request()->routeIs('taxes.*', 'levies.*') ? 'menu-open' : '' }}">
                         <a href="#"
@@ -832,7 +907,7 @@
                             @endcan
                         </ul>
                     </li>
-                @endcan
+                @endif
 
             </ul>
             {{--  --}}
