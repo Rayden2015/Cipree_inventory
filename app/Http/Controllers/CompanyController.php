@@ -24,6 +24,13 @@ class CompanyController extends Controller
     public function index()
     {
         try {
+            // Tenant Admins should manage company/profile from Tenant Settings to avoid duplication.
+            // (Company records are still used in PDFs; they are edited via tenant-admin/settings now.)
+            $user = Auth::user();
+            if ($user && method_exists($user, 'isTenantAdmin') && $user->isTenantAdmin() && ! $user->isSuperAdmin()) {
+                return redirect()->route('tenant-admin.settings');
+            }
+
             $company = Company::all();
 
             Log::info('CompanyController@index: Company data fetched successfully', [

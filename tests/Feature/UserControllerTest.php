@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Section;
 use App\Models\Department;
 use App\Models\Tenant;
+use App\Models\Employee;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\WelcomeMail;
@@ -82,6 +83,7 @@ class UserControllerTest extends TestCase
         $admin = $this->makeAdminUser(['add-user', 'view-user']);
 
         $email = 'newuser@example.com';
+        $assignedRole = Role::create(['name' => 'role-' . Str::uuid(), 'guard_name' => 'web']);
 
         $payload = [
             'name' => 'New User',
@@ -91,7 +93,7 @@ class UserControllerTest extends TestCase
             'section_id' => $this->section->id,
             'status' => 'Active',
             'phone' => null,
-            'roles' => [],
+            'roles' => [$assignedRole->name],
         ];
 
         $response = $this->actingAs($admin)->post(route('users.store'), $payload);
@@ -102,6 +104,55 @@ class UserControllerTest extends TestCase
             'department_id' => $this->department->id,
         ]);
         Mail::assertSent(WelcomeMail::class);
+
+        $userId = User::where('email', $email)->value('id');
+        $this->assertNotNull($userId);
+        $this->assertDatabaseHas('users', [
+            'id' => $userId,
+            'tenant_id' => $this->tenant->id,
+            'site_id' => $this->site->id,
+        ]);
+        $this->assertDatabaseHas('employees', [
+            'login_user_id' => $userId,
+            'tenant_id' => $this->tenant->id,
+            'site_id' => $this->site->id,
+        ]);
+
+        $employeeId = Employee::where('login_user_id', $userId)->value('id');
+        $this->assertNotNull($employeeId);
+        $this->assertDatabaseHas('users', [
+            'id' => $userId,
+            'employee_id' => $employeeId,
+        ]);
+    }
+
+    public function test_store_without_roles_creates_employee_only()
+    {
+        Mail::fake();
+        $admin = $this->makeAdminUser(['add-user', 'view-user']);
+
+        $payload = [
+            'name' => 'Employee Only',
+            'email' => 'employee-only@example.com',
+            'site_id' => $this->site->id,
+            'department_id' => $this->department->id,
+            'section_id' => $this->section->id,
+            'status' => 'Active',
+            'phone' => null,
+            'roles' => [],
+        ];
+
+        $response = $this->actingAs($admin)->post(route('users.store'), $payload);
+
+        $response->assertRedirect(route('employees.index'));
+        $this->assertDatabaseMissing('users', ['email' => 'employee-only@example.com']);
+        $this->assertDatabaseHas('employees', [
+            'email' => 'employee-only@example.com',
+            'login_user_id' => null,
+            'tenant_id' => $this->tenant->id,
+            'site_id' => $this->site->id,
+        ]);
+        Mail::assertNothingSent();
     }
 
     public function test_update_requires_department()

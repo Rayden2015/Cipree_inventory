@@ -58,6 +58,33 @@ class RoleSeeder extends Seeder
         // Tenant Admin should have full access within their tenant scope (org-wide setup data).
         // Departments and Sections are tenant-wide structures, not site-only.
         $tenantAdminPermissions = [
+            // Company/setup (tenant admin)
+            'company-module',
+            'info',
+            'reviews',
+            'view-site',
+            'add-site',
+            'edit-site',
+            'delete-site',
+            'view-uom',
+            'add-uom',
+            'edit-uom',
+            'delete-uom',
+            'view-role',
+            'add-role',
+            'edit-role',
+            'delete-role',
+            'view-permission',
+            'add-permission',
+            'edit-permission',
+            'delete-permission',
+
+            // Users (tenant admin manages access)
+            'view-user',
+            'add-user',
+            'edit-user',
+            'delete-user',
+
             'view-department',
             'add-department',
             'edit-department',
@@ -66,6 +93,26 @@ class RoleSeeder extends Seeder
             'add-section',
             'edit-section',
             'delete-section',
+
+            // Employees
+            'view-employee',
+            'add-employee',
+            'edit-employee',
+            'delete-employee',
+
+            // Endusers split
+            'view-asset',
+            'add-asset',
+            'edit-asset',
+            'delete-asset',
+            'view-personnel',
+            'add-personnel',
+            'edit-personnel',
+            'delete-personnel',
+            'view-enduser',
+            'add-enduser',
+            'edit-enduser',
+            'delete-enduser',
         ];
 
         foreach ($tenantAdminPermissions as $permissionName) {

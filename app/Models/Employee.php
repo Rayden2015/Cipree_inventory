@@ -15,11 +15,28 @@ class Employee extends Model
         'email', 'address', 'emergency_contact_name', 'emergency_contact_phone', 
         'nationality', 'marital_status', 'job_title', 'department_id', 'employment_type', 
         'employee_status', 'date_of_joining', 'reporting_manager', 'employee_grade_level', 
-        'work_location', 'contract_type', 'contract_start_date', 'contract_end_date', 'probation_period','user_id','site_id','tenant_id','edited_by','profile_picture','duration'
+        'work_location', 'contract_type', 'contract_start_date', 'contract_end_date', 'probation_period',
+        // user_id is the record creator/editor (legacy). login_user_id links an employee to a login user account.
+        'user_id', 'login_user_id', 'site_id', 'tenant_id', 'edited_by', 'profile_picture', 'duration'
     ];
     
     public function department(){
         return $this->belongsTo(Department::class,'department_id');
+    }
+
+    public function enduser()
+    {
+        return $this->hasOne(Enduser::class, 'employee_id');
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function loginUser()
+    {
+        return $this->belongsTo(User::class, 'login_user_id');
     }
 
     /**

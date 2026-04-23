@@ -75,6 +75,69 @@
                             @enderror
                         </div>
 
+                        <h4 class="mt-4">Company Profile (Used on PDFs)</h4>
+                        <hr>
+
+                        <div class="form-group">
+                            <label for="company_address">Address</label>
+                            <input type="text" name="company_address" id="company_address"
+                                   class="form-control @error('company_address') is-invalid @enderror"
+                                   value="{{ old('company_address', $company->address ?? '') }}">
+                            @error('company_address')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="company_phone">Phone</label>
+                            <input type="text" name="company_phone" id="company_phone"
+                                   class="form-control @error('company_phone') is-invalid @enderror"
+                                   value="{{ old('company_phone', $company->phone ?? '') }}">
+                            @error('company_phone')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="company_email">Email</label>
+                            <input type="email" name="company_email" id="company_email"
+                                   class="form-control @error('company_email') is-invalid @enderror"
+                                   value="{{ old('company_email', $company->email ?? '') }}">
+                            @error('company_email')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="company_website">Website</label>
+                            <input type="text" name="company_website" id="company_website"
+                                   class="form-control @error('company_website') is-invalid @enderror"
+                                   value="{{ old('company_website', $company->website ?? '') }}">
+                            @error('company_website')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="company_vat">VAT</label>
+                            <input type="text" name="company_vat" id="company_vat"
+                                   class="form-control @error('company_vat') is-invalid @enderror"
+                                   value="{{ old('company_vat', $company->vat ?? '') }}">
+                            @error('company_vat')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="company_vat_no">VAT No</label>
+                            <input type="text" name="company_vat_no" id="company_vat_no"
+                                   class="form-control @error('company_vat_no') is-invalid @enderror"
+                                   value="{{ old('company_vat_no', $company->vat_no ?? '') }}">
+                            @error('company_vat_no')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
+
                         <h4 class="mt-4">Branding</h4>
                         <hr>
 

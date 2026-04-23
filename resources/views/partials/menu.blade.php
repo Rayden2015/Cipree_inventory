@@ -6,27 +6,30 @@
 @endphp
 <aside class="main-sidebar sidebar-light-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="{{ route('home') }}" class="brand-link">
-        @if(isset($tenantBranding['logo']) && $tenantBranding['logo'])
-            <img src="{{ $tenantBranding['logo'] }}" alt="{{ $tenantBranding['name'] }} Logo" class="brand-image"
-                style="opacity: .8; max-width:210px; max-height:100px; object-fit: contain;"><br>
-        @else
-            <img src="{{ asset('images/company/' . $logo) }}" alt="AdminLTE Logo" class="brand-image"
-                style="opacity: .8; width:210px; heigh:100px;"><br>
-        @endif
-        <span style="text-align:center; font-weight:bold; padding-left:80px;">{{ $tenantBranding['name'] ?? 'CIPREE' }}</span> <br>
-        <h6 style="text-align:center; font-weight:bold; padding-top:3px;">{{ $first_name . ', ' }}
-            {{-- {{ Auth::user()->role->name }} --}}
-            @if ($user)
+    <a href="{{ route('home') }}" class="brand-link tenant-branding">
+        <img
+            src="{{ $tenantBranding['logo'] ?? asset('images/branding/cipree.png') }}"
+            alt="{{ $tenantBranding['name'] ?? 'CIPREE' }} Logo"
+            class="tenant-logo"
+            style="opacity:.9;"
+        />
 
+        <div class="tenant-name">
+            {{ $tenantBranding['name'] ?? 'CIPREE' }}
+        </div>
+
+        <div class="tenant-user-roles">
+            <div style="font-weight:700;">{{ $first_name }}</div>
+            @if ($user)
                 @foreach ($user->getRoleNames() as $role)
-                    <span>{{ $role }}</span>
+                    <span class="role-pill">{{ $role }}</span>
                 @endforeach
             @endif
-        </h6>
-        <h6 style="text-align:center;">Last Login: {{ $lastlogin ? \Carbon\Carbon::parse($lastlogin->created_at)->format('d-M-Y H:i') : 'First Login' }}</h6>
+        </div>
 
-        {{-- <h6 style="text-align:center; font-weight:bold;">{{ Auth::user()->role->name }}</h6> --}}
+        <div class="tenant-last-login">
+            Last Login: {{ $lastlogin ? \Carbon\Carbon::parse($lastlogin->created_at)->format('d-M-Y H:i') : 'First Login' }}
+        </div>
     </a>
 
     <!-- Sidebar -->
@@ -81,233 +84,23 @@
                 </li>
                 @endif
 
-                {{-- Tenant Admin Menu --}}
-                @if(Auth::user()->isTenantAdmin() && !Auth::user()->isSuperAdmin())
-                <li class="nav-item {{ request()->routeIs('tenant-admin.*') ? 'menu-open' : '' }}">
-                    <a href="#" class="nav-link {{ request()->routeIs('tenant-admin.*') ? 'active' : '' }}" style="{{ request()->routeIs('tenant-admin.*') ? 'background-color: #0e6258' : '' }}">
-                        <i class="nav-icon fas fa-user-shield"></i>
-                        <p>
-                            Tenant Admin
-                            <i class="fas fa-angle-left right"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="{{ route('tenant-admin.dashboard') }}" class="nav-link {{ request()->routeIs('tenant-admin.dashboard') ? 'active' : '' }}" style="{{ request()->routeIs('tenant-admin.dashboard') ? 'background-color: #0e6258' : '' }}">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Dashboard</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('tenant-admin.sites.index') }}" class="nav-link {{ request()->routeIs('tenant-admin.sites.*') ? 'active' : '' }}" style="{{ request()->routeIs('tenant-admin.sites.*') ? 'background-color: #0e6258' : '' }}">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Manage Sites</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('tenant-admin.users.index') }}" class="nav-link {{ request()->routeIs('tenant-admin.users.*') ? 'active' : '' }}" style="{{ request()->routeIs('tenant-admin.users.*') ? 'background-color: #0e6258' : '' }}">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Manage Users</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('tenant-admin.settings') }}" class="nav-link {{ request()->routeIs('tenant-admin.settings', 'tenant-admin.update-settings') ? 'active' : '' }}" style="{{ request()->routeIs('tenant-admin.settings', 'tenant-admin.update-settings') ? 'background-color: #0e6258' : '' }}">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Settings</p>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                @endif
+                {{-- Tenant Admin navigation is consolidated under Organization Setup to avoid duplication --}}
 
-                <li class="nav-item">
-
-                    {{-- company tab --}}
-                    {{-- @if (Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'site_admin') --}}
-                    @if(Auth::user()->canAny(['company-module', 'info', 'account', 'reviews', 'view-site', 'bulk-mails', 'view-uom', 'view-role', 'view-permission']))
-                    <li
-                        class="nav-item {{ request()->routeIs('company.*', 'users.*', 'reviews.*', 'sites.*', 'roles.*', 'permissions.*', 'uom.*','send.bulk.email') ? 'menu-open' : '' }}">
-                        <a href="#"
-                            class="nav-link {{ request()->routeIs('company.*', 'users.*', 'reviews.*', 'sites.*', 'roles.*', 'permissions.*', 'uom.*','send.bulk.email') ? 'active' : '' }}" style="{{ request()->routeIs('company.*', 'users.*', 'reviews.*', 'sites.*', 'roles.*', 'permissions.*', 'uom.*','send.bulk.email') ? 'background-color: #0e6258' : '' }}">
-                            <i>
-                                <img src="{{ asset('assets/images/icons/comp.png') }}"width="26" height="26"
-                                    alt="" />
-                            </i>
-                            <p>
-                                Company
-                                <i class="fas fa-angle-left right"></i>
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview">
-                            @can('info')
-                                <li class="nav-item">
-                                    <a href="{{ route('company.index') }}"
-                                        class="nav-link {{ request()->routeIs('company.*') ? 'active' : '' }}" style="{{ request()->routeIs('company.*') ? 'background-color: #0e6258' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Info</p>
-                                    </a>
-                                </li>
-                            @endcan
-
-                            @can('account')
-                                <li class="nav-item">
-                                    <a href="{{ route('users.index') }}"
-                                        class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" style="{{ request()->routeIs('users.*') ? 'background-color: #0e6258' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Account</p>
-                                    </a>
-                                </li>
-                            @endcan
-                            @can('reviews')
-                                <li class="nav-item">
-                                    <a href="{{ route('reviews.index') }}"
-                                        class="nav-link {{ request()->routeIs('reviews.*') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Reviews</p>
-                                    </a>
-                                </li>
-                            @endcan
-                            {{-- @if (Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'site_admin') --}}
-                            @can('view-site')
-                                <li class="nav-item">
-                                    <a href="{{ route('sites.index') }}"
-                                        class="nav-link {{ request()->routeIs('sites.*') ? 'active' : '' }}" style="{{ request()->routeIs('sites.*') ? 'background-color: #0e6258' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Sites</p>
-                                    </a>
-                                </li>
-                            @endcan
-
-                            @can('bulk-mails')
-                            <li class="nav-item">
-                                <a href="{{ route('send.bulk.email') }}"
-                                    class="nav-link {{ request()->routeIs('send.bulk.email*') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Bulk Emails</p>
-                                </a>
-                            </li>
-                            @endcan
-
-                            @can('view-uom')
-                                <li class="nav-item">
-                                    <a href="{{ route('uom.index') }}"
-                                        class="nav-link {{ request()->routeIs('uom.*') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>UoM</p>
-                                    </a>
-                                </li>
-                            @endcan
-
-                            @can('view-role')
-                                <li class="nav-item">
-                                    <a href="{{ route('roles.index') }}"
-                                        class="nav-link {{ request()->routeIs('roles.*') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Roles</p>
-                                    </a>
-                                </li>
-                            @endcan
-
-                            @can('view-permission')
-                                <li class="nav-item">
-                                    <a href="{{ route('permissions.index') }}"
-                                        class="nav-link {{ request()->routeIs('permissions.*') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Permissions</p>
-                                    </a>
-                                </li>
-                            @endcan
-                            {{-- @endif --}}
-
-                        </ul>
-                    </li>
-                @endif
-                {{-- @endif --}}
-                {{-- end of company tab --}}
-
-
-                {{-- employee management tab --}}
-                {{-- @if (Auth::user()->role->name == 'admin' || Auth::user()->role->name == 'site_admin') --}}
-                @can('employee-management-module')
-                    <li class="nav-item {{ request()->routeIs('employees*') ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ request()->routeIs('employees*') ? 'active' : '' }}">
-                            <i>
-                                <img src="{{ asset('assets/images/icons/emp.png') }}"width="26" height="26"
-                                    alt="" />
-                            </i>
-                            <p>
-                                Employee Management
-                                <i class="fas fa-angle-left right"></i>
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview">
-
-                            <li class="nav-item">
-                                <a href="{{ route('employees.index') }}"
-                                    class="nav-link {{ request()->routeIs('employees.*') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Employees</p>
-                                </a>
-                            </li>
-
-
-
-                        </ul>
-                    </li>
-                @endcan
-                {{-- @endif --}}
-                {{-- end of employees management tab --}}
-
-                {{-- End User: split into Assets (planners) and Personnel (site admin / HR) --}}
-                @if(Auth::user()->can('endusers-module') || Auth::user()->can('view-asset') || Auth::user()->can('view-personnel'))
-                    <li class="nav-item {{ request()->routeIs('endusers.*') || request()->is('endusersearch*', 'endusersort*', 'enduser_show*') ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ request()->routeIs('endusers.*') || request()->is('endusersearch*', 'endusersort*', 'enduser_show*') ? 'active' : '' }}" style="{{ request()->routeIs('endusers.*') || request()->is('endusersearch*', 'endusersort*', 'enduser_show*') ? 'background-color: #0e6258' : '' }}">
-                            <i>
-                                <img src="{{ asset('assets/images/icons/enduser.jpg') }}" width="26" height="26" alt="" />
-                            </i>
-                            <p>
-                                End User
-                                <i class="fas fa-angle-left right"></i>
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview">
-                            @can('view-asset')
-                                <li class="nav-item">
-                                    <a href="{{ route('endusers.assets') }}"
-                                        class="nav-link {{ request()->routeIs('endusers.assets') || (request()->is('endusersearch*', 'endusersort*') && request()->get('listType') === 'assets') ? 'active' : '' }}" style="{{ request()->routeIs('endusers.assets') || (request()->is('endusersearch*', 'endusersort*') && request()->get('listType') === 'assets') ? 'background-color: #0e6258' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Assets</p>
-                                    </a>
-                                </li>
-                            @endcan
-                            @can('view-personnel')
-                                <li class="nav-item">
-                                    <a href="{{ route('endusers.personnel') }}"
-                                        class="nav-link {{ request()->routeIs('endusers.personnel') || (request()->is('endusersearch*', 'endusersort*') && request()->get('listType') === 'personnel') ? 'active' : '' }}" style="{{ request()->routeIs('endusers.personnel') || (request()->is('endusersearch*', 'endusersort*') && request()->get('listType') === 'personnel') ? 'background-color: #0e6258' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Personnel</p>
-                                    </a>
-                                </li>
-                            @endcan
-                            @can('endusers-module')
-                                <li class="nav-item">
-                                    <a href="{{ route('endusers.index') }}"
-                                        class="nav-link {{ request()->routeIs('endusers.index') && !request()->routeIs('endusers.assets') && !request()->routeIs('endusers.personnel') ? 'active' : '' }}" style="{{ request()->routeIs('endusers.index') && !request()->routeIs('endusers.assets') && !request()->routeIs('endusers.personnel') ? 'background-color: #0e6258' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>All Endusers</p>
-                                    </a>
-                                </li>
-                            @endcan
-                        </ul>
-                    </li>
-                @endif
-                {{-- end of end user tab --}}
-
-                {{-- Organization Setup: tenant-wide master data (Departments & Sections) --}}
-                @if(Auth::user()->can('view-department') || Auth::user()->can('view-section') || Auth::user()->can('add-department') || Auth::user()->can('add-section'))
-                    <li class="nav-item {{ request()->routeIs('departmentslist.*', 'sectionslist.*') ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ request()->routeIs('departmentslist.*', 'sectionslist.*') ? 'active' : '' }}"
-                            style="{{ request()->routeIs('departmentslist.*', 'sectionslist.*') ? 'background-color: #0e6258' : '' }}">
+                {{-- Organization Setup: tenant-wide setup (Company + Org + People + Assets + Roles/Perms) --}}
+                @if(Auth::user()->canAny([
+                    // Company/setup
+                    'company-module', 'info', 'account', 'reviews', 'view-site', 'bulk-mails', 'view-uom', 'view-role', 'view-permission',
+                    'view-user', 'add-user', 'edit-user', 'delete-user',
+                    // Org master data
+                    'view-department', 'add-department', 'view-section', 'add-section',
+                    // Employees
+                    'view-employee', 'add-employee',
+                    // End users split
+                    'view-asset', 'view-personnel', 'endusers-module'
+                ]))
+                    <li class="nav-item {{ request()->routeIs('company.*', 'users.*', 'reviews.*', 'sites.*', 'roles.*', 'permissions.*', 'uom.*', 'send.bulk.email', 'departmentslist.*', 'sectionslist.*', 'employees.*', 'endusers.*') || request()->is('endusersearch*', 'endusersort*', 'enduser_show*') ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ request()->routeIs('company.*', 'users.*', 'reviews.*', 'sites.*', 'roles.*', 'permissions.*', 'uom.*', 'send.bulk.email', 'departmentslist.*', 'sectionslist.*', 'employees.*', 'endusers.*') || request()->is('endusersearch*', 'endusersort*', 'enduser_show*') ? 'active' : '' }}"
+                            style="{{ request()->routeIs('company.*', 'users.*', 'reviews.*', 'sites.*', 'roles.*', 'permissions.*', 'uom.*', 'send.bulk.email', 'departmentslist.*', 'sectionslist.*', 'employees.*', 'endusers.*') || request()->is('endusersearch*', 'endusersort*', 'enduser_show*') ? 'background-color: #0e6258' : '' }}">
                             <i class="nav-icon fas fa-sitemap"></i>
                             <p>
                                 Organization Setup
@@ -315,6 +108,99 @@
                             </p>
                         </a>
                         <ul class="nav nav-treeview">
+                            {{-- Tenant Admin quick links (tenant-scoped) --}}
+                            @if(Auth::user()->isTenantAdmin() && !Auth::user()->isSuperAdmin())
+                                <li class="nav-item">
+                                    <a href="{{ route('tenant-admin.dashboard') }}"
+                                       class="nav-link {{ request()->routeIs('tenant-admin.dashboard') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Tenant Dashboard</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('tenant-admin.settings') }}"
+                                       class="nav-link {{ request()->routeIs('tenant-admin.settings', 'tenant-admin.update-settings') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Tenant Settings (Branding)</p>
+                                    </a>
+                                </li>
+                            @endif
+
+                            {{-- Company --}}
+                            @can('info')
+                                <li class="nav-item">
+                                    <a href="{{ (Auth::user()->isTenantAdmin() && !Auth::user()->isSuperAdmin()) ? route('tenant-admin.settings') : route('company.index') }}"
+                                       class="nav-link {{ request()->routeIs('company.*') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Company Info</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @canany(['account', 'view-user'])
+                                <li class="nav-item">
+                                    <a href="{{ (Auth::user()->isTenantAdmin() && !Auth::user()->isSuperAdmin()) ? route('tenant-admin.users.index') : route('users.index') }}"
+                                       class="nav-link {{ request()->routeIs('users.*', 'tenant-admin.users.*') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Users</p>
+                                    </a>
+                                </li>
+                            @endcanany
+                            @can('view-site')
+                                <li class="nav-item">
+                                    <a href="{{ (Auth::user()->isTenantAdmin() && !Auth::user()->isSuperAdmin()) ? route('tenant-admin.sites.index') : route('sites.index') }}"
+                                       class="nav-link {{ request()->routeIs('sites.*', 'tenant-admin.sites.*') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Sites</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('bulk-mails')
+                                <li class="nav-item">
+                                    <a href="{{ route('send.bulk.email') }}"
+                                       class="nav-link {{ request()->routeIs('send.bulk.email*') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Bulk Emails</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('reviews')
+                                <li class="nav-item">
+                                    <a href="{{ route('reviews.index') }}"
+                                       class="nav-link {{ request()->routeIs('reviews.*') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Reviews</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('view-uom')
+                                <li class="nav-item">
+                                    <a href="{{ route('uom.index') }}"
+                                       class="nav-link {{ request()->routeIs('uom.*') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>UoM</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('view-role')
+                                <li class="nav-item">
+                                    <a href="{{ route('roles.index') }}"
+                                       class="nav-link {{ request()->routeIs('roles.*') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Roles</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('view-permission')
+                                <li class="nav-item">
+                                    <a href="{{ route('permissions.index') }}"
+                                       class="nav-link {{ request()->routeIs('permissions.*') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Permissions</p>
+                                    </a>
+                                </li>
+                            @endcan
+
+                            <li class="nav-header">ORGANIZATION</li>
                             @can('view-department')
                                 <li class="nav-item">
                                     <a href="{{ route('departmentslist.index') }}"
@@ -353,6 +239,46 @@
                                         style="{{ request()->routeIs('sectionslist.create', 'sectionslist.store') ? 'background-color: #0e6258' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Create Section</p>
+                                    </a>
+                                </li>
+                            @endcan
+
+                            {{-- Employees --}}
+                            @can('view-employee')
+                                <li class="nav-item">
+                                    <a href="{{ route('employees.index') }}"
+                                       class="nav-link {{ request()->routeIs('employees.*') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Employees</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('add-employee')
+                                <li class="nav-item">
+                                    <a href="{{ route('employees.create') }}"
+                                       class="nav-link {{ request()->routeIs('employees.create', 'employees.store') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Create Employee</p>
+                                    </a>
+                                </li>
+                            @endcan
+
+                            {{-- End Users --}}
+                            @can('view-asset')
+                                <li class="nav-item">
+                                    <a href="{{ route('endusers.assets') }}"
+                                       class="nav-link {{ request()->routeIs('endusers.assets') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Assets</p>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('endusers-module')
+                                <li class="nav-item">
+                                    <a href="{{ route('endusers.index') }}"
+                                       class="nav-link {{ request()->routeIs('endusers.index') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>All Endusers</p>
                                     </a>
                                 </li>
                             @endcan

@@ -7,13 +7,16 @@ use App\Models\Site;
 use App\Models\User;
 use App\Models\Login;
 use App\Models\Company;
+use App\Helpers\CompanyContext;
 use App\Models\Section;
+use App\Models\Employee;
 use App\Mail\WelcomeMail;
 use App\Models\Department;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Helpers\UploadHelper;
 use App\Models\SiteAdminPrivilege;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Brian2694\Toastr\Facades\Toastr;
@@ -21,7 +24,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\SMSController;
 use App\Traits\LogsErrors;
 
@@ -42,8 +44,13 @@ class UserController extends Controller
         $query = $request->get('query');
         
         // Fetch users and include role names
-        $users = User::where('name', 'like', '%' . $query . '%')
-            ->orWhere('email', 'like', '%' . $query . '%')
+        $users = User::query()
+            ->visibleToAuth()
+            ->where(function ($q) use ($query) {
+                $q->where('name', 'like', '%' . $query . '%')
+                    ->orWhere('email', 'like', '%' . $query . '%');
+            })
+            ->limit(50)
             ->get()
             ->map(function ($user) {
                 $user->role_names = $user->getRoleNames(); // Add role names to the user object
@@ -57,12 +64,14 @@ class UserController extends Controller
     public function index()
 {
     // Get all roles without caching
-    $roles = Role::all();
+    $roles = Role::orderBy('id')->get();
 
-    // Cache the users data for 5 minutes
-    $users = Cache::remember('users_all', 60 * 5, function () {
-        return User::all();
-    });
+    $users = User::query()
+        ->visibleToAuth()
+        ->with('roles')
+        ->orderBy('name')
+        ->paginate(25)
+        ->withQueryString();
 
     return view('users.index', compact('users', 'roles'));
 }
@@ -85,10 +94,16 @@ class UserController extends Controller
                 'request_data' => $request->except(['password', 'image'])
             ]);
 
+            $requestedRoles = $request->input('roles', []);
+            $requestedRoles = is_array($requestedRoles) ? $requestedRoles : [];
+            $shouldCreateLoginUser = count($requestedRoles) > 0;
+            $isCreatingPrivilegedAdmin = in_array('Super Admin', $requestedRoles, true) || in_array('Tenant Admin', $requestedRoles, true);
+
             // Validate request with comprehensive rules
             try {
                 $request->validate([
-                    'email' => 'required|email|max:255|unique:users,email',
+                    // If no roles selected, we create an employee only, so email can be nullable.
+                    'email' => $shouldCreateLoginUser ? 'required|email|max:255|unique:users,email' : 'nullable|email|max:255',
                     'name' => 'required|string|max:255',
                     'dob' => 'nullable|date',
                     'role_id' => 'nullable|integer',
@@ -110,6 +125,90 @@ class UserController extends Controller
                 return redirect()->back()
                     ->withInput()
                     ->withErrors($e->errors());
+            }
+
+            // If no role is selected, create ONLY an employee (no login user account).
+            if (! $shouldCreateLoginUser) {
+                $tenantId = Site::find($request->site_id)?->tenant_id;
+                $employee = Employee::withoutTenantScope()->create([
+                    'fname' => trim((string) strtok($request->name, ' ')) ?: $request->name,
+                    'lname' => trim((string) (str_contains($request->name, ' ') ? substr($request->name, (int) strpos($request->name, ' ') + 1) : '')) ?: null,
+                    'email' => $request->email,
+                    'phone' => $request->phone,
+                    'address' => $request->address,
+                    'department_id' => $request->department_id,
+                    'site_id' => $request->site_id,
+                    'tenant_id' => $tenantId,
+                    'user_id' => Auth::id(),
+                    'edited_by' => Auth::id(),
+                    'login_user_id' => null,
+                ]);
+
+                // Create/ensure Enduser (Personnel) representation for the employee.
+                try {
+                    $departmentName = Department::whereKey($employee->department_id)->value('name') ?? 'N/A';
+                    \App\Models\Enduser::withoutTenantScope()->firstOrCreate(
+                        ['employee_id' => $employee->id],
+                        [
+                            'name' => trim($request->name) ?: ($employee->email ?? 'Employee #' . $employee->id),
+                            'type' => 'Person',
+                            'department' => $departmentName,
+                            'section' => null,
+                            'site_id' => $employee->site_id,
+                            'tenant_id' => $employee->tenant_id,
+                            'department_id' => $employee->department_id,
+                            'section_id' => null,
+                            'status' => 'Active',
+                        ]
+                    );
+                } catch (\Throwable $e) {
+                    // non-critical
+                }
+
+                return redirect()->route('employees.index')
+                    ->withSuccess('Employee created successfully (no login access granted).');
+            }
+
+            // For non-privileged users, enforce "Employee first, then User" and link them.
+            // Tenant Admin / Super Admin can exist without an employee, since they bootstrap the org.
+            $precreatedEmployee = null;
+            if (! $isCreatingPrivilegedAdmin) {
+                $tenantId = Site::find($request->site_id)?->tenant_id;
+
+                $precreatedEmployee = Employee::withoutTenantScope()->create([
+                    'fname' => trim((string) strtok($request->name, ' ')) ?: $request->name,
+                    'lname' => trim((string) (str_contains($request->name, ' ') ? substr($request->name, (int) strpos($request->name, ' ') + 1) : '')) ?: null,
+                    'email' => $request->email,
+                    'phone' => $request->phone,
+                    'address' => $request->address,
+                    'department_id' => $request->department_id,
+                    'site_id' => $request->site_id,
+                    'tenant_id' => $tenantId,
+                    'user_id' => Auth::id(),
+                    'edited_by' => Auth::id(),
+                    'login_user_id' => null,
+                ]);
+
+                // Ensure Enduser(Personnel) representation exists for dropdowns.
+                try {
+                    $departmentName = Department::whereKey($precreatedEmployee->department_id)->value('name') ?? 'N/A';
+                    \App\Models\Enduser::withoutTenantScope()->firstOrCreate(
+                        ['employee_id' => $precreatedEmployee->id],
+                        [
+                            'name' => trim($request->name) ?: ($precreatedEmployee->email ?? 'Employee #' . $precreatedEmployee->id),
+                            'type' => 'Person',
+                            'department' => $departmentName,
+                            'section' => null,
+                            'site_id' => $precreatedEmployee->site_id,
+                            'tenant_id' => $precreatedEmployee->tenant_id,
+                            'department_id' => $precreatedEmployee->department_id,
+                            'section_id' => null,
+                            'status' => 'Active',
+                        ]
+                    );
+                } catch (\Throwable $e) {
+                    // non-critical
+                }
             }
 
             // Validate roles if provided
@@ -142,9 +241,11 @@ class UserController extends Controller
             $user->status = $request->status ?? 'Active'; // Default to Active if not provided
             $user->staff_id = $request->staff_id;
             $user->site_id = $request->site_id;
+            $user->tenant_id = Site::find($request->site_id)?->tenant_id;
             $user->role_id = $request->role_id;
             $user->department_id = $request->department_id;
             $user->section_id = $request->section_id;
+            $user->employee_id = $precreatedEmployee?->id;
             
             // Save user
             try {
@@ -188,6 +289,64 @@ class UserController extends Controller
                     ]);
                     // Continue - user created but roles failed
                 }
+            }
+
+            // Ensure every login user has an employee profile (employees may exist without login; this links the ones that do)
+            try {
+                $tenantId = $user->getCurrentTenant()?->id;
+                $employee = null;
+
+                if ($precreatedEmployee) {
+                    $precreatedEmployee->login_user_id = $user->id;
+                    $precreatedEmployee->save();
+                    $employee = $precreatedEmployee;
+                } elseif (! $isCreatingPrivilegedAdmin) {
+                    // Should not happen, but keep safe fallback for older flows
+                    $employee = Employee::withoutTenantScope()->firstOrCreate(
+                        ['login_user_id' => $user->id],
+                        [
+                            'email' => $user->email,
+                            'phone' => $user->phone,
+                            'site_id' => $user->site_id,
+                            'tenant_id' => $tenantId,
+                            'user_id' => Auth::id(),
+                            'edited_by' => Auth::id(),
+                            'fname' => trim((string) strtok($user->name, ' ')) ?: $user->name,
+                            'lname' => trim((string) (str_contains($user->name, ' ') ? substr($user->name, (int) strpos($user->name, ' ') + 1) : '')) ?: null,
+                            'department_id' => $user->department_id,
+                        ]
+                    );
+                }
+
+                if ($employee && ! $user->employee_id) {
+                    $user->employee_id = $employee->id;
+                    $user->save();
+                }
+
+                // Also ensure an Enduser(Personnel) record exists for dropdowns.
+                if ($employee) {
+                    $departmentName = Department::whereKey($employee->department_id)->value('name') ?? 'N/A';
+                    \App\Models\Enduser::withoutTenantScope()->firstOrCreate(
+                        ['employee_id' => $employee->id],
+                        [
+                            'name' => trim($user->name) ?: ($user->email ?? 'Employee #' . $employee->id),
+                            'type' => 'Person',
+                            'department' => $departmentName,
+                            'section' => null,
+                            'site_id' => $employee->site_id,
+                            'tenant_id' => $employee->tenant_id,
+                            'department_id' => $employee->department_id,
+                            'section_id' => null,
+                            'status' => 'Active',
+                        ]
+                    );
+                }
+            } catch (\Throwable $e) {
+                Log::warning('UserController | store | Employee profile auto-link failed', [
+                    'user_id' => $user->id,
+                    'error_message' => $e->getMessage(),
+                ]);
+                // Non-critical: user creation must succeed even if employee linking fails
             }
     
             // Handle the image upload if an image is provided
@@ -495,6 +654,73 @@ class UserController extends Controller
                 throw $e; // Re-throw to be caught by outer catch
             }
 
+            // Keep linked employee profile in sync (non-admin users must have an employee).
+            try {
+                if (! $user->isSuperAdmin() && ! $user->isTenantAdmin()) {
+                    $tenantId = $user->getCurrentTenant()?->id;
+                    $siteId = $user->site_id;
+
+                    $employee = null;
+                    if ($user->employee_id) {
+                        $employee = Employee::withoutTenantScope()->find($user->employee_id);
+                    }
+
+                    if (! $employee) {
+                        $employee = Employee::withoutTenantScope()->firstOrCreate(
+                            ['login_user_id' => $user->id],
+                            [
+                                'site_id' => $siteId,
+                                'tenant_id' => $tenantId,
+                                'user_id' => Auth::id(),
+                                'edited_by' => Auth::id(),
+                                'fname' => trim((string) strtok($user->name, ' ')) ?: $user->name,
+                                'lname' => trim((string) (str_contains($user->name, ' ') ? substr($user->name, (int) strpos($user->name, ' ') + 1) : '')) ?: null,
+                                'department_id' => $user->department_id,
+                            ]
+                        );
+                    }
+
+                    // Sync overlapping fields (canonical: Employee for profile data; User for login credentials)
+                    $employee->login_user_id = $user->id;
+                    $employee->email = $user->email;
+                    $employee->phone = $user->phone;
+                    $employee->address = $user->address;
+                    $employee->department_id = $user->department_id;
+                    $employee->site_id = $siteId;
+                    $employee->tenant_id = $tenantId;
+                    $employee->edited_by = Auth::id();
+                    $employee->save();
+
+                    if (! $user->employee_id) {
+                        $user->employee_id = $employee->id;
+                        $user->save();
+                    }
+
+                    // Keep personnel Enduser in sync for dropdowns
+                    $departmentName = Department::whereKey($employee->department_id)->value('name') ?? 'N/A';
+                    \App\Models\Enduser::withoutTenantScope()->updateOrCreate(
+                        ['employee_id' => $employee->id],
+                        [
+                            'name' => trim($user->name) ?: ($user->email ?? 'Employee #' . $employee->id),
+                            'type' => 'Person',
+                            'department' => $departmentName,
+                            'section' => null,
+                            'site_id' => $employee->site_id,
+                            'tenant_id' => $employee->tenant_id,
+                            'department_id' => $employee->department_id,
+                            'section_id' => null,
+                            'status' => 'Active',
+                        ]
+                    );
+                }
+            } catch (\Throwable $e) {
+                Log::warning('UserController | update | Employee sync failed', [
+                    'user_id' => $id,
+                    'updated_by' => $authId,
+                    'error_message' => $e->getMessage(),
+                ]);
+            }
+
             // Sync roles - this will update the user's roles
             try {
     if ($request->roles) {
@@ -647,7 +873,8 @@ class UserController extends Controller
     public static function logo()
     {
         try {
-            $logo = Company::first()->value('image');
+            $company = CompanyContext::current();
+            $logo = $company?->image;
             // Log::info('UserController | logo', [
             //     'user_details' => Auth::user(),
             //     'company_logo' => $logo,

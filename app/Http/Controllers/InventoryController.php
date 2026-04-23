@@ -8,6 +8,7 @@ use App\Helpers\Pay;
 use App\Models\Item;
 use App\Models\User;
 use App\Models\Company;
+use App\Helpers\CompanyContext;
 use App\Models\Enduser;
 use App\Models\Category;
 use App\Models\Location;
@@ -278,7 +279,7 @@ class InventoryController extends Controller
      */
     public function show(string $id)
     {
-        $company = Company::first();
+        $company = CompanyContext::current();
         $inventory = Inventory::where('id', '=', $id)->first();
         $inventories = InventoryItemDetail::where('inventory_id', '=', $id)->get();
         return view('inventories.show', compact('inventory', 'company', 'inventories'));
@@ -776,7 +777,7 @@ class InventoryController extends Controller
     public function inventory_history_show(string $id)
     {
         try {
-            $company = Company::first();
+            $company = CompanyContext::current();
 
             $inventory_id = InventoryItemDetail::where('id', '=', $id)->value('inventory_id');
             $inventory = Inventory::where('id', '=', $inventory_id)->first();

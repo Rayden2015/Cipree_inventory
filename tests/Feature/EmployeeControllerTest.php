@@ -9,6 +9,10 @@ use App\Models\Department;
 use App\Models\Tenant;
 use Illuminate\Support\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 
 class EmployeeControllerTest extends TestCase
 {
@@ -22,6 +26,8 @@ class EmployeeControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         // Create tenant first
         $this->tenant = Tenant::factory()->create([
@@ -48,6 +54,8 @@ class EmployeeControllerTest extends TestCase
             'department_id' => $this->department->id,
             'status' => 'Active',
         ]);
+
+        $this->grantEmployeePermissions($this->admin, ['add-employee', 'view-employee', 'edit-employee', 'delete-employee']);
     }
 
     public function test_store_requires_department()
@@ -83,6 +91,26 @@ class EmployeeControllerTest extends TestCase
         $this->assertDatabaseHas('employees', [
             'email' => 'bob@example.com',
             'department_id' => $this->department->id,
+            'tenant_id' => $this->tenant->id,
         ]);
+    }
+
+    protected function grantEmployeePermissions(User $user, array $permissions): void
+    {
+        $permissionRecords = [];
+        foreach ($permissions as $permissionName) {
+            $permissionRecords[] = Permission::firstOrCreate(
+                ['name' => $permissionName, 'guard_name' => 'web']
+            );
+        }
+
+        $role = Role::create([
+            'name' => 'role-' . Str::uuid(),
+            'guard_name' => 'web',
+        ]);
+        $role->givePermissionTo($permissionRecords);
+        $user->assignRole($role);
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 }

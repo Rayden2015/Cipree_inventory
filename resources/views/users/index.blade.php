@@ -50,7 +50,7 @@
                     <tbody id="user-list">
                         @forelse ($users as $user)
                             <tr>
-                                <th scope="row">{{ $loop->iteration }}</th>
+                                <th scope="row">{{ ($users->currentPage() - 1) * $users->perPage() + $loop->iteration }}</th>
                                 <td>{{ $user->name }}</td>
                                 <td>{{ $user->email }}</td>
                                 <td>
@@ -100,9 +100,9 @@
                         @endforelse
                     </tbody>
                 </table>
+                {{ $users->links('pagination::bootstrap-4') }}
             </div>
         </div>
-        {{-- {{ $users->links() }} --}}
         <script>
             $(document).ready(function() {
                 $('#search').on('keyup', function() {

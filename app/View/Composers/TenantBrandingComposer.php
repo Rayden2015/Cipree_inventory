@@ -4,8 +4,8 @@ namespace App\View\Composers;
 
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
 use App\Http\Controllers\UserController;
+use App\Models\Tenant;
 
 class TenantBrandingComposer
 {
@@ -21,24 +21,27 @@ class TenantBrandingComposer
         $secondaryColor = '#6c757d';
 
         // Get default logo path
-        $defaultLogo = asset('images/company/' . UserController::logo());
+        // Prefer a stable built-in default (multi-tenant safe).
+        $defaultLogo = asset('images/branding/cipree.png');
 
         if (Auth::check()) {
             $user = Auth::user();
-            $tenant = $user->getCurrentTenant();
+
+            // Prefer the active tenant context (session) over the user's default tenant.
+            // This matters for domain-based routing and any future tenant-switching behavior.
+            $tenantId = session('current_tenant_id');
+            if ($tenantId) {
+                $tenant = Tenant::find($tenantId);
+            } else {
+                $tenant = $user->getCurrentTenant();
+            }
             
             if ($tenant) {
                 $tenantName = $tenant->name;
                 
-                // Check if tenant has a logo and the file exists
                 if ($tenant->logo_path) {
-                    $logoPath = public_path($tenant->logo_path);
-                    if (File::exists($logoPath)) {
-                        $tenantLogo = asset($tenant->logo_path);
-                    } else {
-                        // Logo path in DB but file doesn't exist, use default
-                        $tenantLogo = $defaultLogo;
-                    }
+                    // Don't block on filesystem checks (can be unreliable across deploys/storage setups).
+                    $tenantLogo = asset($tenant->logo_path);
                 } else {
                     // No logo uploaded, use default
                     $tenantLogo = $defaultLogo;

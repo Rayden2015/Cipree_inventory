@@ -15,7 +15,9 @@ if ($isProduction) {
     ini_set('display_errors', '0');
     ini_set('display_startup_errors', '0');
     // Errors are still logged, just not displayed
-    error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
+    // PHP 8.4 deprecates E_STRICT; do not reference it there at all.
+    $strictMask = (PHP_VERSION_ID >= 80400) ? 0 : (defined('E_STRICT') ? E_STRICT : 0);
+    error_reporting(E_ALL & ~E_DEPRECATED & ~$strictMask);
 } else {
     // In development, suppress deprecation warnings from vendor packages
     // PHP 8.4+ has stricter nullable type requirements that cause warnings in older Laravel/vendor code
@@ -33,7 +35,8 @@ if ($isProduction) {
             }
             // Let other errors through to default handler
             return false;
-        }, E_DEPRECATED | E_STRICT);
+        $strictMask = (PHP_VERSION_ID >= 80400) ? 0 : (defined('E_STRICT') ? E_STRICT : 0);
+        }, E_DEPRECATED | $strictMask);
     }
 }
 

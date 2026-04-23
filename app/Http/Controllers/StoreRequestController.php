@@ -9,6 +9,7 @@ use App\Models\Item;
 use App\Models\User;
 use App\Models\Sorder;
 use App\Models\Company;
+use App\Helpers\CompanyContext;
 use App\Models\Enduser;
 use App\Models\Supplier;
 use PDF;
@@ -464,7 +465,7 @@ class StoreRequestController extends Controller
             'depart_auth_denied_name',
             'approve_by',
         ])->findOrFail($id);
-        $company = Company::first();
+        $company = CompanyContext::current();
         // Eager load item relationship to prevent N+1 queries
         $sorder_parts = SorderPart::with(['item', 'inventoryItem.location'])->where('sorder_id', '=', $id)->get();
         // Calculate the total amount from sorder_parts
@@ -1386,7 +1387,7 @@ class StoreRequestController extends Controller
                 'depart_auth_denied_name',
                 'approve_by',
             ])->findOrFail($id);
-            $company = Company::first();
+            $company = CompanyContext::current();
             // Eager load item relationship to prevent N+1 queries
             $sorder_parts = SorderPart::with(['item', 'inventoryItem.location'])->where('sorder_id', '=', $id)->get();
             $total_amount = $sorder_parts->sum('sub_total');
@@ -1459,7 +1460,7 @@ class StoreRequestController extends Controller
             'depart_auth_denied_name',
             'approve_by',
         ])->findOrFail($id);
-        $company = Company::first();
+        $company = CompanyContext::current();
         $sorder_parts = SorderPart::where('sorder_id', '=', $id)->get();
         // Calculate the total amount from sorder_parts
         $total_amount = $sorder_parts->sum('sub_total');

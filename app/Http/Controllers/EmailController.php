@@ -10,7 +10,11 @@ class EmailController extends Controller
 {
     public function showForm()
     {
-        $users = User::all(); // Fetch all users or apply filters if necessary
+        $users = User::query()
+            ->visibleToAuth()
+            ->orderBy('name')
+            ->select(['id', 'name', 'email'])
+            ->get();
         return view('emails.bulk_email_form', compact('users'));
     }
 

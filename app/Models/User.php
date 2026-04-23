@@ -6,6 +6,7 @@ namespace App\Models;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Auth\Passwords\CanResetPassword;
@@ -26,6 +27,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
+        'employee_id',
         'name',
         'email',
         'department_id',
@@ -91,6 +93,11 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Site::class, 'site_id');
     }
+
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class, 'employee_id');
+    }
     public function department()
     {
         return $this->belongsTo(Department::class, 'department_id');
@@ -146,5 +153,31 @@ class User extends Authenticatable
     public function isTenantAdmin()
     {
         return $this->hasRole('Tenant Admin');
+    }
+
+    /**
+     * Limit user listings to the authenticated viewer's tenant (and site unless Tenant Admin).
+     * Intentionally NOT a global scope: applying TenantScope to User interacts badly with auth resolution.
+     */
+    public function scopeVisibleToAuth(Builder $query): Builder
+    {
+        $user = auth()->user();
+        if (! $user) {
+            return $query->whereRaw('1 = 0');
+        }
+        if ($user->hasRole('Super Admin')) {
+            return $query;
+        }
+
+        $tenantId = session('current_tenant_id') ?? $user->getCurrentTenant()?->id;
+        if ($tenantId) {
+            $query->where('tenant_id', $tenantId);
+        }
+
+        if ($user->site_id && ! $user->hasRole('Tenant Admin')) {
+            $query->where('site_id', $user->site_id);
+        }
+
+        return $query;
     }
 }

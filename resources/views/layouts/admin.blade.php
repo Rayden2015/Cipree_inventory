@@ -69,6 +69,54 @@
         @endif
     </style>
     @endif
+
+    <style>
+        /* Sidebar branding (logo + tenant name + roles) */
+        .brand-link.tenant-branding {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px 10px;
+            line-height: 1.2;
+            height: auto;
+        }
+        .brand-link.tenant-branding .tenant-logo {
+            width: 100%;
+            max-width: 180px;
+            max-height: 72px;
+            object-fit: contain;
+            margin: 0;
+        }
+        .brand-link.tenant-branding .tenant-name {
+            font-weight: 700;
+            font-size: 13px;
+            text-align: center;
+            width: 100%;
+            white-space: normal;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+        .brand-link.tenant-branding .tenant-user-roles,
+        .brand-link.tenant-branding .tenant-last-login {
+            font-size: 11px;
+            text-align: center;
+            width: 100%;
+            white-space: normal;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            margin: 0;
+        }
+        .brand-link.tenant-branding .tenant-user-roles .role-pill {
+            display: inline-block;
+            padding: 2px 6px;
+            margin: 2px 3px 0 0;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.06);
+            font-weight: 600;
+        }
+    </style>
     
     <!-- Daterange picker -->
     <link rel="stylesheet" href="{{ asset('/assets/plugins/daterangepicker/daterangepicker.css') }}">

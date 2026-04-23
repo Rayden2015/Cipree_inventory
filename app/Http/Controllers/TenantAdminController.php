@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Tenant;
 use App\Models\Site;
 use App\Models\User;
+use App\Models\Company;
+use App\Helpers\CompanyContext;
 use App\Helpers\UploadHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -76,7 +78,8 @@ class TenantAdminController extends Controller
                 return redirect()->route('home');
             }
 
-            return view('tenant-admin.settings', compact('tenant'));
+            $company = CompanyContext::current();
+            return view('tenant-admin.settings', compact('tenant', 'company'));
         } catch (\Exception $e) {
             Log::error('TenantAdminController | settings() | Error: ' . $e->getMessage());
             Toastr::error('An error occurred.');
@@ -103,6 +106,13 @@ class TenantAdminController extends Controller
             'contact_name' => 'nullable|string|max:255',
             'contact_email' => 'nullable|email|max:255',
             'contact_phone' => 'nullable|string|max:255',
+            // Company profile (used in PDFs/headers)
+            'company_address' => 'nullable|string|max:255',
+            'company_phone' => 'nullable|string|max:255',
+            'company_email' => 'nullable|email|max:255',
+            'company_website' => 'nullable|string|max:255',
+            'company_vat' => 'nullable|string|max:255',
+            'company_vat_no' => 'nullable|string|max:255',
             'settings' => 'nullable|array',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'primary_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
@@ -144,6 +154,32 @@ class TenantAdminController extends Controller
             }
             
             $tenant->update($updateData);
+
+            // Upsert tenant-scoped company profile (keeps /company from being a separate workflow).
+            // This must NOT block tenant settings updates if the legacy companies table has issues.
+            try {
+                $company = CompanyContext::current();
+                if (! $company) {
+                    $company = new Company();
+                    $company->tenant_id = $tenant->id;
+                    $company->site_id = null;
+                }
+                $company->name = $tenant->name;
+                // NOTE: companies.address + companies.phone are NOT NULL in this codebase.
+                // When no company exists yet for a tenant, default to empty strings to avoid exceptions.
+                $company->address = $request->input('company_address', $company->address) ?? '';
+                $company->phone = $request->input('company_phone', $company->phone) ?? '';
+                $company->email = $request->input('company_email', $company->email);
+                $company->website = $request->input('company_website', $company->website);
+                $company->vat = $request->input('company_vat', $company->vat);
+                $company->vat_no = $request->input('company_vat_no', $company->vat_no);
+                $company->save();
+            } catch (\Exception $e) {
+                Log::error('TenantAdminController | updateSettings() | Company upsert failed', [
+                    'tenant_id' => $tenant->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
 
             Log::info('TenantAdminController | updateSettings() | Tenant settings updated', [
                 'tenant_id' => $tenant->id,

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\Employee;
 use App\Models\Department;
+use App\Models\Enduser;
 use Illuminate\Http\Request;
 use Rinvex\Country\CountryLoader;
 use Illuminate\Support\Facades\Auth;
@@ -14,11 +15,19 @@ class EmployeeController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+        $this->middleware(['auth', 'permission:view-employee'])->only(['index', 'show']);
+        $this->middleware(['auth', 'permission:add-employee'])->only(['create', 'store']);
+        $this->middleware(['auth', 'permission:edit-employee'])->only(['edit', 'update']);
+        $this->middleware(['auth', 'permission:delete-employee'])->only(['destroy']);
     }
     // Display a listing of the employees
     public function index()
     {
-        $employees = Employee::latest()->paginate(15);
+        $siteId = Auth::user()?->site?->id;
+        $employees = Employee::query()
+            ->when($siteId, fn ($q) => $q->where('site_id', $siteId))
+            ->latest()
+            ->paginate(15);
         return view('employees.index', compact('employees'));
     }
 
@@ -34,13 +43,14 @@ class EmployeeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|unique:employees',
+            'email' => 'nullable|email|unique:employees,email',
             'department_id' => 'required|exists:departments,id',
             // Add validation for other fields
         ]);
         
-        $site_id = Auth::user()->site->id;
+        $site_id = Auth::user()?->site?->id;
         $added_by = Auth::id();
+        $tenant_id = Auth::user()?->getCurrentTenant()?->id;
     
         $employee = new Employee();
         $employee->fname = $request->fname;
@@ -85,8 +95,31 @@ class EmployeeController extends Controller
         // Additional data
         $employee->site_id = $site_id;
         $employee->user_id = $added_by;
+        $employee->edited_by = $added_by;
+        $employee->tenant_id = $tenant_id;
     
         $employee->save(); // Save the employee record
+
+        // Ensure employee is also represented as an Enduser (Personnel) for dropdowns/workflows.
+        try {
+            $departmentName = Department::whereKey($employee->department_id)->value('name') ?? 'N/A';
+            Enduser::withoutTenantScope()->firstOrCreate(
+                ['employee_id' => $employee->id],
+                [
+                    'name' => trim(collect([$employee->fname, $employee->oname, $employee->lname])->filter()->join(' ')) ?: ($employee->email ?? 'Employee #' . $employee->id),
+                    'type' => 'Person',
+                    'department' => $departmentName,
+                    'section' => null,
+                    'site_id' => $employee->site_id,
+                    'tenant_id' => $employee->tenant_id,
+                    'department_id' => $employee->department_id,
+                    'section_id' => null,
+                    'status' => 'Active',
+                ]
+            );
+        } catch (\Throwable $e) {
+            // Employee creation should not fail because enduser-link failed.
+        }
     
         return redirect()->route('employees.index')->with('success', 'Employee created successfully.');
     }
@@ -104,13 +137,14 @@ class EmployeeController extends Controller
     public function update(Request $request, Employee $employee)
     {
         $request->validate([
-            'email' => 'required|email|unique:employees,email,' . $employee->id,
+            'email' => 'nullable|email|unique:employees,email,' . $employee->id,
             'department_id' => 'required|exists:departments,id',
             // Add validation for other fields
         ]);
     
         $auth = Auth::id();
-        $site_id = Auth::user()->site->id;
+        $site_id = Auth::user()?->site?->id;
+        $tenant_id = Auth::user()?->getCurrentTenant()?->id;
     
         // Parse the contract start date
         $startDate = Carbon::parse($request->input('contract_start_date'));
@@ -148,7 +182,9 @@ class EmployeeController extends Controller
             'contract_end_date' => $endDate, // Recalculated end date
             'probation_period' => $request->input('probation_period'),
             'user_id' => $auth,
+            'edited_by' => $auth,
             'site_id' => $site_id,
+            'tenant_id' => $tenant_id,
         ]);
     
         return redirect()->back()->with('success', 'Employee updated successfully.');

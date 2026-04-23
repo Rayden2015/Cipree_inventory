@@ -10,6 +10,7 @@ use App\Models\Site;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\Company;
+use App\Helpers\CompanyContext;
 use App\Models\Enduser;
 use App\Models\Location;
 use App\Models\Supplier;
@@ -259,7 +260,7 @@ class OrderController extends Controller
     {
         try {
             $order = Order::find($id);
-            $company = Company::first();
+            $company = CompanyContext::current();
             $order_parts = OrderPart::where('order_id', '=', $id)->get();
             Log::info('OrderController | show', [
                 'user_details' => Auth::user(),

@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\Order;
 use App\Models\Porder;
 use App\Models\Company;
+use App\Helpers\CompanyContext;
 use App\Models\DpPoTax;
 use App\Models\Enduser;
 use App\Models\Category;
@@ -100,7 +101,7 @@ class PurchaseController extends Controller
     }
     public function show($id)
     {
-        $company = Company::first();
+        $company = CompanyContext::current();
         $purchase = Porder::where('id', '=', $id)->first();
         $order_parts = PorderPart::where('order_id', '=', $id)->get();
         return view('purchases.show', compact('purchase', 'order_parts', 'company'));
@@ -603,7 +604,7 @@ class PurchaseController extends Controller
     public function showlist($id)
     {
         try {
-            $company = Company::first();
+            $company = CompanyContext::current();
             $purchase = Porder::where('id', '=', $id)->first();
             $orderid = Porder::where('id', '=', $id)->value('order_id');
             $purchasing_order_number = Porder::where('id', '=', $id)->value('purchasing_order_number');
@@ -763,7 +764,7 @@ class PurchaseController extends Controller
     public function generatePurchaseOrderPDF($id)
     {
         try {
-            $company = Company::first();
+            $company = CompanyContext::current();
             $purchase = Porder::find($id);
             $pdf_filename = Porder::where('id', '=', $id)->value('request_number'); // Get the value directly
             $orderid = $purchase->order_id;

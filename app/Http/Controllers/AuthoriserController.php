@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Order;
 use App\Models\Porder;
 use App\Models\Company;
+use App\Helpers\CompanyContext;
 use App\Models\Enduser;
 use App\Models\Location;
 use App\Models\Purchase;
@@ -116,7 +117,7 @@ class AuthoriserController extends Controller
     public function show($id)
     {
         try {
-            $company = Company::first();
+            $company = CompanyContext::current();
             $purchase = Order::where('id', '=', $id)->first();
             $order_parts = OrderPart::where('order_id', '=', $id)->get();
             Log::info('AuthoriserController | show() ', [
@@ -489,7 +490,7 @@ class AuthoriserController extends Controller
     // purchase list show record
     public function showlist($id)
     {
-        $company = Company::first();
+        $company = CompanyContext::current();
         $purchase = Porder::where('id', '=', $id)->first();
         $orderid = Porder::where('id', '=', $id)->value('order_id');
         $purchasing_order_number = Porder::where('id', '=', $id)->value('purchasing_order_number');

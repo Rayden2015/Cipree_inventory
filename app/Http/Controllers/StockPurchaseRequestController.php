@@ -10,6 +10,7 @@ use App\Models\Levy;
 use App\Models\Part;
 use App\Models\Site;
 use App\Models\Company;
+use App\Helpers\CompanyContext;
 use App\Models\Enduser;
 use App\Models\Location;
 use App\Models\Supplier;
@@ -748,7 +749,7 @@ public function authoriser_remarks_update(Request $request, $id)
     public function auth_spr_list_view($id)
     {
         $sorder = StockPurchaseRequest::find($id);
-        $company = Company::first();
+        $company = CompanyContext::current();
         $sorder_parts = StockPurchaseRequestItem::where('spr_id', '=', $id)->get();
         return view('stockpurchases.auth_view', compact('sorder', 'sorder_parts', 'company'));
 
@@ -1236,7 +1237,7 @@ public function authoriser_remarks_update(Request $request, $id)
     public function spr_pos_show($id)
     {
         $site_id = Auth::user()->site->id;
-        $company = Company::first();
+        $company = CompanyContext::current();
         $spr_pos = SprPorder::where('id', '=', $id)->first();
         $orderid = SprPorder::where('id', '=', $id)->value('order_id');
         $purchasing_order_number = SprPorder::where('id', '=', $id)->value('purchasing_order_number');

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\Company;
+use App\Helpers\CompanyContext;
 use App\Models\SorderPart;
 use Illuminate\Http\Request;
 use App\Models\InventoryItem;
@@ -21,7 +22,7 @@ class ReportController extends Controller
     public function monthlyreport()
     {
         $site_id = Auth::user()->site->id;
-        $company = Company::first();
+        $company = CompanyContext::current();
       
 
         // Get the current date
