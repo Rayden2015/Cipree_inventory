@@ -10,6 +10,8 @@ use App\Models\Tenant;
 use Illuminate\Support\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
+use App\Models\Employee;
+use App\Models\Enduser;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
@@ -93,6 +95,55 @@ class EmployeeControllerTest extends TestCase
             'department_id' => $this->department->id,
             'tenant_id' => $this->tenant->id,
         ]);
+    }
+
+    public function test_store_can_optionally_create_login_user_with_role_and_enduser()
+    {
+        Role::firstOrCreate(['name' => 'Requester', 'guard_name' => 'web']);
+
+        $payload = [
+            'fname' => 'Eve',
+            'lname' => 'Adams',
+            'department_id' => $this->department->id,
+            'employee_status' => 'Active',
+            'create_user' => '1',
+            'role' => 'Requester',
+            'user_email' => 'eve@example.com',
+            'user_password' => 'password123',
+        ];
+
+        $response = $this->actingAs($this->admin)->post(route('employees.store'), $payload);
+
+        $response->assertRedirect(route('employees.index'));
+
+        $employee = Employee::query()->where('email', 'eve@example.com')->first();
+        $this->assertNotNull($employee);
+        $this->assertNotNull($employee->login_user_id);
+
+        $user = User::query()->whereKey($employee->login_user_id)->first();
+        $this->assertNotNull($user);
+        $this->assertSame($employee->id, $user->employee_id);
+        $this->assertTrue($user->hasRole('Requester'));
+
+        $enduser = Enduser::withoutTenantScope()->where('employee_id', $employee->id)->first();
+        $this->assertNotNull($enduser);
+        $this->assertSame('Person', $enduser->type);
+    }
+
+    public function test_create_employee_page_has_checkbox_and_role_fields_for_creating_user()
+    {
+        Role::firstOrCreate(['name' => 'Requester', 'guard_name' => 'web']);
+
+        $response = $this->actingAs($this->admin)->get(route('employees.create'));
+
+        $response->assertStatus(200);
+
+        // Checkbox + fields that enable Employee -> User creation
+        $response->assertSee('id="create_user"', false);
+        $response->assertSee('name="create_user"', false);
+        $response->assertSee('name="user_email"', false);
+        $response->assertSee('name="role"', false);
+        $response->assertSee('name="user_password"', false);
     }
 
     protected function grantEmployeePermissions(User $user, array $permissions): void

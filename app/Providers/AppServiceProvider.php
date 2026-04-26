@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Console\Commands\ProductionAwareSeedCommand;
+use Illuminate\Database\Console\Seeds\SeedCommand;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
@@ -35,5 +37,16 @@ class AppServiceProvider extends ServiceProvider
         
         // Share tenant branding with all views
         View::composer('*', TenantBrandingComposer::class);
+
+        // Replace framework db:seed with a clearer production warning (ConfirmableTrait still applies).
+        $this->app->booted(function () {
+            if (! $this->app->runningInConsole()) {
+                return;
+            }
+
+            $this->app->singleton(SeedCommand::class, function ($app) {
+                return new ProductionAwareSeedCommand($app['db']);
+            });
+        });
     }
 }

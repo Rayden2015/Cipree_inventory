@@ -51,7 +51,7 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="email">Email:</label>
-                        <input type="email" name="email" class="form-control" value="{{ old('email') }}" required>
+                        <input type="email" name="email" class="form-control" value="{{ old('email') }}">
                     </div>
                 </div>
 
@@ -114,6 +114,56 @@
                             <option value="Divorced">Divorced</option>
                             <option value="Widowed">Widowed</option>
                         </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Account (Optional) -->
+            <h3>System Access (Optional)</h3>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="create_user" name="create_user" value="1" {{ old('create_user') ? 'checked' : '' }}>
+                        <label class="form-check-label" for="create_user">Create a login user for this employee</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="user_email">Login Email (required if creating user)</label>
+                        <input type="email" name="user_email" id="user_email" class="form-control @error('user_email') is-invalid @enderror"
+                               value="{{ old('user_email') }}">
+                        @error('user_email')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="role">Role (required if creating user)</label>
+                        <select name="role" id="role" class="form-control @error('role') is-invalid @enderror">
+                            <option value="" selected hidden>Please Select</option>
+                            @foreach ($roles as $role)
+                                <option value="{{ $role->name }}" {{ old('role') === $role->name ? 'selected' : '' }}>
+                                    {{ $role->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('role')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="user_password">Initial Password (optional, defaults to "password")</label>
+                        <input type="text" name="user_password" id="user_password" class="form-control @error('user_password') is-invalid @enderror"
+                               value="{{ old('user_password') }}">
+                        @error('user_password')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
                     </div>
                 </div>
             </div>
